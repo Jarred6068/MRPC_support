@@ -296,18 +296,3 @@ return(Total.Models.All.Tissues)
   
 }
   
-#=========================================useful-lines=============================================== 
-  #practice line of code
- #rerun.ADDIS(tissues.vec=c("WholeBlood","Vagina","Uterus"),tissues.vec2=c("Whole_Blood","Vagina","Uterus") ,save.files=FALSE) 
-  
-  
- #tissue.names=read.csv("/mnt/ceph/jarredk/AddisReRunFiles/tissuenames.csv", header = T)
- #output=rerun.ADDIS(tissues.vec=tissue.names$tissue.name1, tissues.vec2=tissue.names$tissue.name2, save.files=TRUE) 
-  
-  
-  
- 
-  
-  
- #output=rerun.ADDIS(tissues.vec=tissue.names[41,2], tissues.vec2=tissue.names[41,3], save.files=FALSE)
-  

@@ -128,7 +128,6 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   reads = NULL
   
   hic.extent=as.data.frame(matrix(0, nrow = idx, ncol = 4))
-  colnames(hic.extent)=c("min_x", "max_x", "min_y", "max_y")
   
   for(i in 1:idx){
     #establish snp - gene search "box"

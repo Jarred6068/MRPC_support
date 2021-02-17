@@ -59,8 +59,11 @@ get_trio_attr=function(trio.index=NULL, tissue.name="CellsEBVtransformedlymphocy
     trio=triodata[,(trio.index[i]-1)*3+(1:3)]
     gene.name=colnames(trio)[-1]
     snps[i]=colnames(trio)[1]
+    
+    if(verbose==TRUE){
+      print(paste(i,") finding attributes for ", trio.index[i],"...", sep = ""))
+    }
       
-    print("made it this far!")
     #get cis-trans gene attributes
     TGattr=find_trans(TransGeneName=gene.name[2])
     attri.mat.cis[i,] = subset(meta, gene_id == gene.name[1])
@@ -68,17 +71,12 @@ get_trio_attr=function(trio.index=NULL, tissue.name="CellsEBVtransformedlymphocy
       
   }
   
-  
   colnames(attri.mat.trans)=colnames(meta2)
   colnames(attri.mat.cis)=colnames(meta)
+  attri.mat.cis$chr = gsub("chr","", attri.mat.cis$chr)
+  attri.mat.trans$trio.idx=trio.index
+  attri.mat.cis$trio.idx=trio.index
   data.list=list(trans=attri.mat.trans, cis=attri.mat.cis)
-    
-  #check if snp matches
-  if(verbose==TRUE){
-    ifelse(all.equal(snps, data.list$trans)==TRUE, "ERROR", "Checks.out")
-  }
-  
-  
   
   return(list(Attributes=data.list, SNPS=snps))
   
@@ -109,8 +107,83 @@ extract_hic=function(fileName=NULL, chrs=c("1","1"), resol=10000, package.path="
 }
 
 
+#==================================Check_Interactions_Function=======================================================
 
+# a simple function which incorporates the HiC data in .hic format to check if chromatin interactions exist for trios
+# classed as trans or cis mediated models (M1's) obtained from post-processing analysis. 
 
+interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, search.size=100000, tiss="CellsEBVtransformedlymphocytes"){
+  #SYNTAX:
+  #hic.filename -- the path to the desired hic.file
+  #trio.attr -- the attributes information from "get_trio_attr()" 
+  #resolution -- the BP resolution desired and to be passed to "extract_hic()"
+  
+  
+  trio.attr=get_trio_attr(trio.index=trios, tissue.name = tiss)
+  
+  cis.data=trio.attr$Attributes$cis
+  trans.data=trio.attr$Attributes$trans
+  
+  idx = length(trios)
+  reads = NULL
+  
+  hic.extent=as.data.frame(matrix(0, nrow = idx, ncol = 4))
+  colnames(hic.extent)=c("min_x", "max_x", "min_y", "max_y")
+  
+  for(i in 1:idx){
+    #establish snp - gene search "box"
+    left.pos=paste(cis.data$chr[i],":",
+                   cis.data$variant_pos[i]-search.size,":",
+                   cis.data$variant_pos[i]+search.size, sep = "")
+    
+    #establish trans gene search "box"
+    right.pos=paste(trans.data$chr[i],":",
+                    trans.data$left[i]-search.size,":",
+                    trans.data$right[i]+search.size, sep = "")
+    
+    print(left.pos)
+    print(right.pos)
+    
+    #save search upper and lower bounds
+    hic.extent[i,]=c(cis.data$variant_pos[i]-search.size,
+                     cis.data$variant_pos[i]+search.size,
+                     trans.data$left[i]-search.size,
+                     trans.data$right[i]+search.size)
+    
+    #extract data from .hic based on search parameters
+    data.hic=extract_hic(fileName = hic.filename, 
+                         chrs = c(left.pos, right.pos),
+                         resol=resolution)
+    
+    #count interactions
+    reads[i]=ifelse(empty(as.data.frame(data.hic))==TRUE, "NA", as.character(sum(data.hic$counts)))
+    
+    
+    
+  }
+  
+  #summarize
+  info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
+                               reads,
+                               trio.attr$Attributes$cis$chr,
+                               trio.attr$Attributes$trans$chr,
+                               trio.attr$Attributes$cis$variant_pos,
+                               trio.attr$Attributes$trans$left,
+                               trio.attr$Attributes$trans$right,
+                               hic.extent)
+  
+  colnames(info.list)=c("trio.idx", "reads", "cis.chr", "trans.chr",
+                        "variant.pos", "trans.left","trans.right", 
+                        "variant.lower.bound", "variant.upper.bound",
+                        "trans.lower.bound", "trans.upper.bound")
+  
+  return(info.list)
+  
+  
+  
+}
+
+#==================================END_Function========================================================
 
 
 

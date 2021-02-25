@@ -188,12 +188,12 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   #trio.attr -- the attributes information from "get_trio_attr()" 
   #resolution -- the BP resolution desired and to be passed to "extract_hic()"
   
-  
+  #obtain trio attributes
   trio.attr=get_trio_attr(trio.index=trios, tissue.name = tiss, verbose = verbose)
   
   cis.data=trio.attr$Attributes$cis
   trans.data=trio.attr$Attributes$trans
-  
+  #pre-allocate
   idx = length(trios)
   reads = NULL
   averages = NULL
@@ -254,10 +254,9 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
       averages[i]=RS$confInterval[2]
       totals=as.vector(na.omit(RS$resampled.totals))
       num_nas=as.vector(attr(RS$resampled.totals,"na.action"))
-      print(length(num_nas))
       
+      #MC-integration
       vec=ifelse(totals>=reads[i], 1, 0)
-      
       #P(>obs) = P(>obs and NA) + P(>obs and !NA) = 0 + P(>obs)*P(!NA)
       p.values[i]=( sum(na.omit(vec))/length(totals) )*( length(totals)/(length(totals)+length(num_nas)) )
       
@@ -289,14 +288,14 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
   
-  #Holm-Bonferroni correction at FWER alpha = 0.01
+  #Holm-Bonferroni correction at FWER alpha = 0.05
   HB.sorted=NULL
   m=length(p.values)
-  sorted.p=sort(p.vals, index.return=TRUE)
+  sorted.p=sort(p.values, index.return=TRUE, na.last = TRUE)
   HB.thresh=NULL
   #calculate the rejections using step-down procedure
   for(k in 1:m){
-    HB.thresh[k]=0.01/(m+1-k)
+    HB.thresh[k]=0.05/(m+1-k)
     HB.sorted[k]=ifelse(sorted.p$x[k]<HB.thresh[k], TRUE, FALSE)
   }
   

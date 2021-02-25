@@ -146,12 +146,6 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
     #count interactions
     reads[i]=ifelse(empty(as.data.frame(hic.obj))==TRUE, NA, sum(hic.obj$counts))
     
-    # if(is.na(sampler[i])!=TRUE){
-    #   reads[i]=sampler[i]
-    # }
-    # 
-    # i=i+1
-    
   }
   
   
@@ -204,6 +198,8 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   reads = NULL
   averages = NULL
   p.values = NULL
+  total.nas = NULL
+  resampled_dataset=list()
   
   hic.extent=as.data.frame(matrix(0, nrow = idx, ncol = 4))
   colnames(hic.extent)=c("lower_x", "upper_x", "lower_y", "upper_y")
@@ -252,14 +248,18 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                               res=10000,
                               search.size=search.size)
     
-    
       averages[i]=RS$confInterval[2]
     
       totals=as.vector(na.omit(RS$resampled.totals))
+      num_nas=as.vector(attr(RS$resampled.totals,"na.action"))
       
       vec=ifelse(totals>reads[i], 1, 0)
     
-      p.values[i]=sum(na.omit(vec))/length(totals)
+      p.values[i]=( sum(na.omit(vec))/length(totals) )*( length(totals)/(length(totals)+length(num_nas)) )
+      
+      resampled_dataset[[i]]=list(sampled=totals, nas=num_nas)
+      
+      total.nas[i]=length(num_nas)
       
     }
     
@@ -271,7 +271,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads, averages, p.values,
+                               reads, averages, total.nas, p.values,
                                trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
@@ -279,12 +279,11 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   
-  colnames(info.list)=c("trio.idx", "reads", "expected", "P(>obs)", "cis.chr", 
-                        "trans.chr","variant.pos", "trans.left","trans.right", 
-                        "variant.lower.bound", "variant.upper.bound",
-                        "trans.lower.bound", "trans.upper.bound")
+  colnames(info.list)=c("trio.idx", "reads", "expected", "total_NA's", "P(>obs)", "cis.chr", 
+                        "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
+                        "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
-  return(info.list)
+  return(list(summary.table=info.list, data=resampled_dataset))
   
   
   

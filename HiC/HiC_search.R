@@ -189,7 +189,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   #resolution -- the BP resolution desired and to be passed to "extract_hic()"
   
   
-  trio.attr=get_trio_attr(trio.index=trios, tissue.name = tiss)
+  trio.attr=get_trio_attr(trio.index=trios, tissue.name = tiss, verbose = verbose)
   
   cis.data=trio.attr$Attributes$cis
   trans.data=trio.attr$Attributes$trans
@@ -240,29 +240,29 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
     
     #resample the data to obtain a probability distribution by MC integration
     if(is.na(reads[i])==TRUE){
+      #if no reads for variant<-->gene return NA's
       averages[i]=NA
       p.values[i]=NA
     }else{
-
+      #else return the resampled data and determine P(>=obs)
       RS=Resample_interactions(filePath = hic.filename,
                               chrs=c(paste(cis.data$chr[i]),paste(trans.data$chr[i])),
                               res=10000,
                               search.size=search.size)
-    
+      
+      # obtain resampled data, extract NA's and non-NA data points and calc pvalue
       averages[i]=RS$confInterval[2]
-    
       totals=as.vector(na.omit(RS$resampled.totals))
       num_nas=as.vector(attr(RS$resampled.totals,"na.action"))
       print(length(num_nas))
       
-      vec=ifelse(totals>reads[i], 1, 0)
+      vec=ifelse(totals>=reads[i], 1, 0)
       
-      p.before[i]= sum(na.omit(vec))/length(totals)
-    
+      #P(>obs) = P(>obs and NA) + P(>obs and !NA) = 0 + P(>obs)*P(!NA)
       p.values[i]=( sum(na.omit(vec))/length(totals) )*( length(totals)/(length(totals)+length(num_nas)) )
       
+      #return the resampled data set
       resampled_dataset[[i]]=list(sampled=totals, nas=num_nas)
-      
       total.nas[i]=length(num_nas)
       
     }
@@ -273,20 +273,38 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
     
   }
   
+  bh=rep(0, length(p.values))
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads, averages, total.nas, p.values, p.before,
+                               reads, averages, total.nas, p.values, bh,
                                trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
                                trio.attr$Attributes$trans$left,
                                trio.attr$Attributes$trans$right,
                                hic.extent)
-  
-  colnames(info.list)=c("trio.idx", "reads", "expected", "total_NA's", "P(>obs)", "p", "cis.chr", 
+  #name cols
+  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)", "Holm_Bon", "cis.chr", 
                         "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
+  
+  #Holm-Bonferroni correction at FWER alpha = 0.01
+  HB.sorted=NULL
+  m=length(p.values)
+  sorted.p=sort(p.vals, index.return=TRUE)
+  HB.thresh=NULL
+  #calculate the rejections using step-down procedure
+  for(k in 1:m){
+    HB.thresh[k]=0.01/(m+1-k)
+    HB.sorted[k]=ifelse(sorted.p$x[k]<HB.thresh[k], TRUE, FALSE)
+  }
+  
+  info.list=info.list[sorted.p$ix,]
+  info.list$Holm_Bon=HB.sorted
+  
+  
+  #return as list
   return(list(summary.table=info.list, data=resampled_dataset))
   
   

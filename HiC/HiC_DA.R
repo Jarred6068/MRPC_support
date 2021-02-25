@@ -139,6 +139,8 @@ triosM1.hic.result=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyse
                                      search.size=100000,
                                      tiss="CellsEBVtransformedlymphocytes")
 
+write.csv(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/HiC_lymphocyte_result.csv")
+
 
 #check all M1's for Lung
 M1.Lung=ADDIS.M1.check("Lung")
@@ -151,6 +153,7 @@ triosM1.hic.result2=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      search.size=100000,
                                      tiss="Lung")
 
+write.csv(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/Lung/HiC_Lung_result.csv")
 
 #check all M1's skin
 M1.skin=ADDIS.M1.check("SkinNotSunExposed")
@@ -160,8 +163,10 @@ indexes3=c(M1.fibroblasts$Catalog$tiss$SkinNotSunExposed$ADDIS$type2)
 triosM1.hic.result3=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyses/Skin/ENCFF569RJM.hic", 
                                      trios=indexes3,
                                      resolution=10000,
-                                     search.size=50000,
+                                     search.size=100000,
                                      tiss="SkinNotSunExposed")
+
+write.csv(triosM1.hic.result3, file = "/mnt/ceph/jarredk/HiC_Analyses/Skin/HiC_Skin_result.csv")
 
 
 #check all M1's for Fibroblasts
@@ -174,3 +179,16 @@ triosM1.hic.result4=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      resolution=10000,
                                      search.size=100000,
                                      tiss="CellsCulturedfibroblasts")
+
+
+write.csv(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/fibroblast_cells/HiC_Fibroblasts_result.csv")
+
+
+
+
+
+
+
+
+
+                      

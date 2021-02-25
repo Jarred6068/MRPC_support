@@ -107,12 +107,88 @@ extract_hic=function(fileName=NULL, chrs=c("1","1"), resol=10000, package.path="
 }
 
 
+#=============================================Resampling_Function====================================================
+
+Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search.size=100000, resamples=10000, 
+                               verbose=FALSE, plot.hist=FALSE){
+  
+  reads=rep(0, resamples)
+  sampler=NULL
+  CI=NULL
+  i=1
+  data.hic2=extract_hic(fileName = filePath, 
+                        chrs = chrs,
+                        resol=res)
+  
+  bounds=c(min(data.hic2$x), max(data.hic2$x), min(data.hic2$y), max(data.hic2$y))
+  
+  if(verbose==TRUE){
+    print(bounds)
+  }
+
+  for( i in 1:length(reads)){
+    
+    gene1=runif(2, min = bounds[1]+search.size, max = bounds[2]-search.size)
+    gene2=runif(2, min = bounds[3]+search.size, max = bounds[4]-search.size)
+    
+    #establish snp - gene search "box"
+    left.pos=paste(chrs[1],":",
+                   gene1[1]-search.size,":",
+                   gene1[1]+search.size, sep = "")
+  
+    right.pos=paste(chrs[2],":",
+                    gene2[2]-search.size,":",
+                    gene2[2]+search.size, sep = "")
+  
+  
+    hic.obj=extract_hic(fileName=filePath, chrs = c(left.pos, right.pos), resol = res)
+    
+    #count interactions
+    reads[i]=ifelse(empty(as.data.frame(hic.obj))==TRUE, NA, sum(hic.obj$counts))
+    
+    # if(is.na(sampler[i])!=TRUE){
+    #   reads[i]=sampler[i]
+    # }
+    # 
+    # i=i+1
+    
+  }
+  
+  
+  if(plot.hist==TRUE){
+    
+    H1=hist(reads)
+    plot(H1)
+    
+  }
+  
+  reads=na.omit(reads)
+  
+  X.bar=mean(reads)
+  X.sd=sd(reads)
+  lower.limit=X.bar-abs(qnorm(0.025))*X.sd
+  upper.limit=X.bar+abs(qnorm(0.025))*X.sd
+  CI=c(lower.limit, X.bar, upper.limit)
+  names(CI)=c("lower.limit", "mean", "upper.limit")
+  
+  
+  if(plot.hist==TRUE){
+    return(list(resampled.totals=reads,rawdata=sampler, confInterval=CI, Hist.obj=H1))
+  }else{
+    return(list(resampled.totals=reads, confInterval=CI))
+  }
+  
+  
+}
+
+
 #==================================Check_Interactions_Function=======================================================
 
 # a simple function which incorporates the HiC data in .hic format to check if chromatin interactions exist for trios
 # classed as trans or cis mediated models (M1's) obtained from post-processing analysis. 
 
-interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, search.size=100000, tiss="CellsEBVtransformedlymphocytes"){
+interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, search.size=100000, tiss="CellsEBVtransformedlymphocytes",
+                           verbose=TRUE){
   #SYNTAX:
   #hic.filename -- the path to the desired hic.file
   #trio.attr -- the attributes information from "get_trio_attr()" 
@@ -126,8 +202,11 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   idx = length(trios)
   reads = NULL
+  averages = NULL
+  p.values = NULL
   
   hic.extent=as.data.frame(matrix(0, nrow = idx, ncol = 4))
+  colnames(hic.extent)=c("lower_x", "upper_x", "lower_y", "upper_y")
   
   for(i in 1:idx){
     #establish snp - gene search "box"
@@ -140,8 +219,12 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                     trans.data$left[i]-search.size,":",
                     trans.data$right[i]+search.size, sep = "")
     
-    print(left.pos)
-    print(right.pos)
+    
+    if(verbose==TRUE){
+      print(left.pos)
+      print(right.pos)
+    }
+    
     
     #save search upper and lower bounds
     hic.extent[i,]=c(cis.data$variant_pos[i]-search.size,
@@ -154,8 +237,33 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                          chrs = c(left.pos, right.pos),
                          resol=resolution)
     
-    #count interactions
-    reads[i]=ifelse(empty(as.data.frame(data.hic))==TRUE, "NA", as.character(sum(data.hic$counts)))
+    #count interactions in observed
+    reads[i]=ifelse(empty(as.data.frame(data.hic))==TRUE, NA, sum(data.hic$counts))
+    
+    
+    #resample the data to obtain a probability distribution by MC integration
+    if(is.na(reads[i])==TRUE){
+      averages[i]=NA
+      p.values[i]=NA
+    }else{
+
+      RS=Resample_interactions(filePath = hic.filename,
+                              chrs=c(paste(cis.data$chr[i]),paste(trans.data$chr[i])),
+                              res=10000,
+                              search.size=search.size)
+    
+    
+      averages[i]=RS$confInterval[2]
+    
+      totals=as.vector(na.omit(RS$resampled.totals))
+      
+      vec=ifelse(totals>reads[i], 1, 0)
+    
+      p.values[i]=sum(na.omit(vec))/length(totals)
+      
+    }
+    
+    
     
     
     
@@ -163,7 +271,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads,
+                               reads, averages, p.values,
                                trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
@@ -171,8 +279,8 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   
-  colnames(info.list)=c("trio.idx", "reads", "cis.chr", "trans.chr",
-                        "variant.pos", "trans.left","trans.right", 
+  colnames(info.list)=c("trio.idx", "reads", "expected", "P(>obs)", "cis.chr", 
+                        "trans.chr","variant.pos", "trans.left","trans.right", 
                         "variant.lower.bound", "variant.upper.bound",
                         "trans.lower.bound", "trans.upper.bound")
   

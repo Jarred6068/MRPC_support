@@ -199,6 +199,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   averages = NULL
   p.values = NULL
   total.nas = NULL
+  p.before=NULL
   resampled_dataset=list()
   
   hic.extent=as.data.frame(matrix(0, nrow = idx, ncol = 4))
@@ -252,8 +253,11 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
     
       totals=as.vector(na.omit(RS$resampled.totals))
       num_nas=as.vector(attr(RS$resampled.totals,"na.action"))
+      print(length(num_nas))
       
       vec=ifelse(totals>reads[i], 1, 0)
+      
+      p.before[i]= sum(na.omit(vec))/length(totals)
     
       p.values[i]=( sum(na.omit(vec))/length(totals) )*( length(totals)/(length(totals)+length(num_nas)) )
       
@@ -271,7 +275,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads, averages, total.nas, p.values,
+                               reads, averages, total.nas, p.values, p.before,
                                trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
@@ -279,7 +283,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   
-  colnames(info.list)=c("trio.idx", "reads", "expected", "total_NA's", "P(>obs)", "cis.chr", 
+  colnames(info.list)=c("trio.idx", "reads", "expected", "total_NA's", "P(>obs)", "p", "cis.chr", 
                         "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   

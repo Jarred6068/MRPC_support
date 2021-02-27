@@ -319,10 +319,19 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   info.list$Reject=HB.sorted
   info.list$Holm_Bon_Thresh=HB.thresh
   
-  #get qvalues
+  #get qvalues using Hochberg step-up procedure
   library(qvalue, lib=pack.path)
   
-  info.list$qvals=qvalue(info.list$p.values, fdr.level = alpha)
+  Q=qvalue(as.vector(na.omit(info.list$p.values)), fdr.level = alpha, pi0 = 1)
+  
+  for(i in 1:length(p.values)){
+    
+    info.list$qvals[i]=ifelse(is.na(info.list$p.values[i])==TRUE, NA, Q$qvalues[i])
+    
+  }
+  
+
+  
   
   #return as list
   return(list(summary.table=info.list, data=resampled_dataset))

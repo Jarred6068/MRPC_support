@@ -157,7 +157,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
     idx=which(tiss==tissues)
     G=tisspath[idx]
     
-    png(paste("/mnt/ceph/jarredk/HiC_Analyses/Histograms/",G ,"rplot_", trio ,".png", sep = ""))
+    png(paste("/mnt/ceph/jarredk/HiC_Analyses/Histograms/",G ,"/rplot_", trio ,".png", sep = ""))
     
     H1=hist(reads)
     plot(H1)
@@ -192,7 +192,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
 # classed as trans or cis mediated models (M1's) obtained from post-processing analysis. 
 
 interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, search.size=100000, tiss="CellsEBVtransformedlymphocytes",
-                           verbose=TRUE, pack.path="/mnt/ceph/jarredk/Rpackages"){
+                           verbose=TRUE, pack.path="/mnt/ceph/jarredk/Rpackages", plot.h=FALSE){
   #SYNTAX:
   #hic.filename -- the path to the desired hic.file
   #trio.attr -- the attributes information from "get_trio_attr()" 
@@ -260,7 +260,8 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                               res=10000,
                               search.size=search.size,
                               tiss = tiss,
-                              trio = trios[i])
+                              trio = trios[i],
+                              plot.hist = plot.h)
       
       # obtain resampled data, extract NA's and non-NA data points and calc pvalue
       averages[i]=RS$confInterval[2]

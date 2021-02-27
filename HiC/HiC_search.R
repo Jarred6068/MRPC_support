@@ -110,7 +110,10 @@ extract_hic=function(fileName=NULL, chrs=c("1","1"), resol=10000, package.path="
 #=============================================Resampling_Function====================================================
 
 Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search.size=100000, resamples=10000, 
-                               verbose=FALSE, plot.hist=FALSE){
+                               verbose=FALSE, plot.hist=FALSE, trio=NULL, tiss=NULL){
+  
+  tissues=c("CellsCulturedfibroblasts","SkinNotSunExposed","Lung","CellsEBVtransformedlymphocytes")
+  tisspath=c("fibroblast_cells", "Skin","Lung","lymphoblastoid_cells")
   
   reads=rep(0, resamples)
   sampler=NULL
@@ -151,8 +154,15 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   
   if(plot.hist==TRUE){
     
+    idx=which(tiss==tissues)
+    
+    
+    png(paste("/mnt/ceph/jarredk/HiC_Analyses/Histograms/",G ,"rplot_", trio ,".png", sep = ""))
+    
     H1=hist(reads)
     plot(H1)
+    
+    dev.off()
     
   }
   

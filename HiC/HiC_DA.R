@@ -129,60 +129,70 @@ source("/mnt/ceph/jarredk/HiC_Analyses/HiC_search.R")
 #check all M1's for CellsEBVtransformedlymphocytes
 M1.lymphocytes=ADDIS.M1.check("CellsEBVtransformedlymphocytes")
 
-indexes2=c(M1.lymphocytes$Catalog$tiss$CellsEBVtransformedlymphocytes$ADDIS$type2)
+indexes=c(M1.lymphocytes$Catalog$tiss$CellsEBVtransformedlymphocytes$ADDIS$type2)
 
 #M1.lymphocytes$Catalog$tiss$CellsEBVtransformedlymphocytes$ADDIS$type1
 
 triosM1.hic.result=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/ENCFF355OWW.hic", 
-                                     trios=indexes2,
+                                     trios=indexes,
                                      resolution=10000,
                                      search.size=100000,
-                                     tiss="CellsEBVtransformedlymphocytes")
+                                     tiss="CellsEBVtransformedlymphocytes",
+                                     verbose=FALSE)
 
-write.csv(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/HiC_lymphocyte_result.csv")
+write.csv(triosM1.hic.result$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/HiC_lymphocyte_result.csv")
+save(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/resampled.lymph.Rdata")
+triosM1.hic.result$summary.table
 
 
 #check all M1's for Lung
 M1.Lung=ADDIS.M1.check("Lung")
 
-indexes3=c(M1.Lung$Catalog$tiss$Lung$ADDIS$type2)
+indexes2=c(M1.Lung$Catalog$tiss$Lung$ADDIS$type2)
 
 triosM1.hic.result2=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyses/Lung/ENCFF366ERB.hic", 
-                                     trios=indexes3,
+                                     trios=indexes2,
                                      resolution=10000,
                                      search.size=100000,
-                                     tiss="Lung")
+                                     tiss="Lung",
+                                     verbose=FALSE)
 
-write.csv(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/Lung/HiC_Lung_result.csv")
+write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/Lung/HiC_Lung_result.csv")
+save(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/Lung/resampled.Lung.Rdata")
+triosM1.hic.result2$summary.table
 
 #check all M1's skin
 M1.skin=ADDIS.M1.check("SkinNotSunExposed")
 
-indexes3=c(M1.fibroblasts$Catalog$tiss$SkinNotSunExposed$ADDIS$type2)
+indexes3=c(M1.skin$Catalog$tiss$SkinNotSunExposed$ADDIS$type2)
 
 triosM1.hic.result3=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyses/Skin/ENCFF569RJM.hic", 
                                      trios=indexes3,
                                      resolution=10000,
                                      search.size=100000,
-                                     tiss="SkinNotSunExposed")
+                                     tiss="SkinNotSunExposed",
+                                     verbose=TRUE)
 
-write.csv(triosM1.hic.result3, file = "/mnt/ceph/jarredk/HiC_Analyses/Skin/HiC_Skin_result.csv")
-
+write.csv(triosM1.hic.result3$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/Skin/HiC_Skin_result.csv")
+save(triosM1.hic.result3, file = "/mnt/ceph/jarredk/HiC_Analyses/Skin/resampled.Skin.Rdata")
+triosM1.hic.result3$summary.table
 
 #check all M1's for Fibroblasts
 M1.fibroblasts=ADDIS.M1.check("CellsCulturedfibroblasts")
 
-indexes3=c(M1.fibroblasts$Catalog$tiss$CellsCulturedfibroblasts$ADDIS$type2)
+indexes4=c(M1.fibroblasts$Catalog$tiss$CellsCulturedfibroblasts$ADDIS$type2)
 
 triosM1.hic.result4=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyses/fibroblast_cells/ENCFF768UBD.hic", 
-                                     trios=indexes3,
+                                     trios=indexes4,
                                      resolution=10000,
                                      search.size=100000,
-                                     tiss="CellsCulturedfibroblasts")
+                                     tiss="CellsCulturedfibroblasts",
+                                     verbose=FALSE)
 
 
-write.csv(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/fibroblast_cells/HiC_Fibroblasts_result.csv")
-
+write.csv(triosM1.hic.result4$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/fibroblast_cells/HiC_Fibroblasts_result.csv")
+save(triosM1.hic.result4, file = "/mnt/ceph/jarredk/HiC_Analyses/fibroblast_cells/resampled.fibro.Rdata")
+triosM1.hic.result4$summary.table
 
 
 

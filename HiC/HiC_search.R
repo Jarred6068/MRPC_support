@@ -258,7 +258,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
       #MC-integration
       vec=ifelse(totals>=reads[i], 1, 0)
       #P(>obs) = P(>obs and NA) + P(>obs and !NA) = 0 + P(>obs)*P(!NA)
-      p.values[i]=( sum(na.omit(vec))/length(totals) )*( length(totals)/(length(totals)+length(num_nas)) )
+      p.values[i]=( sum(na.omit(vec))/length(totals) )
       
       #return the resampled data set
       resampled_dataset[[i]]=list(sampled=totals, nas=num_nas)
@@ -273,17 +273,18 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   }
   
   bh=rep(0, length(p.values))
+  bh.thresh=rep(0, length(p.values))
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
                                reads, averages, total.nas, p.values, bh,
-                               trio.attr$Attributes$cis$chr,
+                               bh.thresh,trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
                                trio.attr$Attributes$trans$left,
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   #name cols
-  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)", "Holm_Bon", "cis.chr", 
+  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","Reject","Holm_Bon_Thresh", "cis.chr", 
                         "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
@@ -300,8 +301,8 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   }
   
   info.list=info.list[sorted.p$ix,]
-  info.list$Holm_Bon=HB.sorted
-  
+  info.list$Reject=HB.sorted
+  info.list$Holm_Bon_Thresh=HB.thresh
   
   #return as list
   return(list(summary.table=info.list, data=resampled_dataset))

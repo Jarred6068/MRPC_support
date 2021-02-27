@@ -138,7 +138,8 @@ triosM1.hic.result=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyse
                                      resolution=10000,
                                      search.size=100000,
                                      tiss="CellsEBVtransformedlymphocytes",
-                                     verbose=FALSE)
+                                     verbose=TRUE,
+                                     plot.h=TRUE)
 
 write.csv(triosM1.hic.result$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/HiC_lymphocyte_result.csv")
 save(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/resampled.lymph.Rdata")

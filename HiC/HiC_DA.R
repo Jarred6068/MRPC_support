@@ -156,7 +156,8 @@ triosM1.hic.result2=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      resolution=10000,
                                      search.size=100000,
                                      tiss="Lung",
-                                     verbose=FALSE)
+                                     verbose=TRUE,
+                                     plot.h=TRUE)
 
 write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/Lung/HiC_Lung_result.csv")
 save(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/Lung/resampled.Lung.Rdata")
@@ -172,7 +173,8 @@ triosM1.hic.result3=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      resolution=10000,
                                      search.size=100000,
                                      tiss="SkinNotSunExposed",
-                                     verbose=TRUE)
+                                     verbose=TRUE,
+                                     plot.h=TRUE)
 
 write.csv(triosM1.hic.result3$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/Skin/HiC_Skin_result.csv")
 save(triosM1.hic.result3, file = "/mnt/ceph/jarredk/HiC_Analyses/Skin/resampled.Skin.Rdata")
@@ -188,7 +190,8 @@ triosM1.hic.result4=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      resolution=10000,
                                      search.size=100000,
                                      tiss="CellsCulturedfibroblasts",
-                                     verbose=FALSE)
+                                     verbose=TRUE,
+                                     plot.h=TRUE)
 
 
 write.csv(triosM1.hic.result4$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/fibroblast_cells/HiC_Fibroblasts_result.csv")

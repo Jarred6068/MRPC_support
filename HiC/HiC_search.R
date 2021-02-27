@@ -113,7 +113,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
                                verbose=FALSE, plot.hist=FALSE, trio=NULL, tiss=NULL){
   
   tissues=c("CellsCulturedfibroblasts","SkinNotSunExposed","Lung","CellsEBVtransformedlymphocytes")
-  tisspath=c("fibroblast_cells", "Skin","Lung","lymphoblastoid_cells")
+  tisspath=c("fibroblast_cells","Skin","Lung","lymphoblastoid_cells")
   
   reads=rep(0, resamples)
   sampler=NULL
@@ -155,7 +155,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   if(plot.hist==TRUE){
     
     idx=which(tiss==tissues)
-    
+    G=tisspath[idx]
     
     png(paste("/mnt/ceph/jarredk/HiC_Analyses/Histograms/",G ,"rplot_", trio ,".png", sep = ""))
     
@@ -192,7 +192,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
 # classed as trans or cis mediated models (M1's) obtained from post-processing analysis. 
 
 interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, search.size=100000, tiss="CellsEBVtransformedlymphocytes",
-                           verbose=TRUE){
+                           verbose=TRUE, pack.path="/mnt/ceph/jarredk/Rpackages"){
   #SYNTAX:
   #hic.filename -- the path to the desired hic.file
   #trio.attr -- the attributes information from "get_trio_attr()" 
@@ -258,7 +258,9 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
       RS=Resample_interactions(filePath = hic.filename,
                               chrs=c(paste(cis.data$chr[i]),paste(trans.data$chr[i])),
                               res=10000,
-                              search.size=search.size)
+                              search.size=search.size,
+                              tiss = tiss,
+                              trio = trios[i])
       
       # obtain resampled data, extract NA's and non-NA data points and calc pvalue
       averages[i]=RS$confInterval[2]
@@ -284,35 +286,42 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   bh=rep(0, length(p.values))
   bh.thresh=rep(0, length(p.values))
+  qvals=rep(0, length(p.values))
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
                                reads, averages, total.nas, p.values, bh,
-                               bh.thresh,trio.attr$Attributes$cis$chr,
+                               bh.thresh, qvals, trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
                                trio.attr$Attributes$trans$left,
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   #name cols
-  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","Reject","Holm_Bon_Thresh", "cis.chr", 
-                        "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
+  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","Reject","Holm_Bon_Thresh", "qvals",
+                        "cis.chr", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
   
   #Holm-Bonferroni correction at FWER alpha = 0.05
+  alpha=0.05
   HB.sorted=NULL
   m=length(p.values)
   sorted.p=sort(p.values, index.return=TRUE, na.last = TRUE)
   HB.thresh=NULL
   #calculate the rejections using step-down procedure
   for(k in 1:m){
-    HB.thresh[k]=0.05/(m+1-k)
+    HB.thresh[k]=alpha/(m+1-k)
     HB.sorted[k]=ifelse(sorted.p$x[k]<HB.thresh[k], TRUE, FALSE)
   }
   
   info.list=info.list[sorted.p$ix,]
   info.list$Reject=HB.sorted
   info.list$Holm_Bon_Thresh=HB.thresh
+  
+  #get qvalues
+  library(qvalue, lib=pack.path)
+  
+  info.list$qvals=qvalue(info.list$p.values, fdr.level = alpha)
   
   #return as list
   return(list(summary.table=info.list, data=resampled_dataset))

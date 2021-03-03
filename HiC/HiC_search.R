@@ -298,7 +298,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   #name cols
-  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","Reject","Holm_Bon_Thresh", "qvals",
+  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","Reject","HB.Adjusted", "qvals",
                         "cis.chr", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
@@ -308,27 +308,29 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   HB.sorted=NULL
   m=length(p.values)
   sorted.p=sort(p.values, index.return=TRUE, na.last = TRUE)
-  HB.thresh=NULL
+  print(sorted.p$x)
+  HB.adjust=NULL
   #calculate the rejections using step-down procedure
   for(k in 1:m){
-    HB.thresh[k]=alpha/(m+1-k)
-    HB.sorted[k]=ifelse(sorted.p$x[k]<HB.thresh[k], TRUE, FALSE)
+    HB.adjust[k]=sorted.p$x[k]*(m+1-k)
+    HB.sorted[k]=ifelse(sorted.p$x[k]<alpha, TRUE, FALSE)
   }
   
   info.list=info.list[sorted.p$ix,]
   info.list$Reject=HB.sorted
-  info.list$Holm_Bon_Thresh=HB.thresh
+  HB.adjust=ifelse(HB.adjust>1, 1, HB.adjust)
+  info.list$HB.Adjusted=HB.adjust
   
-  #get qvalues using Hochberg step-up procedure
+   #get qvalues using BH step-up procedure
   library(qvalue, lib=pack.path)
   
-  Q=qvalue(as.vector(na.omit(info.list$p.values)), fdr.level = alpha, pi0 = 1)
+  Q=qvalue(as.vector(na.omit(info.list$`P(>obs)`)), fdr.level = alpha, pi0 = 1)
+  print(Q)
   
-  for(i in 1:length(p.values)){
-    
-    info.list$qvals[i]=ifelse(is.na(info.list$p.values[i])==TRUE, NA, Q$qvalues[i])
-    
-  }
+  Qq=as.vector(Q$qvalues)
+  
+  Qq=ifelse(is.na(info.list$`P(>obs)`)==TRUE, NA, info.list$`P(>obs)`)
+  info.list$qvals=Qq
   
 
   

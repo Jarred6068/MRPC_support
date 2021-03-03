@@ -159,7 +159,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
     
     png(paste("/mnt/ceph/jarredk/HiC_Analyses/Histograms/",G ,"/rplot_", trio ,".png", sep = ""))
     
-    H1=hist(reads)
+    H1=hist(reads, breaks = 10)
     plot(H1)
     
     dev.off()

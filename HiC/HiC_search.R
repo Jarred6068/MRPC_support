@@ -304,12 +304,14 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   
   #Holm-Bonferroni correction at FWER alpha = 0.05
+  #initialize
   alpha=0.05
   HB.sorted=NULL
-  m=length(p.values)
+  m=length(na.omit(p.values))
   sorted.p=sort(p.values, index.return=TRUE, na.last = TRUE)
   print(sorted.p$x)
   HB.adjust=NULL
+  
   #calculate the rejections using step-down procedure
   for(k in 1:m){
     HB.adjust[k]=sorted.p$x[k]*(m+1-k)

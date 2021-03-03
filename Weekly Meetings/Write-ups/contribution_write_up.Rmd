@@ -218,7 +218,7 @@ $\bullet$ In general, controling the FWER lowers the risk of a type I error at t
 
 $\bullet$ Just as the p-value gives the expected False Positive Rate (FPR) by rejecting any hypotheses with a p-value at or below the FPR, the q-value similarly gives the Posititive False Discovery Rate (pFDR)/type I error by rejecting any hypothesis with a q-value at or below the pFDR
 
-
+After adjusting for multiple comparisons none of the observed p-values remained significant for any of the correction methods. The histograms of the sampling distributions were retained for all trios and observed p-values were vetted against the sampling distribution. 
 
 
 

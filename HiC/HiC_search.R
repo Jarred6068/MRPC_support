@@ -291,7 +291,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   BY=rep(0, length(p.values))
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads, averages, total.nas, p.values, Hoch,
+                               reads, averages, total.nas, p.values, BY,
                                bh.thresh, qvals, trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,

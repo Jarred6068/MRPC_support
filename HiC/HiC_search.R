@@ -286,12 +286,12 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   }
   
   #preallocate space for FDR/FWER adjustments
-  bh=rep(0, length(p.values))
   bh.thresh=rep(0, length(p.values))
   qvals=rep(0, length(p.values))
+  BY=rep(0, length(p.values))
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads, averages, total.nas, p.values,
+                               reads, averages, total.nas, p.values, Hoch,
                                bh.thresh, qvals, trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
@@ -299,7 +299,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   #name cols
-  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","HB.Adjusted", "qvals",
+  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
                         "cis.chr", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
@@ -334,8 +334,9 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   Qq=ifelse(is.na(info.list$`P(>obs)`)==TRUE, NA, Qq)
   info.list$qvals=Qq
   
-
+  #include the Hochberg step up correction
   
+  info.list$BY=p.adjust(sorted.p$x, method="BY")
   
   #return as list
   return(list(summary.table=info.list, data=resampled_dataset))

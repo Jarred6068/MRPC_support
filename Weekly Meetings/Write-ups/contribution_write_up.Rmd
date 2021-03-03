@@ -206,8 +206,17 @@ Where $n_1$ is the number of resamples not in the set of $NA$'s and $n_2$ be num
 
 Note that a much simpler approach is to notice the exclusivity of the complement event $A_i = NA$ and the event $A_i\geq A_{obs}$ which leads to the realization that $P\big (A_i\geq A_{obs} \big | A_i\neq NA\big) \equiv P\big(B_j \geq B_{obs}\big) \ \forall \ j \in 1:n_1$    
     
-Significant enrichment was defined as an observed probability less than the threshold $\alpha$ taken at the usual level of $\alpha=0.05$. To control for the false detection of significant enrichment, several FWER and FDR corrections were applied to the observed probabilities and these included: Holm-Bonferroni (FWER), Hochberg (FWER), and the BH method (FDR).
+Significant enrichment was defined as an observed probability less than the threshold $\alpha$ taken at the usual level of $\alpha=0.05$. To control for the false detection of significant enrichment, two FWER and one FDR correction were applied to the observed probabilities which included: Holm-Bonferroni (FWER), Hochberg step-up (FWER), and the BH method (FDR).    
 
+\textbf{Some Notes On q-values, FWER and FDR}:
+
+$\bullet$ In the special case of all Null hypotheses being true the FWER and FDR are equivalent. In all other cases the FWER adjustments control the expected number of type I errors among all hypotheses/tests. The FDR controls the expected number of type I errors among significant tests. 
+
+$\bullet$ FWER methods are more stringent then FDR methods because of the consideration of all tests, therefore FDR methods are more powerful. 
+
+$\bullet$ In general, controling the FWER lowers the risk of a type I error at the expense of an increased risk of committing a type II error (failing to reject a null hypothesis). Holm-Bonferroni has a lower risk of type II error than the standard Bonferroni procedure and is therefore uniformly more powerful 
+
+$\bullet$ Just as the p-value gives the expected False Positive Rate (FPR) by rejecting any hypotheses with a p-value at or below the FPR, the q-value similarly gives the Postitive False Discovery Rate (pFDR)/type I error by rejecting any hypothesis with a q-value at or below the pFDR
 
 
 

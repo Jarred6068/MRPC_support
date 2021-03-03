@@ -216,7 +216,7 @@ $\bullet$ FWER methods are more stringent then FDR methods because of the consid
 
 $\bullet$ In general, controling the FWER lowers the risk of a type I error at the expense of an increased risk of committing a type II error (failing to reject a null hypothesis). Holm-Bonferroni has a lower risk of type II error than the standard Bonferroni procedure and is therefore uniformly more powerful 
 
-$\bullet$ Just as the p-value gives the expected False Positive Rate (FPR) by rejecting any hypotheses with a p-value at or below the FPR, the q-value similarly gives the Postitive False Discovery Rate (pFDR)/type I error by rejecting any hypothesis with a q-value at or below the pFDR
+$\bullet$ Just as the p-value gives the expected False Positive Rate (FPR) by rejecting any hypotheses with a p-value at or below the FPR, the q-value similarly gives the Posititive False Discovery Rate (pFDR)/type I error by rejecting any hypothesis with a q-value at or below the pFDR
 
 
 

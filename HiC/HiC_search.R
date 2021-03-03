@@ -285,12 +285,13 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
     
   }
   
+  #preallocate space for FDR/FWER adjustments
   bh=rep(0, length(p.values))
   bh.thresh=rep(0, length(p.values))
   qvals=rep(0, length(p.values))
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads, averages, total.nas, p.values, bh,
+                               reads, averages, total.nas, p.values,
                                bh.thresh, qvals, trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
@@ -298,7 +299,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   #name cols
-  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","Reject","HB.Adjusted", "qvals",
+  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)","HB.Adjusted", "qvals",
                         "cis.chr", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
@@ -306,21 +307,20 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   #Holm-Bonferroni correction at FWER alpha = 0.05
   #initialize
   alpha=0.05
-  HB.sorted=NULL
   m=length(na.omit(p.values))
   sorted.p=sort(p.values, index.return=TRUE, na.last = TRUE)
   print(sorted.p$x)
-  HB.adjust=NULL
+  HB.adjust=rep(0, length(p.values))
   
   #calculate the rejections using step-down procedure
   for(k in 1:m){
     HB.adjust[k]=sorted.p$x[k]*(m+1-k)
-    HB.sorted[k]=ifelse(sorted.p$x[k]<alpha, TRUE, FALSE)
   }
   
+  #store in output table
   info.list=info.list[sorted.p$ix,]
-  info.list$Reject=HB.sorted
   HB.adjust=ifelse(HB.adjust>1, 1, HB.adjust)
+  HB.adjust=ifelse(HB.adjust==0, NA, HB.adjust)
   info.list$HB.Adjusted=HB.adjust
   
    #get qvalues using BH step-up procedure
@@ -331,7 +331,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   Qq=as.vector(Q$qvalues)
   
-  Qq=ifelse(is.na(info.list$`P(>obs)`)==TRUE, NA, info.list$`P(>obs)`)
+  Qq=ifelse(is.na(info.list$`P(>obs)`)==TRUE, NA, Qq)
   info.list$qvals=Qq
   
 

@@ -207,3 +207,44 @@ kable(Addis.cIs, caption = "Table of confidence intervals for the average count 
 
 
 
+
+
+
+
+
+```{r, fig.cap="Density plots summarizing the differences between the relative counts for model 1 type 1 (M11) and Model 2 type 2 (M12) as well as the total distribution of Model 1's (MT)", echo=FALSE, message=FALSE, warning=FALSE}
+#M1-type1 and M2-type2 comparisons
+
+m1sum=read.csv(file="C:/Users/Bruin/Desktop/Research Assistantship/ADDIS_Verify/Complete_M1types_Analysis_ADDIS.csv")
+
+m1sum=m1sum[1:(dim(m1sum)[1]-1),]
+
+
+#making density plots:
+library(ggplot2)
+L=rep("LOND", dim(m1sum)[1])
+A=rep("ADDIS", dim(m1sum)[1])
+
+AplusL=c(A,L)
+plot.list=list()
+
+  
+  df=cbind.data.frame( FDR=as.factor(AplusL), M11=c(m1sum[,2], m1sum[,7]), M12=c(m1sum[,3], m1sum[,8]),
+                       MT=c(m1sum[,4], m1sum[,9]))
+  
+  plot.list[[1]]=ggplot(df, aes(x=M11, color=FDR, fill=FDR)) +geom_density(alpha=0.3)+
+    ggtitle(label = "Density plot for M1 Type 1")
+  
+  plot.list[[2]]=ggplot(df, aes(x=M12, color=FDR, fill=FDR)) +geom_density(alpha=0.3)+
+    ggtitle(label = "Density plot for M1 Type 2")
+  
+  plot.list[[3]]=ggplot(df, aes(x=MT, color=FDR, fill=FDR)) +geom_density(alpha=0.3)+
+    ggtitle(label = "Density plot for Total M1")
+  
+
+
+
+library(gridExtra)
+grid.arrange(grobs=plot.list,nrows=2, ncol=2)
+
+

@@ -15,6 +15,7 @@ loadRData <- function(fileName=NULL){
 #==============================================Helper_Function==============================================
 
 find_trans=function(TransGeneName=NULL){
+  #A simple helper function used by get_trio_attr() to find trans gene attributes
   
   tissue.names=read.csv("/mnt/ceph/jarredk/AddisReRunFiles/tissuenames.csv", header = T)
 
@@ -29,10 +30,11 @@ find_trans=function(TransGeneName=NULL){
 
 #==================================Begin_Helper_Function_2==================================================
 get_trio_attr=function(trio.index=NULL, tissue.name="CellsEBVtransformedlymphocytes", verbose=TRUE){
+  #This function searches for the specified a trios attributes 
+  #-------------------------------------------------------------------------------------------------
   #SYNTAX: 
-  #trio.index -- the index for the specific cis/trans mediated trio (M1's)
-  #index.tissue -- currently only one value ='LCL'
-  #a simple checking mechanism
+  #trio.index -- the index of the trio for which attributes are desired
+  #tissue.name -- the tissue of the trio 
   
   tissue.names=read.csv("/mnt/ceph/jarredk/AddisReRunFiles/tissuenames.csv", header = T)
   name=subset(tissue.names, tissue.name1==tissue.name)
@@ -110,8 +112,24 @@ extract_hic=function(fileName=NULL, chrs=c("1","1"), resol=10000, package.path="
 #=============================================Resampling_Function====================================================
 
 Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search.size=100000, resamples=10000, 
-                               verbose=FALSE, plot.hist=FALSE, trio=NULL, tiss=NULL){
+                               verbose=FALSE, plot.hist=FALSE, trio=NULL, tiss=NULL, FDR=NULL){
   
+  #SYNTAX:
+  #filepath - feeds to extrac_hic to obtain min/max bounds for both chromosomes
+  #chrs - the number, or X/Y identifying the chromosome of variant and trans gene
+  #res - the desired resolution of the extraction
+  #search.size - specifies the size of bin around chrs position to be searched
+  #resamples - the number of resampling iterations
+  #verbose - logical indicating if bounds should be printed
+  #plot.hist - plots and saves to file the histogram of resampled interactions:
+  
+  #------if--plot.hist--TRUE: the following must be specified
+  #trio - the number identifying the trio of interest: i.e 3324
+  #tiss - the tissue for the current trio and interaction data: i.e "SkingNotSunExposed"
+  #FDR - the method of FDR in MRPC by which the trio was classified:"LOND" or "ADDIS"
+  
+  
+  #for histogram plotting
   tissues=c("CellsCulturedfibroblasts","SkinNotSunExposed","Lung","CellsEBVtransformedlymphocytes")
   tisspath=c("fibroblast_cells","Skin","Lung","lymphoblastoid_cells")
   
@@ -122,7 +140,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   data.hic2=extract_hic(fileName = filePath, 
                         chrs = chrs,
                         resol=res)
-  
+  #obtain the bounds of the chromosomes
   bounds=c(min(data.hic2$x), max(data.hic2$x), min(data.hic2$y), max(data.hic2$y))
   
   if(verbose==TRUE){
@@ -130,7 +148,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   }
 
   for( i in 1:length(reads)){
-    
+    #randomly select a position on the chromosomes
     gene1=runif(2, min = bounds[1]+search.size, max = bounds[2]-search.size)
     gene2=runif(2, min = bounds[3]+search.size, max = bounds[4]-search.size)
     
@@ -143,7 +161,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
                     gene2[2]-search.size,":",
                     gene2[2]+search.size, sep = "")
   
-  
+    #extract reads in search box for each gene/variant
     hic.obj=extract_hic(fileName=filePath, chrs = c(left.pos, right.pos), resol = res)
     
     #count interactions
@@ -151,13 +169,13 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
     
   }
   
-  
+  #histogram 
   if(plot.hist==TRUE){
     
     idx=which(tiss==tissues)
     G=tisspath[idx]
     
-    png(paste("/mnt/ceph/jarredk/HiC_Analyses/Histograms/",G ,"/rplot_", trio ,".png", sep = ""))
+    png(paste("/mnt/ceph/jarredk/HiC_Analyses/",FDR,"/Histograms/",G ,"/rplot_", trio ,".png", sep = ""))
     
     H1=hist(reads, breaks = 10)
     plot(H1)
@@ -168,6 +186,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   
   reads=na.omit(reads)
   
+  #calculate confidence interval around mean number of interactions
   X.bar=mean(reads)
   X.sd=sd(reads)
   lower.limit=X.bar-abs(qnorm(0.025))*X.sd
@@ -175,7 +194,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   CI=c(lower.limit, X.bar, upper.limit)
   names(CI)=c("lower.limit", "mean", "upper.limit")
   
-  
+  #return resampled data (and hist object if plot.hist==TRUE)
   if(plot.hist==TRUE){
     return(list(resampled.totals=reads,rawdata=sampler, confInterval=CI, Hist.obj=H1))
   }else{
@@ -192,11 +211,19 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
 # classed as trans or cis mediated models (M1's) obtained from post-processing analysis. 
 
 interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, search.size=100000, tiss="CellsEBVtransformedlymphocytes",
-                           verbose=TRUE, pack.path="/mnt/ceph/jarredk/Rpackages", plot.h=FALSE){
+                           verbose=TRUE, pack.path="/mnt/ceph/jarredk/Rpackages", plot.h=FALSE, FDR=NULL){
   #SYNTAX:
-  #hic.filename -- the path to the desired hic.file
-  #trio.attr -- the attributes information from "get_trio_attr()" 
-  #resolution -- the BP resolution desired and to be passed to "extract_hic()"
+  #hic.filename -- the path to the desired .hic file
+  #trio -- the trios index (or vector of indexes) typically obtained from ADDIS.M1.check() or ADDIS.PostProc() 
+  #resolution -- the BP resolution desired and to be passed to "extract_hic() and Resample_interactions()"
+  #search.size -- the size of the bin around gene positions: also passed to Resample_interactions()
+  #tiss -- a string specifying the name of the tissue to which the trio belongs 
+  #Verbose -- logical which if true prints checkpoints as trios are checked
+  #pack.path -- the path to you Rpackages library for dependencies such as StrawR
+  #plot.h -- logical passed to Resample_interactions()
+  #FDR -- string specifying "LOND" or "ADDIS" passed to Resample_interactions()
+  
+  
   
   #obtain trio attributes
   trio.attr=get_trio_attr(trio.index=trios, tissue.name = tiss, verbose = verbose)
@@ -261,7 +288,8 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                               search.size=search.size,
                               tiss = tiss,
                               trio = trios[i],
-                              plot.hist = plot.h)
+                              plot.hist = plot.h,
+                              FDR = FDR)
       
       # obtain resampled data, extract NA's and non-NA data points and calc pvalue
       averages[i]=RS$confInterval[2]

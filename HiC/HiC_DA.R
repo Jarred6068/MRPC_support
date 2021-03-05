@@ -121,6 +121,17 @@ interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_ce
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 #=====================================================================================================
 #---------------------------Run-Analysis-For-Available-Tissues::ADDIS---------------------------------
 #=====================================================================================================
@@ -161,7 +172,7 @@ triosM1.hic.result2=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      plot.h=TRUE,
                                      FDR="ADDIS")
 
-write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/ADDIS/HiC_Analyses/Lung/HiC_Lung_result.csv")
+write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/HiC_Lung_result.csv")
 save(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/resampled.Lung.Rdata")
 triosM1.hic.result2$summary.table
 

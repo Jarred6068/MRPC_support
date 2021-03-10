@@ -367,6 +367,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   
   #store in output table
   info.list=info.list[sorted.p$ix,]
+  info.list2=info.list2[sorted.p2$ix,]
   HB.adjust=ifelse(HB.adjust>1, 1, HB.adjust)
   HB.adjust=ifelse(HB.adjust==0, NA, HB.adjust)
   info.list$HB.Adjusted=HB.adjust

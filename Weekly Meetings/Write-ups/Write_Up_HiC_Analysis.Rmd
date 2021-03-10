@@ -46,8 +46,42 @@ Significant enrichment was defined as an observed probability less than the thre
 
 All parts of the HiC/Trans Mediated verification process were repeated for the trans mediated trios classified by \textbf{MRPC-LOND}. Under both methods none of the empirical p-values remained significant after adjusting for multiple testing. 
 
+\section*{MAIN POINTS:}
 
+\subsection*{(1) Identification of Trans Mediated Trios and Respective Meta-Data}    
 
+$\bullet$ HiC data for four tissues (Lung, Skin, Lymphoblastoid Cells, Fibroblast Cells) was obtained from the ENCODE consortium    
+
+$\bullet$ All trans-mediated (M1 type-2) classified trios from both \textbf{ADDIS} and \textbf{LOND} methods were extracted using \textit{ADDIS.M1.check()} function
+
+$\bullet$ For each trio the SNP, Cis, and trans gene chromosome number and base pair positions on the chromosome were obtained for alignment with HiC data
+
+\subsection*{(2) Extraction of HiC Interaction Data}
+$\bullet$ HiC data for each individual trio was extracted using \textit{StrawR} package in $R$ and at a 10,000 base pair resolution (the interaction bins were in 10,000 bp increments)
+
+$\bullet$ Extraction was carried out by summing the number of interactions between 200,000 bp regions around both the SNP and the trans-gene's chromosomal positions 
+
+$\bullet$ if no interactions existed for a SNP/trans-gene pair, the count/sum was replaced by "NA" to indicate the information was not available
+
+$\bullet$ The count of interactions between the SNP and trans-gene was carried out and stored for each M1 type-2 trio classified by both \textbf{MRPC} methods
+
+\subsection*{(3) Calculation of Empirical Probabilities}
+
+$\bullet$ Empirical probabilities were used to determine if an observed number of interactions for a SNP/trans-gene pair was significant
+
+$\bullet$ Empirical probabilities were calculated by using 10,000 re-samplings to construct a empirical null distribution of interactions between the SNP chromosome and the trans-gene chromosome 
+
+$\bullet$ Two empirical probabilities were calculated: (1) the ratio of the number of non-NA resamples larger than the observed number of interactions to of the total number of non-NA resamples and (2) the ratio of the number of non-NA resamples larger than the observed number of interactions to the total number of resamples (See detailed description or subsection \textbf{(4)} for more detail)
+
+\subsection*{(4) Re-sampling Methodology}
+
+$\bullet$ we re-sampled the number of interactions between the chromosomes of the SNP and trans-gene by allowing a 200,000 bp region/bin to vary randomly along each chromosome and summing the number of interactions between the bins/regions
+
+$\bullet$ at each iteration a bin mid-point was selected both the SNP and trans-gene chromosomes by a random draw from a uniform distribution specific to each chromosome and the number of interactions for a $\pm 100,000$  bp around each mid point were counted
+
+$\bullet$ the boundaries of the uniform distribution for a given chromosome were the minimum and maximum extents of the chromosome after adjusting the ends by $\pm 100,000$ bp to account for the bin size
+
+$\bullet$ this process was repeated for 10,000 re-samplings and for each individual trio
 
 
 

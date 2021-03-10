@@ -153,7 +153,7 @@ triosM1.hic.result=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyse
                                      plot.h=TRUE,
                                      FDR="ADDIS")
 
-write.csv(triosM1.hic.result$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/lymphoblastoid_cells/HiC_lymphocyte_result.csv")
+write.csv(triosM1.hic.result$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/lymphoblastoid_cells/HiC_lymphocyte_result_ADDIS.csv")
 save(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/lymphoblastoid_cells/resampled.lymph.Rdata")
 triosM1.hic.result$summary.table
 
@@ -172,7 +172,7 @@ triosM1.hic.result2=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      plot.h=TRUE,
                                      FDR="ADDIS")
 
-write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/HiC_Lung_result.csv")
+write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/HiC_Lung_result_ADDIS.csv")
 save(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/resampled.Lung.Rdata")
 triosM1.hic.result2$summary.table
 
@@ -190,7 +190,7 @@ triosM1.hic.result3=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      plot.h=TRUE,
                                      FDR="ADDIS")
 
-write.csv(triosM1.hic.result3$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Skin/HiC_Skin_result.csv")
+write.csv(triosM1.hic.result3$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Skin/HiC_Skin_result_ADDIS.csv")
 save(triosM1.hic.result3, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Skin/resampled.Skin.Rdata")
 triosM1.hic.result3$summary.table
 

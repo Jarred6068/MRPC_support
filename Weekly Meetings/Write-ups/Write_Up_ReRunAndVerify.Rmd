@@ -18,62 +18,30 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8)
 ```
 
 
-\section*{Operations in January and February}
 
-\subsection*{Re-analysis of GTEx Using {\bf MRPC-ADDIS}}
+\section*{Re-analysis of GTEx Using MRPC-ADDIS}
 
-\textbf{DETAILED DESCRIPTION:}    
+\subsection*{DETAILED DESCRIPTION:}    
 
-Implementation of the ADDIS improvement to the MRPC algorithm: This involved adapting the existing scripts developed by M. Badsha to rerun the GTEx data using the ADDIS version of the FDR control. The distribution of model types (M0, M1, ... M4, Other) relative to each tissue was retained from the analyses for both \textbf{ MRPC-LOND} and \textbf{ MRPC-ADDIS} for comparison. Additionally, a host of programs were developed to identify the specific classification of each trio analyzed in each tissue. These programs were further adapted to identify the number of trios for each tissue classified as cis or trans mediated (M1 type 1 or M1 type 2). Such information was again compared with results from \textbf{MRPC LOND} with the intention of understanding the differences in inferred networks between the two FDR control methods.
-
-In General, \textbf{MRPC-ADDIS} loosens the rejection threshold such that more edges/directions are inferred. There was typically a reshuffling of Model types with some specific trends such as most M1's whose graph classification was changed was converted to M2 or M4. M0's were converted to either M1, M2, M3, or M4 (with a large number in each tissue transferring to M3). The path by which M1 was converted to M2 or M4 was generally a direction flip between the cis and trans leading to a dependence structure of the cis gene dependent on both the trans gene and variant. The other method was the inference of an direct edge between the variant and both genes and a general edge between the cis and trans gene.   
+\textbf{(1)} Implementation of the ADDIS improvement to the MRPC algorithm: This involved adapting the existing scripts developed by M. Badsha to rerun the GTEx data using the ADDIS version of the FDR control. \textbf{(2)} The distribution of model types (M0, M1, ... M4, Other) relative to each tissue was retained from the analyses for both \textbf{ MRPC-LOND} and \textbf{ MRPC-ADDIS} for comparison. Additionally, a host of programs were developed to identify the specific classification of each trio analyzed in each tissue.\textbf{(3)} These programs were further adapted to identify the number of trios for each tissue classified as cis or trans mediated (M1 type 1 or M1 type 2). Such information was again compared with results from \textbf{MRPC LOND} with the intention of understanding the differences in inferred networks between the two FDR control methods.
+  
 
 
-\textbf{MAIN POINTS AND FILE LOCATIONS:}
+\section*{MAIN POINTS:}
 
-$\bullet$ Re-run of GTEx data with \textbf{MRPC} using the \textbf{ADDIS} FDR control    
-\indent $\rightarrow$ Done using a slightly modified version of M. Badsha's scripts.    
-\indent $\rightarrow$ All associated output data files are stored at: 
-$$/mnt/ceph/jarredk/AddisReRunFiles$$     
-$\rightarrow$ The script used to Re-run \textbf{MRPC} using \textbf{ADDIS} is located at: 
-$$/mnt/ceph/jarredk/ADDIS\_verify/ADDIS\_ReRun.R$$    
+\subsection*{(1) Re-run of GTEx data with MRPC using the ADDIS FDR control}    
+$\bullet$ Used the general format of the scripts created by M.Badsha to run MRPC on GTEx data for all available tissues.    
+$\bullet$ created a looped version of the script which runs and outputs the list of classifications and model counts for each table for seemless re-analysis
 
+\subsection*{(2) Summarizing of differences between LOND and ADDIS}   
+$\bullet$ The distribution of trio classifications for each tissue were quantified as the number of trios (counts) allocated to each model type (M0, M1, ... M4, Other)    
+$\bullet$ These counts compared numerically and visually to further analyze differences between distribution of model types between \textbf{ADDIS} and \textbf{LOND}    
+$\bullet$ Lastly, we followed up on differences between FDR methods at a finer level by investigating classification changes of individual trios and differences between their adjacency matrix    
 
-
-$\bullet$ Summarizing of differences between \textbf{LOND} and \textbf{ADDIS} trio classifications:   
-$\rightarrow$ quantified the distribution of trio classifications for each tissue as counts of (M0, M1, ... M4, Other) 
-$\rightarrow$ table can be accessed through the cluster at:
-$$/mnt/ceph/jarredk/ADDIS\_verify/Trios\_analysis\_GTEx\_v8\_allPCs\_V3\_ordered\_updated.xlsx$$   
-
-
-
-$\bullet$ followed up on FDR methods by investigating specific trios and their classification differences between FDR methods:      
-
-\textbf{GENERAL STEPS:}   
-\begin{itemize}
-  \item[1] read in SNP, PC, and final output files generated from $ADDIS\_rerun()$ (trio-->model information)
-  \item[2] catalog and store each trios \textbf{LOND} and \textbf{ADDIS} model classification
-  \item[3] count/summarize trios between methods or within tissues (generally both)
-  \item[4] rerun \text{MRPC} on trio using both \textbf{LOND} and \textbf{ADDIS} methods and compare graph and correlation matrices
-\end{itemize}
-
-$\rightarrow$ R-functions developed to assist in tracking trios are in: 
-$$/mnt/ceph/jarredk/ADDIS\_verify/ADDIS\_Post\_Analysis\_processing.R$$
-
-
-
-$\bullet$ followed up and compared mediation model trios of Type-1 (cis mediated) and Type-2 (trans-mediated) for both \textbf{ADDIS} and \textbf{LOND}     
-\textbf{GENERAL STEPS:}   
-\begin{itemize}
-  \item[1] read final output files generated from $ADDIS\_rerun()$ for both FDR methods (trio-->model information)
-  \item[2] use \textbf{MRPC} to re-classify each trio identified as M1 to obtain causal graph matrix for next step
-  \item[3] match trio to appropriate M1-type (1 or 2) by comparing causal graph matrix to type-1 and type-2 expected matrix
-  \item[4] store M1-type classification information in a tiered list and save
-\end{itemize}
-$\rightarrow$ function to classify M1-type is called $ADDIS.M1.Check()$ and is part of the R-script: 
-$$/mnt/ceph/jarredk/ADDIS\_verify/ADDIS\_Post\_Analysis\_processing.R$$
-$\rightarrow$ tables summarizing the counts and relative proportions of cis/trans mediated M1 models can be found at:
-$$/mnt/ceph/jarredk/ADDIS\_verify/$$
+\subsection*{(3) Summarizing differences between LOND and ADDIS - Cis/Trans Mediation models}
+$\bullet$ We extracted the M1 classified trios for both \textbf{ADDIS} and \textbf{LOND} and classified them as Type-1 (cis mediated) and Type-2 (trans-mediated) by the structure of the adjacency matrix    
+$\bullet$ constructed a table of the frequency (counts) and relative proportion of M1-Type-1 and M2-Type-2 mediation models for each method and all tissues    
+$\bullet$ Summarized and compared mediation model trios of (Type-1,Type-2) numerically and visually for both \textbf{ADDIS} and \textbf{LOND}    
 
 \newpage
 \subsection*{Summarizing Information For LOND/ADDIS Comparisons}
@@ -145,7 +113,11 @@ row.names(change.table)=c("mean.change.ct", "SD.change.ct", "mean.change%", "SD.
 
 kable(change.table, caption = "table of the average difference in count and percentage between ADDIS and LOND and their standard errors for the differences", digits = 5)
 
+```
 
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
 #Bootstrap CI's
 
 Addis.cIs=as.data.frame(matrix(0, nrow = 6, ncol = 3))

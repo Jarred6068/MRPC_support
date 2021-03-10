@@ -44,7 +44,7 @@ Note that a much simpler approach is to notice the exclusivity of the complement
     
 Significant enrichment was defined as an observed probability less than the threshold $\alpha$ taken at the usual level of $\alpha=0.05$. To control for the false detection of significant enrichment, two FDR and one FWER correction were applied to the empirical probabilities which included: Holm-Bonferroni (FWER), BY method (FDR), and the BH method (FDR). After Correction, none of the empirical probabilities were significant.    
 
-All parts of the HiC/Trans Mediated Regulation verification process were repeated for the trans mediated trios classified by \textbf{MRPC-LOND}. Under both methods none of the empirical p-values remained significant after adjusting for multiple testing. 
+All parts of the HiC/Trans Mediated verification process were repeated for the trans mediated trios classified by \textbf{MRPC-LOND}. Under both methods none of the empirical p-values remained significant after adjusting for multiple testing. 
 
 
 

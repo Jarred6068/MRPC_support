@@ -242,6 +242,7 @@ triosM1.hic.result=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyse
 write.csv(triosM1.hic.result$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/lymphoblastoid_cells/HiC_lymphocyte_result_LOND.csv")
 save(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/lymphoblastoid_cells/resampled.lymph.LOND.Rdata")
 triosM1.hic.result$summary.table
+triosM1.hic.result$summary.table2
 
 
 #check all M1's for Lung

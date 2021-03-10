@@ -235,8 +235,8 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   reads = NULL
   averages = NULL
   p.values = NULL
+  p.values2 = NULL
   total.nas = NULL
-  p.before=NULL
   resampled_dataset=list()
   
   hic.extent=as.data.frame(matrix(0, nrow = idx, ncol = 4))
@@ -280,6 +280,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
       #if no reads for variant<-->gene return NA's
       averages[i]=NA
       p.values[i]=NA
+      p.values2[i]=NA
     }else{
       #else return the resampled data and determine P(>=obs)
       RS=Resample_interactions(filePath = hic.filename,
@@ -300,6 +301,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
       vec=ifelse(totals>=reads[i], 1, 0)
       #P(>obs) = P(>obs and NA) + P(>obs and !NA) = 0 + P(>obs)*P(!NA)
       p.values[i]=( sum(na.omit(vec))/length(totals) )
+      p.values2[i]=( sum(na.omit(vec))/(length(totals)+length(num_nas)) )
       
       #return the resampled data set
       resampled_dataset[[i]]=list(sampled=totals, nas=num_nas)
@@ -317,6 +319,11 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   bh.thresh=rep(0, length(p.values))
   qvals=rep(0, length(p.values))
   BY=rep(0, length(p.values))
+  
+  bh.thresh2=rep(0, length(p.values))
+  qvals2=rep(0, length(p.values))
+  BY2=rep(0, length(p.values))
+  
   #summarize
   info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
                                reads, averages, total.nas, p.values, BY,
@@ -326,10 +333,22 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$left,
                                trio.attr$Attributes$trans$right,
                                hic.extent)
+  
+  info.list2 = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
+                               reads, averages, total.nas, p.values2, BY2,
+                               bh.thresh2, qvals2, trio.attr$Attributes$cis$chr,
+                               trio.attr$Attributes$trans$chr,
+                               trio.attr$Attributes$cis$variant_pos,
+                               trio.attr$Attributes$trans$left,
+                               trio.attr$Attributes$trans$right,
+                               hic.extent)
   #name cols
-  colnames(info.list)=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
+  cnames=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
                         "cis.chr", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
+  
+  colnames(info.list)=cnames
+  colnames(info.list2)=cnames
   
   
   #Holm-Bonferroni correction at FWER alpha = 0.05
@@ -337,6 +356,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   alpha=0.05
   m=length(na.omit(p.values))
   sorted.p=sort(p.values, index.return=TRUE, na.last = TRUE)
+  sorted.p2=sort(p.values2, index.return=TRUE, na.last = TRUE)
   print(sorted.p$x)
   HB.adjust=rep(0, length(p.values))
   
@@ -351,23 +371,28 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   HB.adjust=ifelse(HB.adjust==0, NA, HB.adjust)
   info.list$HB.Adjusted=HB.adjust
   
+  info.list2$HB.Adjusted=p.adjust(sorted.p2$x, method = "holm")
+  
    #get qvalues using BH step-up procedure
   library(qvalue, lib=pack.path)
   
   Q=qvalue(as.vector(na.omit(info.list$`P(>obs)`)), fdr.level = alpha, pi0 = 1)
-  print(Q)
+  Q2=qvalue(as.vector(na.omit(info.list2$`P(>obs)`)), fdr.level = alpha, pi0 = 1)
   
   Qq=as.vector(Q$qvalues)
+  Qq2=as.vector(Q$qvalues)
   
   Qq=ifelse(is.na(info.list$`P(>obs)`)==TRUE, NA, Qq)
-  info.list$qvals=Qq
+  Qq2=ifelse(is.na(info.list2$`P(>obs)`)==TRUE, NA, Qq2)
+  info.list2$qvals=Qq2
   
   #include the Hochberg step up correction
   
   info.list$BY=p.adjust(sorted.p$x, method="BY")
+  info.list2$BY=p.adjust(sorted.p2$x, method = "BY")
   
   #return as list
-  return(list(summary.table=info.list, data=resampled_dataset))
+  return(list(summary.table1=info.list, summary.table2=info.list2, data=resampled_dataset))
   
   
   

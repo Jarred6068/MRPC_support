@@ -67,7 +67,7 @@ $\bullet$ The resolution was arbitrarily set to 10,000 base pairs which was the 
 
 $\bullet$ To ensure coverage of the regulatory elements of both the SNP and trans-gene, we extracted and totaled all interactions between 200,000 base pair regions on each chromosome and centered at the SNP's/trans-gene's starting position on that chromosome
 
-$\bullet$ if no interactions existed for a SNP/trans-gene pair, the count/sum was replaced by "NA" to indicate the information was not available
+$\bullet$ if no interactions existed for a SNP/trans-gene pair, the count/total was replaced by "NA" to indicate the information was not available
 
 $\bullet$ The count of interactions between the SNP and trans-gene was carried out and stored for each M1 type-2 trio classified by both \textbf{MRPC} methods
 
@@ -90,14 +90,21 @@ $\bullet$ Two empirical p-values were calculated:
 
 $\bullet$ A single sample point was defined as the total number of interactions between two randomly positioned 200,000 bp regions; one on the SNP chromosome and one on the trans chromosome. 
 
-$\bullet$ At each iteration in the sampling procedure, we first selected a single position on each chromosomes by a random draw from a uniform distribution with parameters tailored to each respective chromosome
+$\bullet$ At each iteration in the sampling procedure, we first selected a single position on each chromosome by a random draw from a uniform distribution with parameters tailored to the respective chromosome
 
-$\bullet$ The randomly selected position was then treated as the center of a 200,000 bp region around that position. Again this was done for both the SNP and trans-gene chromosomes 
+$\bullet$ The randomly selected position was then treated as the center of a 200,000 bp region around that position. 
+
+$\bullet$ Again, a region was selected for both the SNP and trans-gene chromosomes and the number of interactions between them was the total of the bins shared by both regions
+
+$\bullet$ if no interactions existed for a pair of random regions, the count/total was replaced by "NA" to indicate the information was not available
 
 $\bullet$ the boundaries of the uniform distribution used to select a position on a given chromosome were the minimum and maximum extents of the the available data for that chromosome after adjusting the min/max values to account for the size of the region 
 
 $\bullet$ this process was repeated 10,000 times for each SNP/trans-gene pair to produce a unique empirical null distribution representative of the number of interactions between the SNP chromosome and trans-gene chromosome
 
+$\bullet$ the number of samplings was arbitraily set to 10,000 to ensure the number of non-NA sample points was sufficiently large
+
+$\bullet$ For the smallest chromosomes, it was possible, but unlikely, for the counted regions of some samples to overlap
 
 
 

@@ -7,8 +7,8 @@
 
 uncover_net=function(trio_number=NULL, FDR="ADDIS", verbose=TRUE){
   #SYNTAX:
-  #trio_number -- 
-  #FDR -- 
+  #trio_number -- the index of the trio you wish to search
+  #FDR -- designates which list data to search in (LOND or ADDIS)
   
   
   #load in previous files
@@ -24,18 +24,17 @@ uncover_net=function(trio_number=NULL, FDR="ADDIS", verbose=TRUE){
   
   for( t in 1:length(tissues.vec)){
     
-    #Load needed Files
-    L1.lond=loadRData(fileName=paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/", tissues.vec[t], 
-                                       "_AllPC/List.models.", tissues.vec[t], ".all.RData", sep = ""))
+    trioData=loadRData(fileName = paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/", 
+                                         tissues.vec[t],"_AllPC/data.snp.cis.trans.final.",tissues.vec[t],".V8.unique.snps.RData", sep = ""))
     
-    L2.addis=loadRData(fileName=paste("/mnt/ceph/jarredk/AddisReRunFiles/List.models.",
-                                        tissues.vec[t], ".all.RData", sep = ""))
-    
+    addisData=ADDIS.M1.check(tissue.names=tissues.vec[t])
+  
+    #get the M-types (M0, M1, ...)
     Mtypes=names(L1.lond)
     
     for(i in 1:length(L1.lond)){
       
-      
+      #match the trio number to trios in each list under Mtypes
       if(FDR=="ADDIS"){
 
         matched=match(trio_number, L2.addis[[i]])
@@ -55,6 +54,7 @@ uncover_net=function(trio_number=NULL, FDR="ADDIS", verbose=TRUE){
       
     }
     
+    #extract tissues the trio was found in and its Mtype for each tissue
     indicator=isTRUE(all.equal(logivec, not_in_tiss, check.attributes=FALSE))
     
     if(verbose==TRUE & indicator==FALSE){
@@ -68,17 +68,20 @@ uncover_net=function(trio_number=NULL, FDR="ADDIS", verbose=TRUE){
 
   }
   
+  #printing
   if(verbose==TRUE){
     print(summary(as.factor(data1$Model)))
     print(paste("Trio found in ",length(na.omit(data1$Tissue)), " Tissues", sep = ""))
+    
   }
-  return(data1)
   
+  
+  return(data1)
   
 }
 
 
-
+#===========================================================================================================
 
 
 

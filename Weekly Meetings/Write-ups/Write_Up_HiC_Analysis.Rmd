@@ -90,21 +90,21 @@ $\bullet$ Two empirical p-values were calculated:
 
 $\bullet$ A single sample point was defined as the total number of interactions between two randomly positioned 200,000 bp regions; one on the SNP chromosome and one on the trans chromosome. 
 
-$\bullet$ At each iteration in the sampling procedure, we first selected a single position on each chromosomes by a random draw from a uniform distribution with parameters tailored to each respective chromosome
+$\bullet$ At each iteration in the sampling procedure, we first selected a single position on each chromosomes by a random draw from a uniform distribution with parameters tailored to the respective chromosome
 
-$\bullet$ The randomly selected position was then treated as the center of a 200,000 bp region around that position. Again this was done for both the SNP and trans-gene chromosomes 
+$\bullet$ The randomly selected position was then treated as the center of a 200,000 bp region at that position. Again this was done for both the SNP and trans-gene chromosomes 
 
-$\bullet$ each position was sampled without replacement 
+$\bullet$ each position was sampled without the possibility of replacement, but regions had the potential to overlap on smaller chromosomes
 
-$\bullet$ the boundaries of the uniform distribution used to select a position on a given chromosome were the minimum and maximum extents of the the available data for that chromosome.
+$\bullet$ the boundaries of the uniform distribution used to select a position on a given chromosome were the minimum and maximum extents (in base pairs) of the the available data for that chromosome.
 
 $\bullet$ the min/max parameters were further constrained so that a randomly selected region could not overlap the boundaries of the data for each respective chromosome. 
 
 $\bullet$ Thus each random region selected lay completely within the available data for the respective chromosome 
 
-$\bullet$ this process was repeated 10,000 times for each SNP/trans-gene pair to produce a unique empirical null distribution representative of the number of interactions between the SNP chromosome and trans-gene chromosome
+$\bullet$ this sampling process was repeated 10,000 times for each SNP/trans-gene pair to produce a unique empirical null distribution representative of the number of interactions between the SNP chromosome and trans-gene chromosome
 
-
+\subsection*{(5) Multiple Comparisons Adjustments}
 
 
 
@@ -134,3 +134,4 @@ $\bullet$ this process was repeated 10,000 times for each SNP/trans-gene pair to
 
 
 \newpage
+\section*{References:}

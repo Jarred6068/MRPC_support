@@ -48,13 +48,16 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
   matchtab1=as.data.frame(matrix(0, nrow = length(tissues.vec), ncol = 2))
   colnames(matchtab1)=c("tissue", "found")
   all.matches=list()
+  all.tables=list()
   
   #begin for all tissues in tissues selection
   for( t in 1:length(tissues.vec)){
     
+    #read in the triodata for selected
     trioData=loadRData(fileName = paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/", 
                                          tissues.vec[t],"_AllPC/data.snp.cis.trans.final.",tissues.vec[t],".V8.unique.snps.RData", sep = ""))
     
+    #read in M1-types data from ADDIS.M1.check() 
     M1.Data=loadRData(fileName = paste("/mnt/ceph/jarredk/Reg_Net/AL_M1Data/", tissues.vec[t],".Rdata", sep = ""))
     
     addisM1 = M1.Data$Catalog[[1]][[1]][[2]]
@@ -67,6 +70,8 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
       if(mediator=="trans"){
         
         matchtab2=list()
+        summary.table1=as.data.frame(matrix(0, nrow = length(addisM1$type2), ncol = 3))
+        colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Trio.Number")
         
         for(j in 1:length(addisM1$type2)){
           
@@ -87,16 +92,21 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
           }
           
           matchtab2[[j]]=matchtab1
-          #print(matchtab2)
+          summary.table1[j, 1]=sum(matchtab1[,2])
+          summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
+          summary.table1[j, 3]=addisM1$type2[j]
+
         }
         
         all.matches[[t]]=matchtab2
-        #print(all.matches)
+        all.tables[[t]]=summary.table1
         
 #------------------addis-cis------------------------        
       }else{
         
         matchtab2=list()
+        summary.table1=as.data.frame(matrix(0, nrow = length(addisM1$type1), ncol = 3))
+        colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Trio.Number")
         
         for(j in 1:length(addisM1$type1)){
           
@@ -117,11 +127,14 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
           }
           
           matchtab2[[j]]=matchtab1
-          #print(matchtab2)
+          summary.table1[j, 1]=sum(matchtab1[,2])
+          summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
+          summary.table1[j, 3]=addisM1$type1[j]
+          
         }
         
         all.matches[[t]]=matchtab2
-        #print(all.matches)
+        all.tables[[t]]=summary.table1
         
       }
       
@@ -134,6 +147,8 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
       if(mediator=="trans"){
         
         matchtab2=list()
+        summary.table1=as.data.frame(matrix(0, nrow = length(londM1$type2), ncol = 3))
+        colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Trio.Number")
         
         for(j in 1:length(londM1$type2)){
           
@@ -154,17 +169,22 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
           }
           
           matchtab2[[j]]=matchtab1
-          #print(matchtab2)
+          summary.table1[j, 1]=sum(matchtab1[,2])
+          summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
+          summary.table1[j, 3]=londM1$type2[j]
+          
         }
         
         all.matches[[t]]=matchtab2
-        #print(all.matches)
+        all.tables[[t]]=summary.table1
       
      
 #-------------------lond--cis------------------------       
       }else{
         
         matchtab2=list()
+        summary.table1=as.data.frame(matrix(0, nrow = length(londM1$type1), ncol = 3))
+        colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Trio.Number")
         
         for(j in 1:length(londM1$type1)){
           
@@ -185,11 +205,14 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
           }
           
           matchtab2[[j]]=matchtab1
-          #print(matchtab2)
+          summary.table1[j, 1]=sum(matchtab1[,2])
+          summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
+          summary.table1[j, 3]=londM1$type1[j]
+          
         }
         
         all.matches[[t]]=matchtab2
-        #print(all.matches)
+        all.tables[[t]]=summary.table1
         
       }
       
@@ -204,7 +227,7 @@ uncover_net=function(tissue.selection=1, FDR="ADDIS", mediator="trans", verbose=
   if(FDR=="LOND" & mediator == "trans"){names(all.matches[[1]])=as.character(londM1$type2)}
   if(FDR=="LOND" & mediator == "cis"){names(all.matches[[1]])=as.character(londM1$type1)}
   
-  return(all.matches)
+  return(list( match.tables=all.matches, summary.tables=summary.table1))
   
 } #closes func
 

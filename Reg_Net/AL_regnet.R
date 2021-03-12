@@ -1,4 +1,4 @@
-#load in previous files
+#save all M1 data for speed
 # source("/mnt/ceph/jarredk/HiC_Analyses/HiC_search.R")
 # 
 # tissues.vec=tissue.names[,2]

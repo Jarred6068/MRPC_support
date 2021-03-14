@@ -16,36 +16,6 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.width=12, fig.height=8)
 ```
 
-\section*{Incorporation of HiC Data To Verify Trans Mediated Regulation }
-
-\subsection*{DETAILED DESCRIPTION:}   
-HiC mapping quality thresholded chromatin interaction data was obtained from the ENCODE consortium for four tissues (lymphoblastoid cells, fibroblast cells, skin, and lung) to identify the presence of interaction enrichment for trios classified as trans-mediated cis regulation by \textbf{MRPC-ADDIS} [@davis2018encyclopedia; @encode2012integrated]. For each trio classified as trans-mediated, the binned interactions between genomic regions was extracted at 10,000 bp resolution using the \textit{StrawR} package provided by Aiden Lab for use with the \textit{.hic} file format [@durand2016juicebox]. From this data, the total number of interactions between each trio's variant and it's associated trans gene was checked. This was done by summing all interaction counts for a 200,000 bp bin around the positions of both the variant and trans gene on their respective chromosomes. This was considered the observed number of interactions for a variant/trans-gene pair. Trios that had no observed interactions (or for which the data wasn't available) were desginated missing or "NA"  
-   
-To identify enrichment, we conducted 10,000 resamplings of interactions between randomly selected and uniformly probable positions throughout the trans-gene and variant's respective chromosomes. As with the observed pairs, the total number of interactions was counted for a 200,000 bp bin around the gene and variant chromosomal positions. This served as a comparative unique null distribution of counts for each trio and was used to ascertain the upper-tail probability of a pair's observed number of interactions.    
-    
-Many of the randomly selected 200,000 bp regions had either no interactions or no reads available. Without the ability to discern between unavailable data and 0 interaction values between two randomly selected regions, all empty interaction pairs were treated as missing data points and designated "NA". Therefore, the 10,000 resamples for each trio were partitioned into available data (non-NA) and unavailable data (NA's). In calculating the upper tail probability it is of significance to consider the quantity of unavailable data for a specific variant/trans-gene pair.
-
-\[P_{obs}=P\big (A_i\geq A_{obs} \big | A_i\neq NA\big) = \frac{P(A_i\geq A_{obs} \ \cap A_i\neq NA)}{P(A_i \neq NA)} \]
-
-using the following indicator functions:
-\[ \text{Let} \ f(A_i) = \begin{cases} 1, & \text{if} \ A_i\neq \text{NA} \ \forall \ i \in 1:N\\ 0, & \text{else} \  \end{cases}   \]
-
-\[ \text{Let} \ g(B_j) = \begin{cases} 1, & \text{if} \ B_j\geq B_{obs} \ \forall \ j \in 1:n_1, \ B\subseteq A\\ 0, & \text{else} \  \end{cases}   \]
-
-Where $n_1$ is the number of resamples not in the set of $NA$'s and $n_2$ be number of resamples in the complement event such that $n_1 + n_2 = N =10,000$. Thus we have:
-
-\[ = \frac{\frac{\sum_{j=1}^{n_1} g(B_j)}{\sum_{i=1}^N f(A_i)} \times \frac{\sum_{i=1}^N f(A_i)}{N}}{\left(\frac{\sum_{j=1}^{n_1} g(B_j)}{\sum_{i=1}^N f(A_i)} \times \frac{\sum_{i=1}^N f(A_i)}{N}\right)+\left( \frac{n_1 -\sum_{j=1}^{n_1} g(B_j)}{\sum_{i=1}^N f(A_i)} \times \frac{\sum_{i=1}^N f(A_i)}{N} \right)}\]
-
-\[ = \frac{   \frac{\sum_{j=1}^{n_1} g(B_j)}{N}    }{ \frac{\sum_{j=1}^{n_1} f(B_j)}{N} +\frac{n_1 - \sum_{j=1}^{n_1} f(B_j)}{N}  }\]
-
-\[ \frac{\sum_{j=1}^{n_1} g(B_j)}{\sum_{j=1}^{n_1} g(B_j)+ \left(n_1 - \sum_{j=1}^{n_1} g(B_j)\right)} = \frac{\sum_{j=1}^{n_1} g(B_j)}{n_1}  \]
-
-Note that a much simpler approach is to notice the exclusivity of the complement event $A_i = NA$ and the event $A_i\geq A_{obs}$ which leads to the realization that $P\big (A_i\geq A_{obs} \big | A_i\neq NA\big) \equiv P\big(B_j \geq B_{obs}\big) \ \forall \ j \in 1:n_1$    
-    
-Significant enrichment was defined as an observed probability less than the threshold $\alpha$ taken at the usual level of $\alpha=0.05$. To control for the false detection of significant enrichment, two FDR and one FWER correction were applied to the empirical probabilities which included: Holm-Bonferroni (FWER), BY method (FDR), and the BH method (FDR). After Correction, none of the empirical probabilities were significant.    
-
-All parts of the HiC/Trans Mediated verification process were repeated for the trans mediated trios classified by \textbf{MRPC-LOND}. Under both methods none of the empirical p-values remained significant after adjusting for multiple testing. 
-
 \section*{MAIN POINTS:}
 
 \subsection*{(1) Identification of Trans Mediated Trios and Respective Meta-Data}    
@@ -80,8 +50,8 @@ $\bullet$ Empirical p-values were calculated by randomly sampling the interactio
 $\bullet$ Two empirical p-values were calculated:
 \begin{itemize}
 
-	\item[1] the ratio of the number of non-NA samples larger than the observed number of interactions to of the total number of non-NA samples
-	\item[2] the ratio of the number of non-NA samples larger than the observed number of interactions to the total number of samples
+	\item[(1)] the ratio of the number of non-NA samples larger than the observed number of interactions to of the total number of non-NA samples
+	\item[(2)] the ratio of the number of non-NA samples larger than the observed number of interactions to the total number of samples
 
 \end{itemize}
 
@@ -96,42 +66,28 @@ $\bullet$ The randomly selected position was then treated as the center of a 200
 
 $\bullet$ each position was sampled without the possibility of replacement, but regions had the potential to overlap on smaller chromosomes
 
-$\bullet$ the boundaries of the uniform distribution used to select a position on a given chromosome were the minimum and maximum extents (in base pairs) of the the available data for that chromosome.
+$\bullet$ the min/max parameters of the uniform distribution used to select a position on a given chromosome were set to be the minimum base pair number represented by the data plus 100,000 bp and the maximum base pair number represented by the data minus 100,000 bp
 
-$\bullet$ the min/max parameters were further constrained so that a randomly selected region could not overlap the boundaries of the data for each respective chromosome. 
-
-$\bullet$ Thus each random region selected lay completely within the available data for the respective chromosome 
+$\bullet$ the parameters were constrained to the above values so that any randomly selected 200,000 bp region would lie completely within the available data for the respective chromosome.
 
 $\bullet$ this sampling process was repeated 10,000 times for each SNP/trans-gene pair to produce a unique empirical null distribution representative of the number of interactions between the SNP chromosome and trans-gene chromosome
 
 \subsection*{(5) Multiple Comparisons Adjustments}
 
+$\bullet$ Significant interaction enrichment was defined as an empirical p-value less than the threshold $\alpha$ taken at the usual level of $\alpha=0.05$
 
+$\bullet$ To account for multiple testing we employed 3 correction techniques to the empirical p-values:
 
+\begin{itemize}
 
+	\item[(1)] the Holm-Bonferroni (HB) Family Wise Error Rate (FWER) adjustment 
+	\item[(2)] Benjamin Yekutieli (BY) control of the false discovery rate
+	\item[(3)] Benjamin Hochberg (BH) control of the false discovery rate
 
+\end{itemize}
 
+$\bullet$ the HB corrected p-values were compared at the original rejection threshold $\alpha = 0.05$
 
+$\bullet$ The resulting q-values for the BH/BY methods were compared the desired false discovery rate $\beta=0.05$
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\newpage
-\section*{References:}
+$\bullet$ After applying the corrections, none of the empirical p-values remained significant

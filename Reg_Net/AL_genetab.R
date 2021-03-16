@@ -277,29 +277,33 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
     
   }else{
     
-    dat=loadRData(fileName=paste("/mnt/ceph/jarredk/Reg_Net/",FDR,"_", mediator,"_", "sorted_data_list.Rdata", sep = ""))
+    dat=loadRData(fileName=paste("/mnt/ceph/jarredk/Reg_Net/",FDR.method,"_", mediator.type,"_", "sorted_data_list.Rdata", sep = ""))
     
   }
   
   
-  
-  prelist=vector(mode = "list", length = dim(tissue.names)[1])
-  names(prelist)=tissue.names[,2]
+  prelist=vector(mode = "list", length = length(tissues))
+  names(prelist)=tissue.names[tissues,2]
+  shared=as.data.frame(matrix(0, nrow = length(tissues), ncol=2))
+  colnames(shared)=c("# genes", "tissue")
+  nam.vec=tissue.names[tissues,2]
   
   
   #loading bar
-  lbar2 = txtProgressBar(min = 0, max = length(tissues), style = 3)
+  lbar = txtProgressBar(min = 0, max = length(tissues), style = 3)
   
   for(i in 1:length(tissues)){
     
     for(j in 1:length(tissues)){
       
-      prelist[[j]]=c(prelist[[j]], as.vector(na.omit(dat$match.tables[[i]][[j]])))
+      prelist[[j]]=unique(c(prelist[[j]], as.vector(na.omit(dat[[1]][[i]][[j]]))))
+      shared[j,1]=length(prelist[[j]])
+      shared[j,2]=nam.vec[j]
       
     }
     
     Sys.sleep(0.05)
-    setTxtProgressBar(lbar2, i)
+    setTxtProgressBar(lbar, i)
     
   }
   
@@ -308,7 +312,7 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
   print("--Data:--Processing--Stage_1--complete--")
   
   
-  return(prelist)
+  return(list(all.genes=prelist, shared.tissues=shared))
   
 }
 

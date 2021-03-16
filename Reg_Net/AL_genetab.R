@@ -15,7 +15,7 @@
 #A function to extract all associated tissues and M classes for a given trio
 
 
-sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FALSE, verbose=TRUE){
+sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FALSE, verbose=FALSE){
   #SYNTAX:
   #trio_number -- the index of the trio you wish to search
   #FDR -- designates which list data to search in (LOND or ADDIS)
@@ -47,10 +47,12 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
   #preallocate space
   matchtab1=as.data.frame(matrix(0, nrow = length(tissues.vec), ncol = 2))
   all.matches=vector(mode = "list", length = length(tissues.vec))
+  all.matches2=vector(mode = "list", length = length(tissues.vec))
   all.tables=vector(mode = "list", length = length(tissues.vec))
   #pre-naming
   colnames(matchtab1)=c("tissue", "found")
   names(all.matches)=tissues.vec
+  names(all.matches2)=tissues.vec
   names(all.tables)=tissues.vec
   
   #loading bar 2
@@ -79,6 +81,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         
         matchtab2=vector(mode = "list", length = length(all.tissues))
         names(matchtab2)=all.tissues
+        matchtab3=list()
         summary.table1=as.data.frame(matrix(0, nrow = length(addisM1$type2), ncol = 3))
         colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
         gene.name=NULL
@@ -102,7 +105,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
             matchtab2[[k]][j]=ifelse(is.na(matched)==TRUE, NA, members)
 
           }
-          
+          matchtab3[[j]]=matchtab1[,2]
           summary.table1[j, 1]=sum(matchtab1[,2])
           summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
           summary.table1[j, 3]=gene.name[j]
@@ -110,6 +113,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         }
 
         all.matches[[t]]=matchtab2
+        all.matches2[[t]]=matchtab3
         all.tables[[t]]=summary.table1
         
 #------------------addis-cis------------------------        
@@ -117,6 +121,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         
         matchtab2=vector(mode = "list", length = length(all.tissues))
         names(matchtab2)=all.tissues
+        matchtab3=list()
         summary.table1=as.data.frame(matrix(0, nrow = length(addisM1$type1), ncol = 3))
         colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
         gene.name=NULL
@@ -141,6 +146,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
             
           }
           
+          matchtab3[[j]]=matchtab1[,2]
           summary.table1[j, 1]=sum(matchtab1[,2])
           summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
           summary.table1[j, 3]=gene.name[j]
@@ -148,6 +154,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         }
         
         all.matches[[t]]=matchtab2
+        all.matches2[[t]]=matchtab3
         all.tables[[t]]=summary.table1
         
       }
@@ -162,6 +169,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         
         matchtab2=vector(mode = "list", length = length(all.tissues))
         names(matchtab2)=all.tissues
+        matchtab3=list()
         summary.table1=as.data.frame(matrix(0, nrow = length(londM1$type2), ncol = 3))
         colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
         gene.name=NULL
@@ -186,6 +194,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
             
           }
           
+          matchtab3[[j]]=matchtab1[,2]
           summary.table1[j, 1]=sum(matchtab1[,2])
           summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
           summary.table1[j, 3]=gene.name[j]
@@ -193,6 +202,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         }
 
         all.matches[[t]]=matchtab2
+        all.matches2[[t]]=matchtab3
         all.tables[[t]]=summary.table1
       
      
@@ -201,6 +211,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         
         matchtab2=vector(mode = "list", length = length(all.tissues))
         names(matchtab2)=all.tissues
+        matchtab3=list()
         summary.table1=as.data.frame(matrix(0, nrow = length(londM1$type1), ncol = 3))
         colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
         gene.name=NULL
@@ -225,6 +236,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
             
           }
           
+          matchtab3[[j]]=matchtab1[,2]
           summary.table1[j, 1]=sum(matchtab1[,2])
           summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
           summary.table1[j, 3]=gene.name[j]
@@ -232,6 +244,7 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         }
         
         all.matches[[t]]=matchtab2
+        all.matches2[[t]]=matchtab3
         all.tables[[t]]=summary.table1
         
       }
@@ -246,11 +259,11 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
   
   if(save.data==TRUE){
     print("--Saving-Files-To:--/mnt/ceph/jarredk/Reg_Net/--")
-    save.set=list(all.matches, all.tables)
+    save.set=list(all.matches, all.matches2, all.tables)
     save(save.set, file = paste("/mnt/ceph/jarredk/Reg_Net/",FDR,"_", mediator,"_", "sorted_data_list.Rdata", sep = ""))
   }
   
-  return(list( match.tables=all.matches, summary.tables=all.tables))
+  return(list( match.tables=all.matches, match.df=all.matches2, summary.tables=all.tables))
   
 } #closes func
 
@@ -281,11 +294,16 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
     
   }
   
-  
+  #originals
   prelist=vector(mode = "list", length = length(tissues))
   names(prelist)=tissue.names[tissues,2]
+  #reduced by uniques
+  postlist=vector(mode = "list", length = length(tissues))
+  names(prelist)=tissue.names[tissues,2]
+  #number of genes in each tissue
   shared=as.data.frame(matrix(0, nrow = length(tissues), ncol=2))
   colnames(shared)=c("# genes", "tissue")
+  
   nam.vec=tissue.names[tissues,2]
   
   
@@ -296,7 +314,8 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
     
     for(j in 1:length(tissues)){
       
-      prelist[[j]]=unique(c(prelist[[j]], as.vector(na.omit(dat[[1]][[i]][[j]]))))
+      prelist[[j]]=c(prelist[[j]], as.vector(na.omit(dat[[1]][[i]][[j]])))
+      postlist[[j]]=unique(c(postlist[[j]], as.vector(na.omit(dat[[1]][[i]][[j]]))))
       shared[j,1]=length(prelist[[j]])
       shared[j,2]=nam.vec[j]
       
@@ -311,8 +330,51 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
   close(lbar)
   print("--Data:--Processing--Stage_1--complete--")
   
+  df.new=c(1:49)
   
-  return(list(all.genes=prelist, shared.tissues=shared))
+  #loading bar
+  lbar2 = txtProgressBar(min = 0, max = length(tissues), style = 3)
+  
+  for(t in 1:length(tissues)){
+    
+    df=as.data.frame.list(dat[[2]][[t]])
+    df2=apply(t(df),2,as.numeric)
+    df2=cbind.data.frame(dat[[3]][[t]][,3], df2)
+    df.new=rbind(df.new, df2)
+    
+    Sys.sleep(0.05)
+    setTxtProgressBar(lbar2, t)
+    
+  }
+  
+  df.new=df.new[2:dim(df.new)[1],]
+  row.names(df.new)=as.character(seq(dim(df.new)[1]))
+  
+  gene.vec=unique(unlist(prelist))
+  print(length(gene.vec))
+  
+  idx=match(gene.vec, df.new[,1])
+  
+  df.new=df.new[idx,]
+  
+  
+  dist1=as.data.frame(matrix(0, nrow=length(tissues), ncol = 2))
+  colnames(dist1)=c("# tissues", "count")
+  
+  X=rowSums(df.new[,-1])
+  
+  for(i in 1:length(tissues)){
+    
+    dist1[i,1]=i
+    dist1[i,2]=length(X[X==i])
+    
+  }
+  
+  
+  close(lbar2)
+  print("--Data:--Processing--Stage_2--complete--")
+  
+  return(list(all.genes=postlist, shared.tissues=shared, master.table=df.new, dist.table=dist1))
   
 }
 

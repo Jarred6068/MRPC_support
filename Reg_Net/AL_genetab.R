@@ -9,10 +9,53 @@
 # 
 # }
 
+#===================================================================================================
+ADDIS.M1.checkV2=function(trio.index=NULL, tissue.name=NULL, FDR="ADDIS", verbose=FALSE){
+  #SYNTAX: 
+  #tissue.names -- can be either a single tissue name or character vector of names
+  #corresponding to the format of column 2 in tissuenames.csv
+  
+  typeM=NULL
+  
+
+  
+  #establish ground truths for M1.1 and M1.2
+  Truth.M1.type1=matrix(c(1,0,0,1,0,0), nrow = 3, ncol = 2, byrow = T)
+  Truth.M1.type2=matrix(c(0,1,0,0,1,0), nrow = 3, ncol = 2, byrow = T)
+  
+
+      if(FDR=="ADDIS"){
+        
+        results=Lond2Addis.lookup(trio.index = trio.index, tissue.name = tissue.name)
+        MRPC.graph=results$MRPC.table.ADDIS[1:3,2:3]
+        
+        typeM=ifelse(all.equal(MRPC.graph, Truth.M1.type1, check.attributes=FALSE)==TRUE, "M1.1", NA)
+        typeM=ifelse(all.equal(MRPC.graph, Truth.M1.type2, check.attributes=FALSE)==TRUE, "M1.2", typeM)
+        
+      }else{
+        
+        results=Lond2Addis.lookup(trio.index = trio.index, tissue.name = tissue.name)
+        MRPC.graph=results$MRPC.table.LOND[1:3,2:3]
+        
+        typeM=ifelse(all.equal(MRPC.graph, Truth.M1.type1, check.attributes=FALSE)==TRUE, "M1.1", NA)
+        typeM=ifelse(all.equal(MRPC.graph, Truth.M1.type2, check.attributes=FALSE)==TRUE, "M1.2", typeM)
+        
+      }
+  
+  return(typeM)
+  
+}
+
+#==========================================END--FUNCTION_3===================================
+
 
 #===========================================================================================================
 
 #A function to extract all associated tissues and M classes for a given trio
+
+#source("/mnt/ceph/jarredk/Reg_Net/AL_genetab.R")
+#sort.gt(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.data=TRUE, verbose=FALSE)
+
 
 
 sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FALSE, verbose=FALSE){
@@ -45,12 +88,12 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
   print("--Data:--loading--complete--")
   
   #preallocate space
-  matchtab1=as.data.frame(matrix(0, nrow = length(tissues.vec), ncol = 2))
+  matchtab1=as.data.frame(matrix(0, nrow = length(tissues.vec), ncol = 3))
   all.matches=vector(mode = "list", length = length(tissues.vec))
   all.matches2=vector(mode = "list", length = length(tissues.vec))
   all.tables=vector(mode = "list", length = length(tissues.vec))
   #pre-naming
-  colnames(matchtab1)=c("tissue", "found")
+  colnames(matchtab1)=c("tissue", "found&M1", "Mtype")
   names(all.matches)=tissues.vec
   names(all.matches2)=tissues.vec
   names(all.tables)=tissues.vec
@@ -85,30 +128,71 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         summary.table1=as.data.frame(matrix(0, nrow = length(addisM1$type2), ncol = 3))
         colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
         gene.name=NULL
+        #print(length(addisM1$type2))
         
         for(j in 1:length(addisM1$type2)){
           
+          # begin.time=Sys.time()
           index=(addisM1$type2[j]-1)*3+(1:3)
           members=colnames(trioData[,index])[3]
           if(verbose==TRUE){print(members)}
           gene.name[j]=members
-          
+
           for(k in 1:length(all.tissues)){
             
-            trioData2=colnames(loaded.datasets[[k]])
+            any.matches=any(which(colnames(loaded.datasets[[k]])==members))
+            if(isTRUE(any.matches)==FALSE){
+              matched=NA
+            }else{
+              matched=which(colnames(loaded.datasets[[k]])==members)
+            }
             
-            matched=match(members, trioData2)
-            #print(matched)
             
-            matchtab1[k,1]=ifelse(is.na(matched)==TRUE, NA, all.tissues[k])
-            matchtab1[k,2]=ifelse(is.na(matched)==TRUE, 0, 1)
-            matchtab2[[k]][j]=ifelse(is.na(matched)==TRUE, NA, members)
+            if(isTRUE(any.matches)==FALSE){
+              
+              trio.idx=NA
+              typeM=NA
+              
+            }else{
+              
+              trio.idx=NULL
+              for(i in 1:length(matched)){
+                trio.idx[i]=ifelse(isTRUE(matched[i]%%3==0), matched[i]/3, (matched[i]+1)/3)
+              }
+
+              M1.Data2=loadRData(fileName = paste("/mnt/ceph/jarredk/Reg_Net/AL_M1Data/", all.tissues[k],".Rdata", sep = ""))
+              addis2M1 = M1.Data2$Catalog[[1]][[1]][[2]]
+              
+              matched2=NULL
+              for(i in 1:length(trio.idx)){
+                matched2[i]=any(which(addis2M1$type2==trio.idx[i]))
+              }
+              
+              typeM=ifelse(isTRUE(any(matched2))==FALSE, NA, "M1.2")
+              print(typeM)
+              
+            }
+            
+             print(any(matched2))
+             print(matched2)
+             print("=================================================")
+
+            matchtab1[k,1]=ifelse(is.na(typeM)==TRUE, NA, all.tissues[k])
+            matchtab1[k,2]=ifelse(is.na(typeM)==TRUE, 0, 1)
+            matchtab1[k,3]=typeM
+            matchtab2[[k]][j]=ifelse(is.na(typeM)==TRUE, NA, members)
+            
 
           }
+          
+          #print(matchtab1)
           matchtab3[[j]]=matchtab1[,2]
           summary.table1[j, 1]=sum(matchtab1[,2])
           summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
           summary.table1[j, 3]=gene.name[j]
+          
+          # end.time=Sys.time()
+          # print(end.time-begin.time)
 
         }
 
@@ -119,43 +203,9 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
 #------------------addis-cis------------------------        
       }else{
         
-        matchtab2=vector(mode = "list", length = length(all.tissues))
-        names(matchtab2)=all.tissues
-        matchtab3=list()
-        summary.table1=as.data.frame(matrix(0, nrow = length(addisM1$type1), ncol = 3))
-        colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
-        gene.name=NULL
+
         
-        for(j in 1:length(addisM1$type1)){
-          
-          index=(addisM1$type1[j]-1)*3+(1:3)
-          members=colnames(trioData[,index])[3]
-          if(verbose==TRUE){print(members)}
-          gene.name[j]=members
-          
-          for(k in 1:length(all.tissues)){
-            
-            trioData2=colnames(loaded.datasets[[k]])
-            
-            matched=match(members, trioData2)
-            #print(matched)
-            
-            matchtab1[k,1]=ifelse(is.na(matched)==TRUE, NA, all.tissues[k])
-            matchtab1[k,2]=ifelse(is.na(matched)==TRUE, 0, 1)
-            matchtab2[[k]][j]=ifelse(is.na(matched)==TRUE, NA, members)
-            
-          }
-          
-          matchtab3[[j]]=matchtab1[,2]
-          summary.table1[j, 1]=sum(matchtab1[,2])
-          summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
-          summary.table1[j, 3]=gene.name[j]
-          
-        }
-        
-        all.matches[[t]]=matchtab2
-        all.matches2[[t]]=matchtab3
-        all.tables[[t]]=summary.table1
+
         
       }
       
@@ -173,9 +223,11 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
         summary.table1=as.data.frame(matrix(0, nrow = length(londM1$type2), ncol = 3))
         colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
         gene.name=NULL
+        #print(length(addisM1$type2))
         
         for(j in 1:length(londM1$type2)){
           
+          # begin.time=Sys.time()
           index=(londM1$type2[j]-1)*3+(1:3)
           members=colnames(trioData[,index])[3]
           if(verbose==TRUE){print(members)}
@@ -183,69 +235,74 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
           
           for(k in 1:length(all.tissues)){
             
-            trioData2=colnames(loaded.datasets[[k]])
+            any.matches=any(which(colnames(loaded.datasets[[k]])==members))
+            if(isTRUE(any.matches)==FALSE){
+              matched=NA
+            }else{
+              matched=which(colnames(loaded.datasets[[k]])==members)
+            }
             
-            matched=match(members, trioData2)
-            #print(matched)
             
-            matchtab1[k,1]=ifelse(is.na(matched)==TRUE, NA, all.tissues[k])
-            matchtab1[k,2]=ifelse(is.na(matched)==TRUE, 0, 1)
-            matchtab2[[k]][j]=ifelse(is.na(matched)==TRUE, NA, members)
+            if(isTRUE(any.matches)==FALSE){
+              
+              trio.idx=NA
+              typeM=NA
+              
+            }else{
+              
+              trio.idx=NULL
+              for(i in 1:length(matched)){
+                trio.idx[i]=ifelse(isTRUE(matched[i]%%3==0), matched[i]/3, (matched[i]+1)/3)
+              }
+              
+              M1.Data2=loadRData(fileName = paste("/mnt/ceph/jarredk/Reg_Net/AL_M1Data/", all.tissues[k],".Rdata", sep = ""))
+              lond2M1 = M1.Data2$Catalog[[1]][[1]][[1]]
+              
+              matched2=NULL
+              for(i in 1:length(trio.idx)){
+                matched2[i]=any(which(lond2M1$type2==trio.idx[i]))
+              }
+              
+              typeM=ifelse(isTRUE(any(matched2))==FALSE, NA, "M1.2")
+              
+            }
+            
+            # print(any(matched2))
+            # print(matched2)
+            # print(typeM)
+            # print("=================================================")
+            
+            matchtab1[k,1]=ifelse(is.na(typeM)==TRUE, NA, all.tissues[k])
+            matchtab1[k,2]=ifelse(is.na(typeM)==TRUE, 0, 1)
+            matchtab1[k,3]=typeM
+            matchtab2[[k]][j]=ifelse(is.na(typeM)==TRUE, NA, members)
+            
             
           }
           
+          #print(matchtab1)
           matchtab3[[j]]=matchtab1[,2]
           summary.table1[j, 1]=sum(matchtab1[,2])
           summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
           summary.table1[j, 3]=gene.name[j]
           
+          # end.time=Sys.time()
+          # print(end.time-begin.time)
+          
         }
-
+        
         all.matches[[t]]=matchtab2
         all.matches2[[t]]=matchtab3
         all.tables[[t]]=summary.table1
+
+        
+
       
      
 #-------------------lond--cis------------------------       
       }else{
         
-        matchtab2=vector(mode = "list", length = length(all.tissues))
-        names(matchtab2)=all.tissues
-        matchtab3=list()
-        summary.table1=as.data.frame(matrix(0, nrow = length(londM1$type1), ncol = 3))
-        colnames(summary.table1)=c("Count.Tissues", "Percent.Tissues","Gene.Name")
-        gene.name=NULL
-        
-        for(j in 1:length(londM1$type1)){
-          
-          index=(londM1$type1[j]-1)*3+(1:3)
-          members=colnames(trioData[,index])[3]
-          if(verbose==TRUE){print(members)}
-          gene.name[j]=members
-          
-          for(k in 1:length(all.tissues)){
-            
-            trioData2=colnames(loaded.datasets[[k]])
-            
-            matched=match(members, trioData2)
-            #print(matched)
-            
-            matchtab1[k,1]=ifelse(is.na(matched)==TRUE, NA, all.tissues[k])
-            matchtab1[k,2]=ifelse(is.na(matched)==TRUE, 0, 1)
-            matchtab2[[k]][j]=ifelse(is.na(matched)==TRUE, NA, members)
-            
-          }
-          
-          matchtab3[[j]]=matchtab1[,2]
-          summary.table1[j, 1]=sum(matchtab1[,2])
-          summary.table1[j, 2]=sum(matchtab1[,2])/length(all.tissues)
-          summary.table1[j, 3]=gene.name[j]
-          
-        }
-        
-        all.matches[[t]]=matchtab2
-        all.matches2[[t]]=matchtab3
-        all.tables[[t]]=summary.table1
+
         
       }
       
@@ -270,11 +327,6 @@ sort.gt=function(tissue.selection=1, FDR="ADDIS", mediator="trans", save.data=FA
 
 #===========================================================================================================
 
-
-
-
-#source("/mnt/ceph/jarredk/Reg_Net/AL_genetab.R")
-#sort.gt(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.data=TRUE, verbose=FALSE)
 
 
 #===========================================================================================================
@@ -304,7 +356,7 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
   shared=as.data.frame(matrix(0, nrow = length(tissues), ncol=2))
   colnames(shared)=c("# genes", "tissue")
   
-  nam.vec=tissue.names[tissues,2]
+  nam.vec=tissue.names[,2]
   
   
   #loading bar
@@ -348,14 +400,15 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
   }
   
   df.new=df.new[2:dim(df.new)[1],]
-  row.names(df.new)=as.character(seq(dim(df.new)[1]))
-  
   gene.vec=unique(unlist(prelist))
-  print(length(gene.vec))
+  #print(length(gene.vec))
   
   idx=match(gene.vec, df.new[,1])
   
   df.new=df.new[idx,]
+  
+  row.names(df.new)=as.character(seq(dim(df.new)[1]))
+  colnames(df.new)=c("gene.name", nam.vec)
   
   
   dist1=as.data.frame(matrix(0, nrow=length(tissues), ncol = 2))
@@ -382,9 +435,20 @@ table.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans"
 
 
 
+#===========================================================================================================
 
-
-
+table2.create=function(tissues=c(1:48), FDR.method="ADDIS", mediator.type="trans", run.sort.gt=FALSE, verbose=FALSE){
+  
+  meta.data=read.table(file="/mnt/ceph/jarredk/Reg_Net/mart_export.txt", sep=",", header=T)
+  
+  TT=table.create(tissues = tissues, FDR.method = FDR.method, mediator.type=mediator.type, run.sort.gt = FALSE)
+  
+  
+  
+  
+  
+  
+}
 
 
 

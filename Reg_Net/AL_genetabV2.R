@@ -274,7 +274,7 @@ master.create=function(tissue.selection=c(1:48)){
   am1t2=subset(df, Mediator=="AM1T2")
   
   
-  return(list(lm1t1=lm1t1, lm1t2=lm1t2, am1t1=am1t1, am1t2=am1t2))
+  return(list(mdf=df, lm1t1=lm1t1, lm1t2=lm1t2, am1t1=am1t1, am1t2=am1t2))
 }
 
   

@@ -28,6 +28,21 @@ find_trans=function(TransGeneName=NULL){
   
 }
 
+#==============================================Helper_Function==============================================
+
+find_cis=function(CisGeneName=NULL, tiss.name=NULL){
+  #A simple helper function used by get_trio_attr() to find trans gene attributes
+  name=subset(tissue.names, tissue.name1==tiss.name)
+  meta=loadRData(fileName = paste("/mnt/ceph/jarredk/AddisReRunFiles/", name[3], ".eGenes.V8.unique.RData", sep = ""))
+  
+  CGattr=subset(meta, gene_id==CisGeneName)
+  
+  return(CGattr)
+  
+}
+
+
+
 #==================================Begin_Helper_Function_2==================================================
 get_trio_attr=function(trio.index=NULL, tissue.name="CellsEBVtransformedlymphocytes", verbose=TRUE){
   #This function searches for the specified a trios attributes 

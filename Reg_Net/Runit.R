@@ -110,8 +110,8 @@ am1t2.unique$trans.Gene.type=as.factor(am1t2.unique$trans.Gene.type)
 percent.ACasM.types=summary(am1t1.unique$cis.Gene.type)/sum(summary(am1t1.unique$cis.Gene.type))
 percent.ATasM.types=summary(am1t2.unique$trans.Gene.type)/sum(summary(am1t2.unique$trans.Gene.type))
 
-kable(percent.ACasM.types, col.names="Percentage")
-kable(percent.ATasM.types, col.names="Percentage")
+kable(percent.ACasM.types, col.names="Percentage", caption="ADDIS Cis Mediator Gene Types")
+kable(percent.ATasM.types, col.names="Percentage", caption="ADDIS Trans Mediator Gene Types")
 
 
 

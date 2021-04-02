@@ -44,10 +44,21 @@ plotit(ACasM, "ACasM")
 #creating some summary tables
 library(knitr, lib="/mnt/ceph/jarredk/Rpackages")
 #hist--tables
-kable(LTasM$bins, caption="LOND Trans Mediated")
-kable(LCasM$bins, caption="LOND Cis Mediated")
-kable(ATasM$bins, caption="ADDIS Trans Mediated")
-kable(ACasM$bins, caption="ADDIS Cis Mediated")
+#===============================================================================
+sort.bins=function(bins.table=NULL){
+  
+  G=sort(bins.table[,2], index.return=TRUE)
+  bins.table=bins.table[G$ix,]
+  
+  return(bins.table)
+}
+
+#===============================================================================
+
+kable(sort.bins(LTasM$bins), caption="LOND Trans Mediated")
+kable(sort.bins(LCasM$bins), caption="LOND Cis Mediated")
+kable(sort.bins(ATasM$bins), caption="ADDIS Trans Mediated")
+kable(sort.bins(ACasM$bins), caption="ADDIS Cis Mediated")
 
 
 #percentage of unqiue genes---tables

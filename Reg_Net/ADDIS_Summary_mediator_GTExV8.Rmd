@@ -1,0 +1,410 @@
+---
+title: "Summary M1 Mediators ADDIS"
+subtitle: 'STAT 550'
+author: "Jarred Kvamme"
+date: '3/28/2021'
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+fontsize: 12pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=12, fig.height=8)
+```
+
+
+
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+source("C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/AL_genetabV2.R")
+
+loadRData <- function(fileName=NULL){
+  #loads an RData file, and returns it
+  load(fileName)
+  get(ls()[ls() != "fileName"])
+}
+
+
+df=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/loaded_AL_datatables.Rdata")
+
+inter.med=intersect(df$am1t1$Cis.Gene.ID, df$am1t2$Trans.Gene.ID)
+trans.med=df$am1t2[-c(match(inter.med, df$am1t2$Trans.Gene.ID)), ]$Trans.Gene.ID
+cis.med=df$am1t1[-c(match(inter.med, df$am1t1$Cis.Gene.ID)), ]$Cis.Gene.ID
+total.med=length(inter.med)+length(trans.med)+length(cis.med)
+
+summary1=cbind.data.frame(c(length(cis.med), length(trans.med),length(inter.med)), 
+                          c(length(cis.med)/total.med, length(trans.med)/total.med, length(inter.med)/total.med))
+colnames(summary1)=c("Total.Num.Genes", "Percent.Of.Total")
+row.names(summary1)=c("Cis Only","Trans Only","Both Cis & Trans")
+
+library(knitr)
+kable(summary1, caption = "Total number of Cis and Trans genes identified as Mediators under MRPC-ADDIS")
+
+unq.trans.med=unique(trans.med)
+unq.cis.med=unique(cis.med)
+unq.inter.med=unique(inter.med)
+unq.total.med=length(unq.inter.med)+length(unq.trans.med)+length(unq.cis.med)
+
+summary2=cbind.data.frame(c(length(unq.cis.med), length(unq.trans.med),length(unq.inter.med)), 
+                          c(length(unq.cis.med)/unq.total.med, length(unq.trans.med)/unq.total.med, length(unq.inter.med)/unq.total.med))
+colnames(summary2)=c("Total.Unique.Genes", "Percent.Of.Total")
+row.names(summary2)=c("Cis Only Unique", "Trans Only Unique","Both Cis & Trans")
+
+library(knitr)
+kable(summary2, caption = "Total number of Unqiue Cis and Trans genes identified as Mediators under MRPC-ADDIS")
+
+
+```
+
+
+
+
+
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#counts and bins for 4 subsets
+LTasM=binit(df$lm1t2, target=4)
+LCasM=binit(df$lm1t1, target=3)
+
+ATasM=binit(df$am1t2, target=4)
+ACasM=binit(df$am1t1, target=3)
+
+
+#Helper plotting function
+plotit=function(data=NULL, name=NULL){
+
+  H1=hist(data$counts[,2], breaks = 15, xlab = "# of Tissues Shared", ylab ="# of Genes",
+       main = paste("Frequency of Shared Tissues for",name,sep = " "))
+  
+}
+
+#plot the histograms for 4 subsets
+par(mfrow=c(1,2))
+plotit(ATasM, "Trans Mediators")
+plotit(ACasM, "Cis Mediators")
+par(mfrow=c(1,1))
+
+```
+
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#===============================================================================
+sort.bins=function(bins.table=NULL){
+  #tissue.names=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/ADDIS_ReRun/tissuenames.csv")
+  G=sort(bins.table[,2], index.return=TRUE)
+  bins.table=bins.table[G$ix,]
+  
+  return(bins.table)
+}
+
+#===============================================================================
+
+A=sort.bins(ATasM$bins)
+B=sort.bins(ACasM$bins)
+kable(A, caption="ADDIS Trans Mediator Tissue Counts", row.names = FALSE)
+kable(B, caption="ADDIS Cis Mediator Tissue Counts", row.names = FALSE)
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#Helper function
+match.rowN=function(df=NULL, target.vec=NULL){
+  
+  idx=rep(0, length(target.vec))
+  
+  for(i in 1:length(target.vec)){
+    
+    idx[i]=match(target.vec[i], df)
+    
+  }
+  
+  return(idx)
+  
+}
+
+#percentage of unique cis and trans mediator gene types for ADDIS
+
+IX.cis=match.rowN(df=df$am1t1$Cis.Gene.ID, target.vec = unq.cis.med)
+am1t1.unique=df$am1t1[IX.cis,]
+
+IX.trans=match.rowN(df=df$am1t2$Trans.Gene.ID, target.vec = unq.trans.med)
+am1t2.unique=df$am1t2[IX.trans,]
+
+IX.inter=match.rowN(df=df$am1t2$Trans.Gene.ID, target.vec = inter.med)
+inter.unique=df$am1t2[IX.inter,]
+
+am1t1.unique$cis.Gene.type=as.factor(am1t1.unique$cis.Gene.type)
+am1t2.unique$trans.Gene.type=as.factor(am1t2.unique$trans.Gene.type)
+inter.unique$cis.Gene.type=as.factor(inter.unique$cis.Gene.type)
+inter.unique$trans.Gene.type=as.factor(inter.unique$trans.Gene.type)
+
+percent.both.types=as.data.frame(matrix(0, nrow=8, ncol = 4))
+colnames(percent.both.types)=c("Cis.Gene.Type", "Percent.Cis", "Trans.Gene.Type", "Percent.Trans")
+
+percent.both.types$Cis.Gene.Type=c(names(summary(inter.unique$cis.Gene.type)), "--")
+percent.both.types$Trans.Gene.Type=names(summary(inter.unique$trans.Gene.type))
+percent.both.types$Percent.Cis=c(round(summary(inter.unique$cis.Gene.type)/sum(summary(inter.unique$cis.Gene.type)), 5), "--")
+percent.both.types$Percent.Trans=round(summary(inter.unique$trans.Gene.type)/sum(summary(inter.unique$trans.Gene.type)), 5)
+
+percent.ACasM.types=summary(am1t1.unique$cis.Gene.type)/sum(summary(am1t1.unique$cis.Gene.type))
+percent.ATasM.types=summary(am1t2.unique$trans.Gene.type)/sum(summary(am1t2.unique$trans.Gene.type))
+
+kable(percent.ACasM.types, col.names="Percentage", caption="ADDIS Unique Cis Mediator Gene Types", digits = 5)
+kable(percent.ATasM.types, col.names="Percentage", caption="ADDIS Unique Trans Mediator Gene Types", digits = 5)
+kable(percent.both.types, caption="ADDIS gene types for genes found as both Cis and Trans Mediators", row.names = FALSE)
+
+
+```
+
+\section*{Analysis of Gene Type}
+
+To analyze the mediator genes classified under MRPC-ADDIS, we employed hypothesis testing to determine if there was dependence among a mediator gene's position (2 levels: Cis or Trans) and its gene type (2 levels: Pseudogene or Non-pseudogene). We conducted a Chi-Squared test of Independence with the null and alternative hypotheses:
+
+\[ H_0: \text{Gene type is independent of mediator position}  \]
+\[ H_A: \text{Gene type is not independent of mediator position}  \]
+
+The resulting $2\times 2$ contingency table is given in \textbf{table 8}. The test yielded a $\chi_{(1)}^2 = 43.77, \ p =  1.489e^{-09}$ and we therefore rejected the null hypothesis of no dependence. From \textbf{table 8} the resulting rejection is due to an approximately $10\%$ enrichment of pseudogene types among trans mediators. 
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#all.addis.df=rbind.data.frame(am1t1.unique, am1t2.unique)
+
+#cis.types=as.factor(all.addis.df$cis.Gene.type)
+#trans.types=as.factor(all.addis.df$trans.Gene.type)
+
+cis.types=as.factor(am1t1.unique$cis.Gene.type)
+trans.types=as.factor(am1t2.unique$trans.Gene.type)
+
+pseudo=function(input=NULL){
+  
+  replacement=rep(0, length(input))
+  test.str="pseudogene"
+  
+  for(i in 1:length(input)){
+    
+    replacement[i]=ifelse(isTRUE(grepl(test.str, input[i], fixed = TRUE)), "Pseudogene", "non-pseudo")
+    
+  }
+  
+  return(as.factor(replacement))
+  
+}
+
+#Chi-square test of independence
+cis.types=pseudo(cis.types)
+cis.types2=cbind.data.frame(cis.types, rep("cis", length(cis.types)))
+colnames(cis.types2)=c("type","med")
+cis.types2$med=as.factor(cis.types2$med)
+trans.types=pseudo(trans.types)
+trans.types2=cbind.data.frame(trans.types, rep("trans", length(trans.types)))
+colnames(trans.types2)=c("type","med")
+trans.types2$med=as.factor(trans.types2$med)
+
+cont.table=table(rbind.data.frame(cis.types2, trans.types2))
+
+print(chisq.test(as.matrix(cont.table)))
+
+cont.table=cbind.data.frame(cont.table[,1], round(cont.table[,1]/sum(cont.table[,1]),4), cont.table[,2], round(cont.table[,2]/sum(cont.table[,2]),4))
+
+cont.table.disp=rbind(cont.table, colSums(cont.table))
+cont.table.disp=cbind(cont.table.disp, rowSums(cont.table.disp[,c(1,3)]))
+
+row.names(cont.table.disp)=c("non-pseudo", "pseudo", "row.total")
+
+kable(cont.table.disp, col.names = c("cis",'%cis',"trans",'%trans',"Col.Total"), caption = "2X2 contingency table of mediator gene type")
+```
+
+To further investigate the possibility of trans mediator pseudogene enrichment, we employed a Chi-Squared Goodness of Fit test to determine if enrichment was comparable to the proportion of pseudogenes present in the whole genome. In this case, the vector of probabilities ${\bf p}$ is taken to be the observed proportion of pseudo and non-pseudogene types among trans mediator genes and ${\bf p_0}$ is the expected proportions given by the proportion of pseudo/non-pseudogene types in the entire genome. This leads to the null and alternative hypotheses:
+
+\[ H_0: {\bf p} = {\bf p_0}  \]
+\[ H_A: {\bf p} \neq {\bf p_0} \]
+
+The test resulted in a $\chi_{(1)}^2 = 43.77, \ p = 3.68e^{-11}$ and we therefore rejected the null hypothesis of equality of observed and expected proportions. \textbf{Table 9} indicates that the rejection is due to a roughly $5.4\%$ increase of pseudogene gene types among trans mediators relative to the entire genome. 
+
+It is important to note that, because the test statistic in both tests is asymptotically $\chi^2$, the large sample sizes translate into high power and therefore a small difference is translated into a null hypothesis rejection. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#Chi-square goodness of fit:
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export.txt", sep=",", header=T)
+
+all.types=as.factor(BM$Gene.type)
+all.types.adj=pseudo(all.types)
+
+observed.probs=summary(all.types.adj)/sum(summary(all.types.adj))
+
+AchsqGOF=chisq.test(summary(trans.types), p=observed.probs)
+
+print(AchsqGOF)
+
+mat1=rbind.data.frame(summary(trans.types), summary(all.types.adj))
+per=rbind(summary(trans.types)/sum(summary(trans.types)), summary(all.types.adj)/sum(summary(all.types.adj)))
+mat1=cbind.data.frame(mat1[,1], per[,1] ,mat1[,2], per[,2])
+colnames(mat1)=c("non-pseudo", '%non-pseudo',"pseudogene", '%pseudogene')
+row.names(mat1)=c("observed","expected")
+
+kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions ADDIS", digits=4)
+
+
+```
+
+
+
+
+
+
+
+
+\section*{BackCheck Chi-Square with LOND}
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#back-check lond results
+
+df=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/loaded_AL_datatables.Rdata")
+#get uniques
+Linter.med=intersect(df$lm1t1$Cis.Gene.ID, df$lm1t2$Trans.Gene.ID)
+Ltrans.med=df$lm1t2[-c(match(Linter.med, df$lm1t2$Trans.Gene.ID)), ]$Trans.Gene.ID
+Lcis.med=df$lm1t1[-c(match(Linter.med, df$lm1t1$Cis.Gene.ID)), ]$Cis.Gene.ID
+
+Lunq.trans.med=unique(Ltrans.med)
+Lunq.cis.med=unique(Lcis.med)
+Lunq.inter.med=unique(Linter.med)
+
+#extract unique gene rows from table 
+
+IX.cis=match.rowN(df=df$lm1t1$Cis.Gene.ID, target.vec = Lunq.cis.med)
+lm1t1.unique=df$lm1t1[IX.cis,]
+
+IX.trans=match.rowN(df=df$lm1t2$Trans.Gene.ID, target.vec = Lunq.trans.med)
+lm1t2.unique=df$lm1t2[IX.trans,]
+
+#run chi-square
+
+L.cis.types=as.factor(lm1t1.unique$cis.Gene.type)
+L.trans.types=as.factor(lm1t2.unique$trans.Gene.type)
+
+pseudo=function(input=NULL){
+  
+  replacement=rep(0, length(input))
+  test.str="pseudogene"
+  
+  for(i in 1:length(input)){
+    
+    replacement[i]=ifelse(isTRUE(grepl(test.str, input[i], fixed = TRUE)), "Pseudogene", "non-pseudo")
+    
+  }
+  
+  return(as.factor(replacement))
+  
+}
+
+#Chi-square test of independence
+L.cis.types=pseudo(L.cis.types)
+L.cis.types2=cbind.data.frame(L.cis.types, rep("cis", length(L.cis.types)))
+colnames(L.cis.types2)=c("type","med")
+L.cis.types2$med=as.factor(L.cis.types2$med)
+L.trans.types=pseudo(L.trans.types)
+L.trans.types2=cbind.data.frame(L.trans.types, rep("trans", length(L.trans.types)))
+colnames(L.trans.types2)=c("type","med")
+L.trans.types2$med=as.factor(L.trans.types2$med)
+
+Lcont.table=table(rbind.data.frame(L.cis.types2, L.trans.types2))
+
+Lchsq=chisq.test(as.matrix(Lcont.table))
+print(Lchsq)
+
+Lcont.table.disp=rbind(Lcont.table, colSums(Lcont.table))
+Lcont.table.disp=cbind(Lcont.table.disp, rowSums(Lcont.table.disp))
+
+row.names(Lcont.table.disp)=c("non-pseudo", "pseudo", "margins")
+
+kable(Lcont.table.disp, col.names = c("cis","trans","margins"), caption = "2X2 contingency table of mediator gene type")
+
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+all.types=as.factor(BM$Gene.type)
+all.types.adj=pseudo(all.types)
+
+observed.probs=summary(all.types.adj)/sum(summary(all.types.adj))
+
+AchsqGOF2=chisq.test(summary(L.trans.types), p=observed.probs)
+
+print(AchsqGOF2)
+
+mat2=rbind.data.frame(summary(L.trans.types), summary(all.types.adj))
+colnames(mat2)=c("non-pseudo","pseudogene")
+row.names(mat2)=c("observed","expected")
+
+kable(mat2, caption = "Chi-Square GOF observed vs. Expected proportions LOND")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,100 @@
+---
+title: "backchecking mediator summary analysis with LOND"
+author: "Jarred Kvamme"
+date: "4/2/2021"
+output: pdf_document
+---
+
+
+
+
+\section*{BackCheck Chi-Square with LOND}
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#back-check lond results
+
+df=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/loaded_AL_datatables.Rdata")
+#get uniques
+Linter.med=intersect(df$lm1t1$Cis.Gene.ID, df$lm1t2$Trans.Gene.ID)
+Ltrans.med=df$lm1t2[-c(match(Linter.med, df$lm1t2$Trans.Gene.ID)), ]$Trans.Gene.ID
+Lcis.med=df$lm1t1[-c(match(Linter.med, df$lm1t1$Cis.Gene.ID)), ]$Cis.Gene.ID
+
+Lunq.trans.med=unique(Ltrans.med)
+Lunq.cis.med=unique(Lcis.med)
+Lunq.inter.med=unique(Linter.med)
+
+#extract unique gene rows from table 
+
+IX.cis=match.rowN(df=df$lm1t1$Cis.Gene.ID, target.vec = Lunq.cis.med)
+lm1t1.unique=df$lm1t1[IX.cis,]
+
+IX.trans=match.rowN(df=df$lm1t2$Trans.Gene.ID, target.vec = Lunq.trans.med)
+lm1t2.unique=df$lm1t2[IX.trans,]
+
+#run chi-square
+
+L.cis.types=as.factor(lm1t1.unique$cis.Gene.type)
+L.trans.types=as.factor(lm1t2.unique$trans.Gene.type)
+
+pseudo=function(input=NULL){
+  
+  replacement=rep(0, length(input))
+  test.str="pseudogene"
+  
+  for(i in 1:length(input)){
+    
+    replacement[i]=ifelse(isTRUE(grepl(test.str, input[i], fixed = TRUE)), "Pseudogene", "non-pseudo")
+    
+  }
+  
+  return(as.factor(replacement))
+  
+}
+
+#Chi-square test of independence
+L.cis.types=pseudo(L.cis.types)
+L.cis.types2=cbind.data.frame(L.cis.types, rep("cis", length(L.cis.types)))
+colnames(L.cis.types2)=c("type","med")
+L.cis.types2$med=as.factor(L.cis.types2$med)
+L.trans.types=pseudo(L.trans.types)
+L.trans.types2=cbind.data.frame(L.trans.types, rep("trans", length(L.trans.types)))
+colnames(L.trans.types2)=c("type","med")
+L.trans.types2$med=as.factor(L.trans.types2$med)
+
+Lcont.table=table(rbind.data.frame(L.cis.types2, L.trans.types2))
+
+Lchsq=chisq.test(as.matrix(Lcont.table))
+print(Lchsq)
+
+Lcont.table.disp=rbind(Lcont.table, colSums(Lcont.table))
+Lcont.table.disp=cbind(Lcont.table.disp, rowSums(Lcont.table.disp))
+
+row.names(Lcont.table.disp)=c("non-pseudo", "pseudo", "margins")
+
+kable(Lcont.table.disp, col.names = c("cis","trans","margins"), caption = "2X2 contingency table of mediator gene type")
+
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+all.types=as.factor(BM$Gene.type)
+all.types.adj=pseudo(all.types)
+
+observed.probs=summary(all.types.adj)/sum(summary(all.types.adj))
+
+AchsqGOF2=chisq.test(summary(L.trans.types), p=observed.probs)
+
+print(AchsqGOF2)
+
+mat2=rbind.data.frame(summary(L.trans.types), summary(all.types.adj))
+colnames(mat2)=c("non-pseudo","pseudogene")
+row.names(mat2)=c("observed","expected")
+
+kable(mat2, caption = "Chi-Square GOF observed vs. Expected proportions LOND")
+
+```

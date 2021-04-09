@@ -1,8 +1,8 @@
 ---
-title: "ADDIS Summary of Mediators GTExV8"
+title: "LOND Summary of Mediators GTExV8"
 subtitle: 'Audrey Fu Lab'
 author: "Jarred Kvamme"
-date: '3/28/2021'
+date: '4/8/2021'
 output:
   word_document: default
   html_document: default
@@ -14,10 +14,6 @@ fontsize: 12pt
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.width=12, fig.height=8)
 ```
-
-
-
-
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -32,9 +28,9 @@ loadRData <- function(fileName=NULL){
 
 df=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/loaded_AL_datatables.Rdata")
 
-inter.med=intersect(df$am1t1$Cis.Gene.ID, df$am1t2$Trans.Gene.ID)
-trans.med=df$am1t2[-c(match(inter.med, df$am1t2$Trans.Gene.ID)), ]$Trans.Gene.ID
-cis.med=df$am1t1[-c(match(inter.med, df$am1t1$Cis.Gene.ID)), ]$Cis.Gene.ID
+inter.med=intersect(df$lm1t1$Cis.Gene.ID, df$lm1t2$Trans.Gene.ID)
+trans.med=df$lm1t2[-c(match(inter.med, df$lm1t2$Trans.Gene.ID)), ]$Trans.Gene.ID
+cis.med=df$lm1t1[-c(match(inter.med, df$lm1t1$Cis.Gene.ID)), ]$Cis.Gene.ID
 total.med=length(inter.med)+length(trans.med)+length(cis.med)
 
 summary1=cbind.data.frame(c(length(cis.med), length(trans.med),length(inter.med)), 
@@ -43,7 +39,7 @@ colnames(summary1)=c("Total.Num.Genes", "Percent.Of.Total")
 row.names(summary1)=c("Cis Only","Trans Only","Both Cis & Trans")
 
 library(knitr)
-kable(summary1, caption = "Total number of Cis and Trans genes identified as Mediators under MRPC-ADDIS")
+kable(summary1, caption = "Total number of Cis and Trans genes identified as Mediators under MRPC-LOND")
 
 unq.trans.med=unique(trans.med)
 unq.cis.med=unique(cis.med)
@@ -56,14 +52,10 @@ colnames(summary2)=c("Total.Unique.Genes", "Percent.Of.Total")
 row.names(summary2)=c("Cis Only Unique", "Trans Only Unique","Both Cis & Trans")
 
 library(knitr)
-kable(summary2, caption = "Total number of Unqiue Cis and Trans genes identified as Mediators under MRPC-ADDIS")
+kable(summary2, caption = "Total number of Unqiue Cis and Trans genes identified as Mediators under MRPC-LOND")
 
 
 ```
-
-
-
-
 
 
 
@@ -74,8 +66,6 @@ kable(summary2, caption = "Total number of Unqiue Cis and Trans genes identified
 LTasM=binit(df$lm1t2, target=4)
 LCasM=binit(df$lm1t1, target=3)
 
-ATasM=binit(df$am1t2, target=4)
-ACasM=binit(df$am1t1, target=3)
 
 
 #Helper plotting function
@@ -88,8 +78,8 @@ plotit=function(data=NULL, name=NULL){
 
 #plot the histograms for 4 subsets
 par(mfrow=c(1,2))
-plotit(ATasM, "Trans Mediators")
-plotit(ACasM, "Cis Mediators")
+plotit(LTasM, "Trans Mediators")
+plotit(LCasM, "Cis Mediators")
 par(mfrow=c(1,1))
 
 ```
@@ -110,19 +100,12 @@ sort.bins=function(bins.table=NULL){
 
 #===============================================================================
 
-A=sort.bins(ATasM$bins)
-B=sort.bins(ACasM$bins)
-kable(A, caption="ADDIS Trans Mediator Tissue Counts", row.names = FALSE)
-kable(B, caption="ADDIS Cis Mediator Tissue Counts", row.names = FALSE)
+A=sort.bins(LTasM$bins)
+B=sort.bins(LCasM$bins)
+kable(A, caption="LOND Trans Mediator Tissue Counts", row.names = FALSE)
+kable(B, caption="LOND Cis Mediator Tissue Counts", row.names = FALSE)
 
 ```
-
-
-
-
-
-
-
 
 
 
@@ -145,23 +128,23 @@ match.rowN=function(df=NULL, target.vec=NULL){
 
 #percentage of unique cis and trans mediator gene types for ADDIS
 
-IX.cis=match.rowN(df=df$am1t1$Cis.Gene.ID, target.vec = unq.cis.med)
-am1t1.unique=df$am1t1[IX.cis,]
+IX.cis=match.rowN(df=df$lm1t1$Cis.Gene.ID, target.vec = unq.cis.med)
+lm1t1.unique=df$lm1t1[IX.cis,]
 
-IX.trans=match.rowN(df=df$am1t2$Trans.Gene.ID, target.vec = unq.trans.med)
-am1t2.unique=df$am1t2[IX.trans,]
+IX.trans=match.rowN(df=df$lm1t2$Trans.Gene.ID, target.vec = unq.trans.med)
+lm1t2.unique=df$lm1t2[IX.trans,]
 
-IX.inter1=match.rowN(df=df$am1t2$Trans.Gene.ID, target.vec = inter.med)
-IX.inter2=match.rowN(df=df$am1t1$Cis.Gene.ID, target.vec = inter.med)
-inter.unique.trans=df$am1t2[IX.inter1,]
-inter.unique.cis=df$am1t1[IX.inter2,]
+IX.inter1=match.rowN(df=df$lm1t2$Trans.Gene.ID, target.vec = inter.med)
+IX.inter2=match.rowN(df=df$lm1t1$Cis.Gene.ID, target.vec = inter.med)
+inter.unique.trans=df$lm1t2[IX.inter1,]
+inter.unique.cis=df$lm1t1[IX.inter2,]
 
-am1t1.unique$cis.Gene.type=as.factor(am1t1.unique$cis.Gene.type)
-am1t2.unique$trans.Gene.type=as.factor(am1t2.unique$trans.Gene.type)
+lm1t1.unique$cis.Gene.type=as.factor(lm1t1.unique$cis.Gene.type)
+lm1t2.unique$trans.Gene.type=as.factor(lm1t2.unique$trans.Gene.type)
 inter.unique.cis$cis.Gene.type=as.factor(inter.unique.cis$cis.Gene.type)
 inter.unique.trans$trans.Gene.type=as.factor(inter.unique.trans$trans.Gene.type)
 
-percent.both.types=as.data.frame(matrix(0, nrow=8, ncol = 4))
+percent.both.types=as.data.frame(matrix(0, nrow=9, ncol = 4))
 colnames(percent.both.types)=c("Cis.Gene.Type", "Percent.Cis", "Trans.Gene.Type", "Percent.Trans")
 
 percent.both.types$Cis.Gene.Type=c(names(summary(inter.unique.cis$cis.Gene.type)))
@@ -169,16 +152,19 @@ percent.both.types$Trans.Gene.Type=names(summary(inter.unique.trans$trans.Gene.t
 percent.both.types$Percent.Cis=c(round(summary(inter.unique.cis$cis.Gene.type)/sum(summary(inter.unique.cis$cis.Gene.type)), 5))
 percent.both.types$Percent.Trans=round(summary(inter.unique.trans$trans.Gene.type)/sum(summary(inter.unique.trans$trans.Gene.type)), 5)
 
-percent.ACasM.types=summary(am1t1.unique$cis.Gene.type)/sum(summary(am1t1.unique$cis.Gene.type))
-percent.ATasM.types=summary(am1t2.unique$trans.Gene.type)/sum(summary(am1t2.unique$trans.Gene.type))
+percent.LCasM.types=summary(lm1t1.unique$cis.Gene.type)/sum(summary(lm1t1.unique$cis.Gene.type))
+percent.LTasM.types=summary(lm1t2.unique$trans.Gene.type)/sum(summary(lm1t2.unique$trans.Gene.type))
 
-kable(percent.ACasM.types, col.names="Percentage", caption="ADDIS Unique Cis Mediator Gene Types", digits = 5)
-kable(percent.ATasM.types, col.names="Percentage", caption="ADDIS Unique Trans Mediator Gene Types", digits = 5)
-kable(percent.both.types[,c(1,2)], caption="ADDIS gene types for genes found as both Cis and Trans Mediators",
+kable(percent.LCasM.types, col.names="Percentage", caption="LOND Unique Cis Mediator Gene Types", digits = 5)
+kable(percent.LTasM.types, col.names="Percentage", caption="LOND Unique Trans Mediator Gene Types", digits = 5)
+kable(percent.both.types[,c(1,2)], caption="LOND gene types for genes found as both Cis and Trans Mediators",
       col.names=c("Gene.Type", "Percent"),row.names = FALSE)
 
 
 ```
+
+
+
 
 
 
@@ -210,8 +196,8 @@ types4table=function(input=NULL){
   
 }
 
-types_am1t1=types4table(am1t1.unique$cis.Gene.type)
-types_am1t2=types4table(am1t2.unique$trans.Gene.type)
+types_lm1t1=types4table(lm1t1.unique$cis.Gene.type)
+types_lm1t2=types4table(lm1t2.unique$trans.Gene.type)
 types_wholegenome=types4table(BM$Gene.type)
 
 process.table=function(idx.table=NULL){
@@ -234,13 +220,13 @@ process.table=function(idx.table=NULL){
   
 }
 
-table.am1t1=process.table(types_am1t1)
-table.am1t2=process.table(types_am1t2)
+table.lm1t1=process.table(types_lm1t1)
+table.lm1t2=process.table(types_lm1t2)
 table.wholegenome=process.table(types_wholegenome)
 
-kable(table.am1t1, caption = "ADDIS Unique cis mediator gene types after grouping all gene types into 4 categories: pseudogene, protein_coding, lncRNA, and Others")
+kable(table.lm1t1, caption = "LOND Unique cis mediator gene types after grouping all gene types into 4 categories: pseudogene, protein_coding, lncRNA, and Others")
 
-kable(table.am1t2, caption = "ADDIS Unique trans mediator gene types after grouping all gene types into 4 categories: pseudogene, protein_coding, lncRNA, and Others")
+kable(table.lm1t2, caption = "LOND Unique trans mediator gene types after grouping all gene types into 4 categories: pseudogene, protein_coding, lncRNA, and Others")
 
 kable(table.wholegenome, caption = "Gene types in the entire genome after grouping all gene types into 4 categories: pseudogene, protein_coding, lncRNA, and Others")
 
@@ -257,12 +243,12 @@ kable(table.wholegenome, caption = "Gene types in the entire genome after groupi
 \section*{Analysis of Gene Type}
 \subsection*{Detecting Pseudogene Enrichment}
 
-To analyze the mediator genes classified under MRPC-ADDIS, we partitioned the Cis and Trans mediator genes into subsets by their gene types (2 levels: Pseudogene or Non-pseudogene). We then employed hypothesis testing to determine if there was dependence among a mediator gene's position (2 levels: Cis or Trans) and its gene type. We conducted a Chi-Squared test of Independence with the null and alternative hypotheses:
+To analyze the mediator genes classified under MRPC-LOND, we partitioned the Cis and Trans mediator genes into subsets by their gene types (2 levels: Pseudogene or Non-pseudogene). We then employed hypothesis testing to determine if there was dependence among a mediator gene's position (2 levels: Cis or Trans) and its gene type. We conducted a Chi-Squared test of Independence with the null and alternative hypotheses:
 
 \[ H_0: \text{Gene type is independent of mediator position}  \]
 \[ H_A: \text{Gene type is not independent of mediator position}  \]
 
-The resulting $2\times 2$ contingency table is given in \textbf{table 11 and 12}. The test yielded a $\chi_{(1)}^2 = 43.77, \ p =  1.489e^{-09}$ and we therefore rejected the null hypothesis of no dependence. From \textbf{tables 11 and 12} the resulting rejection is due to an approximately $10\%$ difference in the number of pseudogenes between Cis and Trans gene positions. However, under the current test conditions, we are unable to determine if the trans position is $10\%$ enriched with pseudogenes or is the cis position is $10\%$ depleted. 
+The resulting $2\times 2$ contingency table is given in \textbf{table 11 and 12}. The test yielded a $\chi_{(1)}^2 = 50.45, \ p \approx 0$ and we therefore rejected the null hypothesis of no dependence. From \textbf{tables 11 and 12} the resulting rejection is due to an approximately $12\%$ difference in the number of pseudogenes between Cis and Trans gene positions. However, under the current test conditions, we are unable to determine if the trans position is $12\%$ enriched with pseudogenes or is the cis position is $12\%$ depleted. 
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -272,8 +258,8 @@ The resulting $2\times 2$ contingency table is given in \textbf{table 11 and 12}
 #cis.types=as.factor(all.addis.df$cis.Gene.type)
 #trans.types=as.factor(all.addis.df$trans.Gene.type)
 
-cis.types=as.factor(am1t1.unique$cis.Gene.type)
-trans.types=as.factor(am1t2.unique$trans.Gene.type)
+cis.types=as.factor(lm1t1.unique$cis.Gene.type)
+trans.types=as.factor(lm1t2.unique$trans.Gene.type)
 
 pseudo=function(input=NULL){
   
@@ -331,12 +317,24 @@ kable(chi.t, caption = "Chi-Squared Test of Independence Summary: gene.type = ps
 
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
 To further investigate the possibility of trans mediator pseudogene enrichment, we employed a Chi-Squared Goodness of Fit test to determine if enrichment was similar to the proportion of pseudogenes present in the whole genome. In this case, the vector of probabilities ${\bf p}$ is taken to be the observed proportion of pseudo and non-pseudogene types among trans mediator genes, and ${\bf p_0}$ is the expected proportions given by the proportion of pseudo/non-pseudogene types in the entire genome. This leads to the null and alternative hypotheses:
 
 \[ H_0: {\bf p} = {\bf p_0}  \]
 \[ H_A: {\bf p} \neq {\bf p_0} \]
 
-The test resulted in a $\chi_{(1)}^2 = 43.77, \ p = 3.68e^{-11}$ and we therefore rejected the null hypothesis of equality of observed and expected proportions. \textbf{Table 13} indicates that the rejection is due to a roughly $5.4\%$ increase of pseudogene gene type among trans mediators relative to the entire genome. 
+The test resulted in a $\chi_{(1)}^2 = 28.72, \ p = 8.345e^{-08}$ and we therefore rejected the null hypothesis of equality of observed and expected proportions. \textbf{Table 13} indicates that the rejection is due to a roughly $5.4\%$ increase of pseudogene gene type among trans mediators relative to the entire genome. 
 
 It is important to note that, because the test statistic in both tests is asymptotically $\chi^2$, the large sample sizes translate into high power and therefore a small difference is translated into a null hypothesis rejection. 
 
@@ -367,16 +365,18 @@ kable(mat1, caption = "Chi-Square GOF observed vs. expected proportions of trans
 
 
 
+
+
 \subsection*{Detecting Protein Coding Gene Enrichment}
 
-Similar to the above tests, we also explored the dependence among gene position and gene type with types consisting of protein coding or non-protein coding. Again, we conducted a Chi-square test of independence (\textbf{tables 14 and 15}). The test yielded a $\chi_{(1)}^2 = 189.98, \ p \approx 0$ and we rejected the null hypothesis of no dependence. The rejection is due to an approximately $1:2$ ratio of protein coding to non-protein coding gene types among the cis mediators and an approximately $1:5$ ratio of protein coding to non-protein coding gene types among the trans mediators. 
+Similar to the above tests, we also explored the dependence among gene position and gene type with types consisting of protein coding or non-protein coding. Again, we conducted a Chi-square test of independence (\textbf{tables 14 and 15}). The test yielded a $\chi_{(1)}^2 = 175.83, \ p \approx 0$ and we rejected the null hypothesis of no dependence. The rejection is due to an approximately $1:2$ ratio of protein coding to non-protein coding gene types among the cis mediators and an approximately $1:5$ ratio of protein coding to non-protein coding gene types among the trans mediators. 
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #analysis of protein coding genes
 
-cis.types=as.factor(am1t1.unique$cis.Gene.type)
-trans.types=as.factor(am1t2.unique$trans.Gene.type)
+cis.types=as.factor(lm1t1.unique$cis.Gene.type)
+trans.types=as.factor(lm1t2.unique$trans.Gene.type)
 
 prot_code=function(input=NULL){
   
@@ -438,10 +438,7 @@ kable(chi2.t, caption = "Chi-Squared Test of Independence Summary: gene.type = p
 
 
 
-
-
-
-We further explored protein coding gene type enrichment among cis mediators by conducting a Chi-Square GOF test to compare the relative proportion of protein-coding genes among cis mediators to the observed proportion of protein coding genes in the entire genome. The test resulted in a $\chi^2_{(1)} = 122.72, \ p\approx 0$. we therefore rejected the null hypothesis of equality of observed and expected proportions. \textbf{Table 16} indicates that the rejection is due to an approximately $16%$ difference in the proportion of protein coding gene type among cis mediators relative to the entire genome.
+We further explored protein coding gene type enrichment among cis mediators by conducting a Chi-Square GOF test to compare the relative proportion of protein-coding genes among cis mediators to the observed proportion of protein coding genes in the entire genome. The test resulted in a $\chi^2_{(1)} = 39.95, \ p = 2.596e^{-10}$. we therefore rejected the null hypothesis of equality of observed and expected proportions. \textbf{Table 16} indicates that the rejection is due to an approximately $18%$ difference in the proportion of protein coding gene type among cis mediators relative to the entire genome.
 
 
 
@@ -476,14 +473,14 @@ kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of cis g
 
 \subsection*{Detecting lncRNA Enrichment}
 
-Finally, we explored the dependence among gene position and gene type with type consisting of lncRNA or non-lncRNA using a Chi-square test of independence (\textbf{tables 17 and 18}). The test yielded a $\chi_{(1)}^2 = 12.68, \ p \approx 0.00037$, and we rejected the null hypothesis of no dependence. The rejection is due to an approximately $1:4$ ratio of non-lncRNA to lncRNA gene types among the cis mediators and an approximately $1:5$ ratio of non-lncRNA to lncRNA gene types among the trans mediators.   
+Finally, we explored the dependence among gene position and gene type with type consisting of lncRNA or non-lncRNA using a Chi-square test of independence (\textbf{tables 17 and 18}). The test yielded a $\chi_{(1)}^2 = 15.18, \ p =9.73e^{-05}$, and we rejected the null hypothesis of no dependence. The rejection is due to an approximately $1:4$ ratio of non-lncRNA to lncRNA gene types among the cis mediators and an approximately $1:5$ ratio of non-lncRNA to lncRNA gene types among the trans mediators.   
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #analysis of protein coding genes
 
-cis.types=as.factor(am1t1.unique$cis.Gene.type)
-trans.types=as.factor(am1t2.unique$trans.Gene.type)
+cis.types=as.factor(lm1t1.unique$cis.Gene.type)
+trans.types=as.factor(lm1t2.unique$trans.Gene.type)
 
 lncrna=function(input=NULL){
   
@@ -543,7 +540,7 @@ kable(chi3.t, caption = "Chi-Squared Test of Independence Summary: gene.type = l
 
 
 
-To Explore lncRNA gene type enrichment among trans mediators we conducted a Chi-Square GOF test to compare the relative proportion of lncRNA genes among trans mediators to the observed proportion of lncRNA genes in the entire genome. The test resulted in a $\chi^2_{(1)} = 63.06, \ p\approx 0$. we therefore rejected the null hypothesis of equality of observed and expected proportions. \textbf{Table 19} indicates that the rejection is due to an approximately $5.5\%$ difference in the proportion of lncRNA gene type among trans mediators relative to the entire genome.
+To Explore lncRNA gene type enrichment among trans mediators we conducted a Chi-Square GOF test to compare the relative proportion of lncRNA genes among trans mediators to the observed proportion of lncRNA genes in the entire genome. The test resulted in a $\chi^2_{(1)} = 47.96, \ p=4.351e^{-12}$. we therefore rejected the null hypothesis of equality of observed and expected proportions. \textbf{Table 19} indicates that the rejection is due to an approximately $7\%$ difference in the proportion of lncRNA gene type among trans mediators relative to the entire genome.
 
 
 
@@ -576,6 +573,142 @@ kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of gene 
 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -84,6 +84,14 @@ row.names(tmethyl.M)=paste0(geo_id_equivs$GSE53195_ID[na.omit(idx2)],
 
 tmethyl.M[1:10, 1:5]
 
+save(tmethyl.M, file = "/mnt/ceph/jarredk/Methyl/Mdata.matched.final.Rdata")
+save(covariates.final, file = "/mnt/ceph/jarredk/Methyl/Mdata.matched.covars.final.Rdata")
+
+#==========================================================================================
+#read in the data
+
+tmethyl.M = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.final.Rdata")
+covariates.final = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.covars.final.Rdata")
 
 #probes are proportions i.e between 0 and 1
 #preform logit transformation on each probe
@@ -120,6 +128,34 @@ for( i in 1:100){
 #convert gender to a factor
 covariates.final$Gender=as.factor(covariates.final$Gender)
 
+#=========================================function to impute the response=======================================================
+
+#runs interal to get.resids
+impute.avg=function(data.mat=NULL){
+  
+  #locate missing data
+  omitted=na.omit(data.mat$log.Y)
+  locations=attr(omitted, "na.action")
+  
+  #extract regressors
+  regressors=data.mat[locations, -1]
+  
+  group.avg=NULL
+  #impute average of obs with regressor traits
+  for(i in 1:length(locations)){
+    
+    x=subset(data.mat, Gender == regressors[i,1] & Age == regressors[i,2])[,1]
+    print(x)
+    group.avg[i]=mean(na.omit(x))
+    
+  }
+  
+  data.mat$log.Y[locations] = group.avg
+  #return imputed obs vector
+  return(data.mat$log.Y)
+  
+}
+
 
 #=========================================function to get and plot the residuals:===============================================
 get.resids=function(X, covars, impute.method="column_average", plot.pairs=TRUE, verbose=0){
@@ -136,29 +172,37 @@ get.resids=function(X, covars, impute.method="column_average", plot.pairs=TRUE, 
   library(missMDA)
   
   residuals.matrix=as.data.frame(matrix(0, nrow = dim(tmethyl.Mlt)[1], ncol = dim(tmethyl.Mlt)[2]))
+  #preform a regression on each methylation probe against covariates:
   
-  #impute the missing values:
-  if(impute.method=="column_average"){
-    
-    
-    
-  }
   
   for(i in 1:dim(X)[2]){
     #bind column and covars into easy-to-use dataframe for lm
     data1=cbind.data.frame(X[,i], covars)
     colnames(data1)=c("log.Y", colnames(covars))
     
+    #impute any missing values:
+    if(sum(is.na(data1$log.Y))>0){
+      print("found an NA", sum(is.na(data1$log.Y)))
+      
+      data1$log.Y=impute.avg(data1)
+      
+      print(sum(is.na(data1$log.Y)))
+      
+    }
+    
+    #fit model 
     print(head(data1))
     print(summary(data1))
     
     model=lm(log.Y ~ Gender*poly(Age, 2), data = data1)
     
     print(summary(model))
+    #get residuals
     residuals.matrix[,i]=model$residuals
     
   }
   
+  #plotting
   if(plot.pairs==TRUE){
 
     for( i in 1:100){
@@ -178,7 +222,7 @@ get.resids=function(X, covars, impute.method="column_average", plot.pairs=TRUE, 
   
   colnames(residuals.matrix)=colnames(X)
   row.names(residuals.matrix)=row.names(X)
-    
+  #return the residual matrix (data adjusted for covariates)
   return(residuals.matrix)
     
 }

@@ -49,23 +49,19 @@ tbsgs=as.data.frame(apply(tbsgs, 2, as.numeric))
 colnames(tbsgs)=Ref_id
 row.names(tbsgs)=subjects
 
-tbsgs=tbsgs[, cols.to.keep]
-
-tbsgs[1:10,1:10]
-
 #matching up covariates with rows of bsgs data
 covariates=na.omit(geo.bsgs[,3:6])
 cov.id=covariates[,4]
 idx2=NULL
-
-for(i in 1:length(cov.id)){
   
-  idx2[i]=match(subjects[i], cov.id)
-  
-}
+  idx2=match(cov.id, subjects)
 
-covariates.final=covariates[idx,]
+covariates.final=covariates[idx2,]
 covariates.final[1:10,]
+
+tbsgs=tbsgs[idx2, cols.to.keep]
+
+tbsgs[1:10,1:10]
 
 #center and scale
 library('preprocessCore',lib="/mnt/ceph/jarredk/Rpackages")
@@ -147,7 +143,7 @@ PEER_setNk(model,K)
 PEER_setPhenoMean(model, as.matrix(tbsgs.scaled.normal))
 dim(PEER_getPhenoMean(model))
 #5 covariates matrix
-PEER_setCovariates(model, as.matrix(covariates.final))
+PEER_setCovariates(model, as.matrix(covariates.final[,1:3]))
 
 # 6 perform the inference
 PEER_update(model)
@@ -166,11 +162,21 @@ Peerdata.bsgs[1:5,1:5]
 save(Peerdata.bsgs, file="/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.RData")
 write.csv(Peerdata.bsgs, file="/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.csv")
 
-# png("/mnt/ceph/jarredk/Methyl/hist3.png")
-# hist(tbsgs.log[,3])
-# 
-# dev.off()
 
+#pairwise plots of columns of peer residuals with scaled expression data 
+peer1=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.Rdata")
 
-
+for( i in 1:100){
+  #pre-transformation:
+  png(paste("/mnt/ceph/jarredk/Methyl/ExpressData/Pair_plots2/","pairplots_",colnames(peer1)[i],i, ".png", sep = ""))
+  plot(tbsgs.scaled.normal[,i], peer1[,i+1], 
+       xlab = "Scaled and quantile normalized",
+       ylab = "Peer",
+       main = paste("plot:", colnames(peer1)[i], sep = " "))
+  abline(0, 1)
+  
+  dev.off()
+  
+  
+}
 

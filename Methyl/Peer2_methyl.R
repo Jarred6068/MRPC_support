@@ -90,6 +90,13 @@ save(covariates.final, file = "/mnt/ceph/jarredk/Methyl/Mdata.matched.covars.fin
 #==========================================================================================
 #read in the data
 
+
+loadRData <- function(fileName=NULL){
+  #loads an RData file, and returns it
+  load(fileName)
+  get(ls()[ls() != "fileName"])
+}
+
 tmethyl.M = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.final.Rdata")
 covariates.final = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.covars.final.Rdata")
 
@@ -98,7 +105,7 @@ covariates.final = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.
 
 LT=function(X){
   
-  Z=log(X/(1-X))
+  Z=ifelse(is.na(X), NA, log(X/(1-X)))
   
   return(Z)
 }
@@ -125,53 +132,18 @@ for( i in 1:100){
 #McRae, Allan F., et al. "Contribution of genetic variation to transgenerational 
 #inheritance of DNA methylation." Genome biology 15.5 (2014): 1-10.
 
-#convert gender to a factor
-covariates.final$Gender=as.factor(covariates.final$Gender)
-
-#=========================================function to impute the response=======================================================
-
-#runs interal to get.resids
-impute.avg=function(data.mat=NULL){
-  
-  #locate missing data
-  omitted=na.omit(data.mat$log.Y)
-  locations=attr(omitted, "na.action")
-  
-  #extract regressors
-  regressors=data.mat[locations, -1]
-  
-  group.avg=NULL
-  #impute average of obs with regressor traits
-  for(i in 1:length(locations)){
-    
-    x=subset(data.mat, Gender == regressors[i,1] & Age == regressors[i,2])[,1]
-    print(x)
-    group.avg[i]=mean(na.omit(x))
-    
-  }
-  
-  data.mat$log.Y[locations] = group.avg
-  #return imputed obs vector
-  return(data.mat$log.Y)
-  
-}
-
-
 #=========================================function to get and plot the residuals:===============================================
-get.resids=function(X, covars, impute.method="column_average", plot.pairs=TRUE, verbose=0){
+get.resids=function(X, covars, plot.pairs=TRUE, verbose=0){
   #--------------------------------------------------------------------------------------------
   #SYNTAX:
-  #X -- the matrix of filtered and logit transformed methylation probes
+  #X -- the matrix of filtered but untransformed methylation probes
   #covars -- matrix of covariates
-  #impute.method -- one of "column_average", "FAMD", or "PCA"
   #plot.pairs -- logical indicating if first 100 probes should be plotted against the residuals
   #verbose -- integer in [0, 1]: setting to 1 outputs progress printing
   #--------------------------------------------------------------------------------------------
   
   
-  library(missMDA)
-  
-  residuals.matrix=as.data.frame(matrix(0, nrow = dim(tmethyl.Mlt)[1], ncol = dim(tmethyl.Mlt)[2]))
+  residuals.matrix=as.data.frame(matrix(0, nrow = dim(X)[1], ncol = dim(X)[2]))
   #preform a regression on each methylation probe against covariates:
   
   
@@ -179,27 +151,17 @@ get.resids=function(X, covars, impute.method="column_average", plot.pairs=TRUE, 
     #bind column and covars into easy-to-use dataframe for lm
     data1=cbind.data.frame(X[,i], covars)
     colnames(data1)=c("log.Y", colnames(covars))
-    
-    #impute any missing values:
-    if(sum(is.na(data1$log.Y))>0){
-      print("found an NA", sum(is.na(data1$log.Y)))
-      
-      data1$log.Y=impute.avg(data1)
-      
-      print(sum(is.na(data1$log.Y)))
-      
-    }
+    zero.idx=match(0, data1$log.Y)
     
     #fit model 
-    print(head(data1))
-    print(summary(data1))
+    if(verbose==1){print(head(data1)); print(summary(data1))}
     
-    model=lm(log.Y ~ Gender*poly(Age, 2), data = data1)
+    model=glm(log.Y ~ Gender*poly(Age, 2), na.action = na.exclude, family = "binomial", data = data1)
     
-    print(summary(model))
+    if(verbose==1){ print(summary(model)) }
+    
     #get residuals
-    residuals.matrix[,i]=model$residuals
-    
+    residuals.matrix[,i]=resid(model)
   }
   
   #plotting
@@ -207,7 +169,7 @@ get.resids=function(X, covars, impute.method="column_average", plot.pairs=TRUE, 
 
     for( i in 1:100){
       #pre-transformation:
-      png(paste("/mnt/ceph/jarredk/Methyl/ExpressData/Pair_plotsM/","pairplots_",colnames(X)[i],i, ".png", sep = ""))
+      png(paste("/mnt/ceph/jarredk/Methyl/Pair_plotsM/","pairplots_",colnames(X)[i],i, ".png", sep = ""))
       plot(X[,i], residuals.matrix[,i], 
            xlab = "Logit Transformed",
            ylab = "Regression Residuals",
@@ -229,8 +191,11 @@ get.resids=function(X, covars, impute.method="column_average", plot.pairs=TRUE, 
 
 #====================================================================================================================
 
+#convert gender to a factor
+covariates.final$Gender=as.factor(covariates.final$Gender)
 
-
+#now run get.resids()
+tmethyl.M.resids=get.resids(tmethyl.M[,1:10], covariates.final)
 
 
 

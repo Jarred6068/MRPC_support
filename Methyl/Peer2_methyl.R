@@ -10,7 +10,7 @@ loadRData <- function(fileName=NULL){
 }
 
 #read in methylation data, bsgs/brisbane subject ID equivalents, and covariates
-methyl_original=read.csv(file = "/mnt/ceph/jarredk/Methyl/new_data_M_average_delete.csv")
+methyl_original=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/new_data_M_average_delete.Rdata")
 geo.bsgs=read.csv(file = "/mnt/ceph/jarredk/Methyl/ExpressData/BSGS_GEO_Accession_data2.csv")
 geo_id_equivs=read.table(file = "/mnt/ceph/jarredk/Methyl/GSE53195_GSE56105_ID_equivalence.txt", header = T)
 methyl_original[1:10,1:5]
@@ -57,12 +57,13 @@ colnames(info1)=c("p","m","idx")
 
 
 cols.to.remove=subset(info1, p>5 | m>11)$idx
-print(cols.to.remove)
-
+print(length(cols.to.remove))
+UCSC_RefGene_Name2=UCSC_RefGene_Name[-cols.to.remove]
+print(length(UCSC_RefGene_Name2))
 
 #remove
 tmethyl.M=tmethyl.M[,-cols.to.remove]
-
+print(dim(tmethyl.M))
 #align covariates
 #matching up covariates with subjects (i.e rows) of methyl data
 covariates=na.omit(geo.bsgs[,3:6])
@@ -81,6 +82,7 @@ colnames(tmethyl.M)=ID_Ref[-cols.to.remove]
 row.names(tmethyl.M)=paste0(geo_id_equivs$GSE53195_ID[na.omit(idx2)], 
                             rep("/", length(geo_id_equivs$GSE56105_ID[na.omit(idx2)])), 
                             geo_id_equivs$GSE56105_ID[na.omit(idx2)])
+tmethyl.M=rbind.data.frame(UCSC_RefGene_Name2, tmethyl.M)
 
 tmethyl.M[1:10, 1:5]
 
@@ -97,11 +99,14 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
-tmethyl.M = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.final.Rdata")
+tmethyl.MO = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.final.Rdata")
 covariates.final = loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Mdata.matched.covars.final.Rdata")
 
 #probes are proportions i.e between 0 and 1
 #preform logit transformation on each probe
+UCSC_RefGene_Name2=tmethyl.MO[1,]
+tmethyl.M=apply(tmethyl.MO[-1,],2,as.numeric )
+
 
 LT=function(X){
   
@@ -110,7 +115,16 @@ LT=function(X){
   return(Z)
 }
 
+pseudocount=function(X){
+  
+  if(length(which(X==0))>0){ X[which(X==0)]=0.001 }
+  if(length(which(X==1))>0){ X[which(X==1)]=0.999 }
+  
+  return(X)
+  
+}
 
+tmethyl.M=apply(tmethyl.M, 2, pseudocount)
 tmethyl.Mlt=apply(tmethyl.M, 2, LT)
 
 
@@ -151,12 +165,11 @@ get.resids=function(X, covars, plot.pairs=TRUE, verbose=0){
     #bind column and covars into easy-to-use dataframe for lm
     data1=cbind.data.frame(X[,i], covars)
     colnames(data1)=c("log.Y", colnames(covars))
-    zero.idx=match(0, data1$log.Y)
     
     #fit model 
     if(verbose==1){print(head(data1)); print(summary(data1))}
     
-    model=glm(log.Y ~ Gender*poly(Age, 2), na.action = na.exclude, family = "binomial", data = data1)
+    model=lm(log.Y ~ Gender*poly(Age, 2), na.action = na.exclude, data = data1)
     
     if(verbose==1){ print(summary(model)) }
     
@@ -174,7 +187,7 @@ get.resids=function(X, covars, plot.pairs=TRUE, verbose=0){
            xlab = "Logit Transformed",
            ylab = "Regression Residuals",
            main = paste("plot:", colnames(X)[i], sep = " "))
-      abline(0, 1, col="red")
+      abline(a=0, b=1, col="red")
       
       dev.off()
       
@@ -195,9 +208,14 @@ get.resids=function(X, covars, plot.pairs=TRUE, verbose=0){
 covariates.final$Gender=as.factor(covariates.final$Gender)
 
 #now run get.resids()
-tmethyl.M.resids=get.resids(tmethyl.M[,1:10], covariates.final)
+tmethyl.M.resids=get.resids(tmethyl.Mlt, covariates.final)
 
+tmethyl.M.resids2=rbind.data.frame(UCSC_RefGene_Name2, tmethyl.M.resids)
+colnames(tmethyl.M.resids2)=colnames(tmethyl.M)
+rownames(tmethyl.M.resids2)=c("UCSC_Ref_Gene", row.names(tmethyl.MO)[2:dim(tmethyl.MO)[1]] )
 
+#write.csv(tmethyl.M.resids2, file = "/mnt/ceph/jarredk/Methyl/MethylData.RegressResids.csv")
+save(tmethyl.M.resids2, file = "/mnt/ceph/jarredk/Methyl/MethylData.RegressResids.Rdata")
 
 
 

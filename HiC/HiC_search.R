@@ -350,6 +350,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$cis$gene_id,
                                reads, averages, total.nas, p.values, BY,
                                bh.thresh, qvals, trio.attr$Attributes$cis$chr,
+                               trio.attr$Attributes$trans$gene_id,
                                trio.attr$Attributes$trans$chr,
                                trio.attr$Attributes$cis$variant_pos,
                                trio.attr$Attributes$trans$left,
@@ -363,14 +364,15 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                 trio.attr$Attributes$cis$gene_id,
                                 reads, averages, total.nas, p.values2, BY2,
                                 bh.thresh2, qvals2, trio.attr$Attributes$cis$chr,
+                                trio.attr$Attributes$trans$gene_id,
                                 trio.attr$Attributes$trans$chr,
                                 trio.attr$Attributes$cis$variant_pos,
                                 trio.attr$Attributes$trans$left,
                                 trio.attr$Attributes$trans$right,
-                               hic.extent)
+                                hic.extent)
   #name cols
-  cnames=c("SNP", "gene_name", "gene_id","obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
-                        "cis.chr", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
+  cnames=c("SNP", "gene_name", "cis.gene.ID","obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
+                        "cis.chr", "trans.gene.ID", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
   colnames(info.list)=cnames

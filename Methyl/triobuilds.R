@@ -165,8 +165,9 @@ for(j in c(1,2,4,5,7:14)){
     
     png(paste("/mnt/ceph/jarredk/Methyl/ClusCheckPlots/","plots", colnames(submat.methyl)[i], ".png", sep = ""))
     hist(submat.methyl[,i], 
-         ylab = "Methylation Residuals",
-         main = paste("plot:",colnames(submat.methyl)[i], sep = " "))
+         breaks = 20,
+         xlab = "Post-normalization Methylation Residuals",
+         main = paste("Histogram:",colnames(submat.methyl)[i], sep = " "))
     
     dev.off()
     

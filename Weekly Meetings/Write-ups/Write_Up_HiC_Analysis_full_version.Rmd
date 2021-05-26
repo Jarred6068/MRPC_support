@@ -50,7 +50,7 @@ All parts of the HiC/Trans Mediated verification process were repeated for the t
 
 \subsection*{(1) Identification of Trans Mediated Trios and Respective Meta-Data}    
 
-$\bullet$ HiC data for four tissues (Lung, Skin, Lymphoblastoid Cells, Fibroblast Cells) was obtained from the ENCODE consortium    
+$\bullet$ HiC data for four tissues: Lung, Skin, Lymphoblastoid Cells, Fibroblast Cells (ENCFF366ERB, ENCFF569RJM, ENCFF355OWW, ENCFF768UBD respectively) was obtained from the ENCODE consortium    
 
 $\bullet$ All trans-mediated (M1 type-2) classified trios from both \textbf{ADDIS} and \textbf{LOND} methods were extracted using \textit{ADDIS.M1.check()} function
 

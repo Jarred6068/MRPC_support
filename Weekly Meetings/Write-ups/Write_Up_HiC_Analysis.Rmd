@@ -20,7 +20,23 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8)
 
 \subsection*{(1) Identification of Trans Mediated Trios and Respective Meta-Data}    
 
-$\bullet$ HiC data for four tissues (Lung, Skin, Lymphoblastoid Cells, Fibroblast Cells) was obtained from the ENCODE consortium    
+$\bullet$ Mapping Quality thresholded chromatin interaction data for four tissues: Lung, Skin, Lymphoblastoid Cells, Fibroblast Cells  (See table 1).    
+
+\begin{table}
+\centering
+\caption{File and dataset ID numbers for mapping quality thresholded chromatin interactions obtained from the ENCODE consortium }
+\begin{tabular}{c|c|c}
+\hline
+\textbf{Tissue}      & \textbf{File ID}       & \textbf{Dataset ID}     \\ \hline
+Lung                 & $ENCFF366ERB$          & $ENCSR645ZPH$           \\ \hline
+Skin                 & $ENCFF569RJM$          & $ENCSR912RAV$           \\ \hline
+Lymphoblastoid Cells & $ENCFF355OWW$          & $ENCSR423SYP$           \\ \hline
+Fibroblast Cells     & $ENCFF768UBD$          & $ENCSR220MNC$           \\
+\end{tabular}
+\end{table}
+
+
+
 
 $\bullet$ All trans-mediated (M1 type-2) classified trios from both \textbf{ADDIS} and \textbf{LOND} methods were extracted using \textit{ADDIS.M1.check()} function
 

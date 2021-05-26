@@ -135,6 +135,8 @@ interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_ce
 #=====================================================================================================
 #---------------------------Run-Analysis-For-Available-Tissues::ADDIS---------------------------------
 #=====================================================================================================
+#set.seed(566)
+
 source("/mnt/ceph/jarredk/HiC_Analyses/HiC_search.R")
 
 #check all M1's for CellsEBVtransformedlymphocytes
@@ -153,9 +155,9 @@ triosM1.hic.result=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyse
                                      plot.h=TRUE,
                                      FDR="ADDIS")
 
-write.csv(triosM1.hic.result$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/lymphoblastoid_cells/HiC_lymphocyte_result_ADDIS.csv")
+write.csv(triosM1.hic.result$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/lymphoblastoid_cells/HiC_lymphocyte_result_ADDIS.csv")
 save(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/lymphoblastoid_cells/resampled.lymph.Rdata")
-triosM1.hic.result$summary.table
+triosM1.hic.result$summary.table1
 
 
 #check all M1's for Lung
@@ -172,9 +174,9 @@ triosM1.hic.result2=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      plot.h=TRUE,
                                      FDR="ADDIS")
 
-write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/HiC_Lung_result_ADDIS.csv")
+write.csv(triosM1.hic.result2$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/HiC_Lung_result_ADDIS.csv")
 save(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Lung/resampled.Lung.Rdata")
-triosM1.hic.result2$summary.table
+triosM1.hic.result2$summary.table1
 
 #check all M1's skin
 M1.skin=ADDIS.M1.check("SkinNotSunExposed")
@@ -190,9 +192,9 @@ triosM1.hic.result3=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      plot.h=TRUE,
                                      FDR="ADDIS")
 
-write.csv(triosM1.hic.result3$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Skin/HiC_Skin_result_ADDIS.csv")
+write.csv(triosM1.hic.result3$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Skin/HiC_Skin_result_ADDIS.csv")
 save(triosM1.hic.result3, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/Skin/resampled.Skin.Rdata")
-triosM1.hic.result3$summary.table
+triosM1.hic.result3$summary.table1
 
 #check all M1's for Fibroblasts
 M1.fibroblasts=ADDIS.M1.check("CellsCulturedfibroblasts")
@@ -209,9 +211,9 @@ triosM1.hic.result4=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                      FDR="ADDIS")
 
 
-write.csv(triosM1.hic.result4$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/fibroblast_cells/HiC_Fibroblasts_result_ADDIS.csv")
+write.csv(triosM1.hic.result4$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/fibroblast_cells/HiC_Fibroblasts_result_ADDIS.csv")
 save(triosM1.hic.result4, file = "/mnt/ceph/jarredk/HiC_Analyses/ADDIS/fibroblast_cells/resampled.fibro.ADDIS.Rdata")
-triosM1.hic.result4$summary.table
+triosM1.hic.result4$summary.table1
 
 
 
@@ -239,9 +241,9 @@ triosM1.hic.result=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analyse
                                      plot.h=TRUE,
                                      FDR="LOND")
 
-write.csv(triosM1.hic.result$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/lymphoblastoid_cells/HiC_lymphocyte_result_LOND.csv")
+write.csv(triosM1.hic.result$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/lymphoblastoid_cells/HiC_lymphocyte_result_LOND.csv")
 save(triosM1.hic.result, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/lymphoblastoid_cells/resampled.lymph.LOND.Rdata")
-triosM1.hic.result$summary.table
+triosM1.hic.result$summary.table1
 triosM1.hic.result$summary.table2
 
 
@@ -259,9 +261,9 @@ triosM1.hic.result2=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                       plot.h=TRUE,
                                       FDR="LOND")
 
-write.csv(triosM1.hic.result2$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/Lung/HiC_Lung_result_LOND.csv")
+write.csv(triosM1.hic.result2$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/Lung/HiC_Lung_result_LOND.csv")
 save(triosM1.hic.result2, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/Lung/resampled.Lung.LOND.Rdata")
-triosM1.hic.result2$summary.table
+triosM1.hic.result2$summary.table1
 
 #check all M1's skin
 M1.skin=ADDIS.M1.check("SkinNotSunExposed")
@@ -277,9 +279,9 @@ triosM1.hic.result3=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                       plot.h=TRUE,
                                       FDR="LOND")
 
-write.csv(triosM1.hic.result3$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/Skin/HiC_Skin_result_LOND.csv")
+write.csv(triosM1.hic.result3$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/Skin/HiC_Skin_result_LOND.csv")
 save(triosM1.hic.result3, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/Skin/resampled.Skin.LOND.Rdata")
-triosM1.hic.result3$summary.table
+triosM1.hic.result3$summary.table1
 
 #check all M1's for Fibroblasts
 M1.fibroblasts=ADDIS.M1.check("CellsCulturedfibroblasts")
@@ -296,9 +298,9 @@ triosM1.hic.result4=interaction_check(hic.filename="/mnt/ceph/jarredk/HiC_Analys
                                       FDR="LOND")
 
 
-write.csv(triosM1.hic.result4$summary.table, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/fibroblast_cells/HiC_Fibroblasts_result_LOND.csv")
+write.csv(triosM1.hic.result4$summary.table1, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/fibroblast_cells/HiC_Fibroblasts_result_LOND.csv")
 save(triosM1.hic.result4, file = "/mnt/ceph/jarredk/HiC_Analyses/LOND/fibroblast_cells/resampled.fibro.LOND.Rdata")
-triosM1.hic.result4$summary.table
+triosM1.hic.result4$summary.table1
 
 
 

@@ -330,17 +330,24 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
     
   }
   
+  
+  
   #preallocate space for FDR/FWER adjustments
   bh.thresh=rep(0, length(p.values))
   qvals=rep(0, length(p.values))
   BY=rep(0, length(p.values))
   
-  bh.thresh2=rep(0, length(p.values))
-  qvals2=rep(0, length(p.values))
-  BY2=rep(0, length(p.values))
+  bh.thresh2=rep(0, length(p.values2))
+  qvals2=rep(0, length(p.values2))
+  BY2=rep(0, length(p.values2))
+  
+  print(dim(hic.extent))
+  print("made it this far1")
   
   #summarize
-  info.list = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
+  info.list = cbind.data.frame(trio.attr$SNPS,
+                               trio.attr$Attributes$cis$gene_name,
+                               trio.attr$Attributes$cis$gene_id,
                                reads, averages, total.nas, p.values, BY,
                                bh.thresh, qvals, trio.attr$Attributes$cis$chr,
                                trio.attr$Attributes$trans$chr,
@@ -349,16 +356,20 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                                trio.attr$Attributes$trans$right,
                                hic.extent)
   
-  info.list2 = cbind.data.frame(trio.attr$Attributes$cis$trio.idx, 
-                               reads, averages, total.nas, p.values2, BY2,
-                               bh.thresh2, qvals2, trio.attr$Attributes$cis$chr,
-                               trio.attr$Attributes$trans$chr,
-                               trio.attr$Attributes$cis$variant_pos,
-                               trio.attr$Attributes$trans$left,
-                               trio.attr$Attributes$trans$right,
+  print(info.list)
+  
+  info.list2 = cbind.data.frame(trio.attr$SNPS, 
+                                trio.attr$Attributes$cis$gene_name,
+                                trio.attr$Attributes$cis$gene_id,
+                                reads, averages, total.nas, p.values2, BY2,
+                                bh.thresh2, qvals2, trio.attr$Attributes$cis$chr,
+                                trio.attr$Attributes$trans$chr,
+                                trio.attr$Attributes$cis$variant_pos,
+                                trio.attr$Attributes$trans$left,
+                                trio.attr$Attributes$trans$right,
                                hic.extent)
   #name cols
-  cnames=c("trio.idx", "obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
+  cnames=c("SNP", "gene_name", "gene_id","obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
                         "cis.chr", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
                         "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
   
@@ -396,10 +407,11 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   Q2=qvalue(as.vector(na.omit(info.list2$`P(>obs)`)), fdr.level = alpha, pi0 = 1)
   
   Qq=as.vector(Q$qvalues)
-  Qq2=as.vector(Q$qvalues)
+  Qq2=as.vector(Q2$qvalues)
   
   Qq=ifelse(is.na(info.list$`P(>obs)`)==TRUE, NA, Qq)
   Qq2=ifelse(is.na(info.list2$`P(>obs)`)==TRUE, NA, Qq2)
+  info.list$qvals=Qq
   info.list2$qvals=Qq2
   
   #include the Hochberg step up correction

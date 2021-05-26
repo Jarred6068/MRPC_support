@@ -14,6 +14,11 @@ output: pdf_document
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 #back-check lond results
+loadRData <- function(fileName=NULL){
+  #loads an RData file, and returns it
+  load(fileName)
+  get(ls()[ls() != "fileName"])
+}
 
 df=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/loaded_AL_datatables.Rdata")
 #get uniques

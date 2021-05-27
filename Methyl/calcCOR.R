@@ -9,7 +9,7 @@ loadRData <- function(fileName=NULL){
 
 load(file="/mnt/ceph/jarredk/Methyl/Wksp1.Rdata")
 
-genos.mat=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
+genos.mat=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenos.Rdata")
 
 EM.triolist=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/completedTrios1.Rdata")
 

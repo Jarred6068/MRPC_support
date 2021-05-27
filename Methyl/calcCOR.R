@@ -7,7 +7,7 @@ loadRData <- function(fileName=NULL){
 
 #load in necesarry files from workspace
 
-#load(file="/mnt/ceph/jarredk/Methyl/Wksp1.Rdata")
+load(file="/mnt/ceph/jarredk/Methyl/Wksp1.Rdata")
 
 genos.mat=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
 

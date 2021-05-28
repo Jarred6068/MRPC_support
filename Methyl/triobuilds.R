@@ -69,7 +69,7 @@ match.gn.parsed=function(egn, mgnp){
   
 }
 
-#triobuildlist=match.gn.parsed(express.genenames, methyl.gn.parsed)
+triobuildlist=match.gn.parsed(express.genenames, methyl.gn.parsed)
 
 #save(triobuildlist, file = "/mnt/ceph/jarredk/Methyl/triobuildlist.Rdata")
 #====================================================================================
@@ -181,7 +181,11 @@ for(j in c(1,2,4,5,7:14)){
 start.time=Sys.time()
 
 build.trios=function(emat=NULL, mmat=NULL, tbl=NULL, enames=NULL){
-  
+  #emat -- the expression data matrix
+  #mmat -- the methylation data matrix
+  #tbl -- the triobuildlist (output from match.gn.parsed)
+  #enames -- the gene names that correspond to the columns of the 
+  #           expression matrix
   
   trio.full.list=vector("list", length = length(enames))
   names(trio.full.list)=enames

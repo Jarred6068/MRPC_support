@@ -1,4 +1,9 @@
 
+#================================================================================
+#--------------------build-pieces-needed-to-run-correlations---------------------
+#================================================================================
+
+
 loadRData <- function(fileName=NULL){
   #loads an RData file, and returns it
   load(fileName)
@@ -74,18 +79,51 @@ Mprobenames.final=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Used.Mprobes.fi
 #retreive relevant metadata for the "In-Use" methylation probes:
 
 matched.meta_M=match(Mprobenames.final, imp.meta_M[,1])
-imp.meta_M.final=imp.meta_M[matched.meta_M,c(2:3)]
+imp.meta_M.final=imp.meta_M[matched.meta_M,]
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#=========================================================================================================
+#-------------------------------------calculate-the-correlations------------------------------------------
+#=========================================================================================================
 #function to compute correlations between SNPS based on locations within each chromosome
+#load in the necessary information:
+
+genos.mat=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
+EM.triolist=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/completedTrios1.Rdata")
+triobuildlist=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/triobuildlist.Rdata")
+simulated.meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
+Mprobenames.final=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Used.Mprobes.final.Rdata")
+meta_M=read.csv(file = "/mnt/ceph/megheib/M_G_data/GPL13534_M.csv")
+#retreive relevant metadata for the "In-Use" methylation probes:
+imp.meta_M=meta_M[,c(1,12,13)]
+matched.meta_M=match(Mprobenames.final, imp.meta_M[,1])
+imp.meta_M.final=imp.meta_M[matched.meta_M,]
 
 
-calc.cors=function(triolist=NULL, genomat=NULL){
+
+calc.cors=function(EMtriolist=NULL, GMInfo=NULL, genomat=NULL, genoInfo=NULL){
   
-  size1=NULL
-  for(i in 1:length(triobuildlist)){size1[i]=length(triobuildlist[[i]])}
-  
-  print(paste("number of trios to compute", paste0(sum(vec1),"X",dim(genos.mat)[2]), sep = ":"))
+  #size1=NULL
+  #for(i in 1:length(triobuildlist)){size1[i]=length(triobuildlist[[i]])}
+  #print(paste("number of trios to compute", paste0(sum(vec1),"X",dim(genos.mat)[2]), sep = ":"))
   
   
   

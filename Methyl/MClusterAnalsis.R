@@ -1,0 +1,100 @@
+
+#load in normalized methylation data
+loadRData <- function(fileName=NULL){
+  #loads an RData file, and returns it
+  load(fileName)
+  get(ls()[ls() != "fileName"])
+}
+
+Mdata=loadRData(methyl.resids2, file = "/mnt/ceph/jarredk/Methyl/MethylData.methylresids2.Rdata")
+
+
+
+
+
+calc.dens=function(data=NULL, mvec=NULL, sigvec=NULL, pvec=NULL, mix=NULL){
+  
+  dens.vec=NULL
+  
+  for(j in 1:mix){ dens.vec[j]=dnorm(data, mvec[j], sigvec[j])*pvec[j]}
+  #print(dens.vec)
+  return(sum(dens.vec))
+}
+
+
+
+
+
+
+
+
+
+EM=function(data=NULL, start.props=c(0.3, 0.7), start.mu=c(1, 19), start.sigmas=c(1,1), mixtures=2, conv.thresh=0.01){
+  
+  #initialize
+  n=length(data)
+  prop.vec=start.props
+  mu.vec=start.mu
+  sigma.vec=start.sigmas
+  T.mat=as.data.frame(matrix(0, nrow = n, ncol = mixtures))
+  
+  
+  prop.estimates=list()
+  #prop.estimates[[1]]=start.props
+  means.estimates=list()
+  #means.estimates[[1]]=start.mu
+  sigma.estimates=list()
+  #sigma.estimates[[1]]=sigma.vec
+  
+  k=1
+  t=1
+  while(abs(t)>conv.thresh){
+    
+    
+    #E-step
+    for(i in 1:n){
+      
+      for(j in 1:mixtures){
+        
+        T.ij=(dnorm(data[i], mu.vec[j], sigma.vec[j])*prop.vec[j])/
+          calc.dens(data=data[i], mvec=mu.vec, sigvec=sigma.vec, pvec=prop.vec, mix=mixtures)
+        
+        T.mat[i,j]=T.ij
+          
+      }
+      
+    }
+    
+    #print(T.mat)
+    
+    #M-step
+    
+    prop.estimates[[k]]=colSums(T.mat)/n
+    means.estimates[[k]]=colSums(T.mat*data)/colSums(T.mat)
+    sigma.estimates[[k]]=sqrt(colSums(T.mat*(data-means.estimates[[k]])^2)/colSums(T.mat))
+    
+    t=prop.estimates[[k]][1]-prop.vec[1]
+    prop.vec=prop.estimates[[k]]
+    mu.vec=means.estimates[[k]]
+    sigma.vec=sigma.estimates[[k]]
+    
+    print(rbind(prop.vec, mu.vec, sigma.vec))
+    #print(mu.vec)
+    #print(sigma.vec)
+    
+    #print(t)
+    k=k+1
+    
+  }
+  
+  #print(prop.estimates)
+  return(T.mat)
+
+}
+
+
+#test algorithm
+
+test.data=c(rnorm(2000, 0, 1), rnorm(8000, 20, 1))
+
+T.mat1=EM(data = test.data)

@@ -6,7 +6,7 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
-Mdata=loadRData(methyl.resids2, file = "/mnt/ceph/jarredk/Methyl/MethylData.methylresids2.Rdata")
+Mdata=loadRData( fileName = "/mnt/ceph/jarredk/Methyl/MethylData.RegressResids.Rdata")
 
 
 
@@ -98,3 +98,24 @@ EM=function(data=NULL, start.props=c(0.3, 0.7), start.mu=c(1, 19), start.sigmas=
 test.data=c(rnorm(2000, 0, 1), rnorm(8000, 20, 1))
 
 T.mat1=EM(data = test.data)
+
+
+
+
+
+
+
+
+
+#using Mclust
+
+install.packages("mclust", lib = "/mnt/ceph/jarredk/Rpackages", dependencies = T)
+
+library('mclust', lib="/mnt/ceph/jarredk/Rpackages")
+
+
+
+
+
+
+

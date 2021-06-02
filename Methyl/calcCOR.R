@@ -140,7 +140,7 @@ testexpress.gn=express.genenames[-attr(na.omit(matched.meta_E), "na.action")]
 #-------------------------------------------------------------------------
 #=========================helper_function_1===============================
 
-prep.cors=function(GMInfo=NULL, GEInfo=NULL, genomat=NULL, genoInfo=NULL, chrs=NULL){
+prep.cors=function(GMInfo=NULL, GEInfo=NULL, genomat=NULL, genoInfo=NULL, chrs=NULL, bp.range=1000000){
   #SYNTAX:
   
   #GMInfo -- Gene Methylation matrix additional info in the form
@@ -173,14 +173,14 @@ prep.cors=function(GMInfo=NULL, GEInfo=NULL, genomat=NULL, genoInfo=NULL, chrs=N
     for(j in 1:dim(chr.GM.matched)[1]){
       
       #index the snps that are close to each Methylation probe
-      snps.in.range[[j]]=which(abs(chr.GM.matched[j,3]-chr.geno.matched[,2])<1000000)
+      snps.in.range[[j]]=which(abs(chr.GM.matched[j,3]-chr.geno.matched[,2])<bp.range)
       #print(snps.in.range[[j]])
     }
     
     for(j in 1:dim(chr.GE.matched)[1]){
       
       #index the snps that are close to each Expression probe
-      snps.in.range2[[j]]=which(abs(chr.GE.matched[j,3]-chr.geno.matched[,2])<1000000)
+      snps.in.range2[[j]]=which(abs(chr.GE.matched[j,3]-chr.geno.matched[,2])<bp.range)
       #print(snps.in.range2[[j]])
     }
     

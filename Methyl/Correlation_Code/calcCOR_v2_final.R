@@ -123,7 +123,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     SNP=colnames(SNP.mat)[snps.in.rangeE]
     cors2=as.vector(cor(express.mat[,1], SNP.mat[, snps.in.rangeE], use = "complete.obs"))
     init.table2=cbind.data.frame(Eprobe, SNP, cors2)
-    colnames(init.table2)=c("Express_Probe_ID", "SNP_ID", "Cor")
+    colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Cor")
     
     print(dim(init.table2))
     

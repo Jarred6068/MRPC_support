@@ -47,6 +47,11 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
 
 calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, genoInfo=NULL, chrs=NULL, bp.range=1000000){
   #SYNTAX:
+  #mmat - the methylation matrix/df with column-names as probe ID's
+  
+  #emat - the expression matrix (aligned with BIOmart meta-data in GEInfo)
+  
+  #gmat -- the matrix/df of genotype data (with column-names as SNP ID's)
   
   #GMInfo -- Gene Methylation matrix additional info in the form
   # [ probe_name  Chr  start_position  ]   
@@ -59,7 +64,8 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
   #genoInfo -- SNP matrix/df of additional info in the form
   # [ Chr  Start_position  ]
   
-  #Chrs -- passed from calc.cors
+  #Chrs -- the chromosome(s) for which the script should be run can be
+  #        can be a single or multi element vector
   
   for(i in 1:length(chrs)){
     
@@ -101,6 +107,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     write.table(init.table, file = fnM,
                 row.names = FALSE)
     
+    #loop which writes correlations to above table
     cc.loop(probe.matched=chr.GM.matched, 
             Geno.matched=chr.geno.matched, 
             probe.mat=methyl.mat, 
@@ -130,6 +137,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
                 file = fnE,
                 row.names = FALSE)
     
+    #loop which writes correlations to above table
     cc.loop(probe.matched=chr.GE.matched, 
             Geno.matched=chr.geno.matched, 
             probe.mat=express.mat, 
@@ -142,6 +150,8 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
   
 }
 
+
+#Example Run
 start.time=Sys.time()
 trycors1=calc.corsV2(mmat = Mdata,
                      emat = Edata,

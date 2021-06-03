@@ -15,7 +15,7 @@ loadRData <- function(fileName=NULL){
 
 #load in previously cleaned data
 genotype_data=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
-simulated.Geno_meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
+G_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
 M_metadata=loadRData(imp.meta_M.final, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
 E_metadata=loadRData(imp.meta_E.final, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
 Edata=loadRData(testexpress, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
@@ -23,7 +23,7 @@ Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/MethylData.RegressResids.Rd
 #-------------------------------------------------------------------------
 #=========================helper_function_1===============================
 
-cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=NULL, bp.range=1000000, fn=NULL, verbose=FALSE ){
+cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=NULL, bp.range=1000000, fn=NULL){
   
   for(j in 2:dim(probe.matched)[1]){
     
@@ -39,7 +39,7 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
                 col.names = FALSE,
                 append = TRUE)
     
-    if(isTRUE(verbose)){print(head(add.tab))}
+    #if(isTRUE(verbose)){print(head(add.tab))}
   }
 }
 
@@ -113,8 +113,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
             probe.mat=methyl.mat, 
             SNP.mat=SNP.mat, 
             bp.range=bp.range, 
-            fn=fnM, 
-            verbose=FALSE)
+            fn=fnM)
     
     
     #--------------------------Expression-Probes----------------------------
@@ -143,8 +142,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
             probe.mat=express.mat, 
             SNP.mat=SNP.mat, 
             bp.range=bp.range, 
-            fn=fnE, 
-            verbose=FALSE )
+            fn=fnE)
     
   }
   
@@ -153,12 +151,13 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
 
 #Example Run
 start.time=Sys.time()
+
 trycors1=calc.corsV2(mmat = Mdata,
                      emat = Edata,
                      gmat = genotype_data, 
                      GMInfo = M_metadata, 
                      GEInfo = E_metadata, 
-                     genoInfo = simulated.meta, 
+                     genoInfo = G_metadata, 
                      chrs=c("1"),
                      bp.range = 1000000)
 end.time=Sys.time()

@@ -1,9 +1,11 @@
 
+
+
 #=========================================================================================================
 #-------------------------------------calculate-the-correlations------------------------------------------
 #=========================================================================================================
 #function to compute correlations between SNPS based on locations within each chromosome
-#load in the necessary information:
+#load in the necessary files needed to run function:
 #-------------------------------prep-data----------------------------------
 loadRData <- function(fileName=NULL){
   #loads an RData file, and returns it
@@ -12,28 +14,12 @@ loadRData <- function(fileName=NULL){
 }
 
 #load in previously cleaned data
-load(file="/mnt/ceph/jarredk/Methyl/Wksp1.Rdata")
-genos.mat=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
-#EM.triolist=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/completedTrios1.Rdata")
-#triobuildlist=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/triobuildlist.Rdata")
-simulated.meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
-Mprobenames.final=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Used.Mprobes.final.Rdata")
-#load in methylation meta-data
-meta_M=read.csv(file = "/mnt/ceph/megheib/M_G_data/GPL13534_M.csv")
-#load in expression meta-data from biomart
-meta_E=read.table(file = "/mnt/ceph/jarredk/Methyl/mart_export.txt", sep = ",", header = T)
-
-#retrieve relevant metadata for the "In-Use" methylation probes:
-imp.meta_M=na.omit(cbind(meta_M[,c(1,15)], as.numeric(meta_M[,16])))
-matched.meta_M=match(Mprobenames.final, imp.meta_M[,1])
-imp.meta_M.final=imp.meta_M[matched.meta_M,]
-#retrieve relevant metadata for the "In-Use" Expression probes:
-matched.meta_E=match(express.genenames, meta_E[,1])
-imp.meta_E.final=meta_E[na.omit(matched.meta_E), ]
-#filter out columns (genes) that didn't have chr position information according to BioMart
-testexpress=express.aligned[,-attr(na.omit(matched.meta_E), "na.action")]
-testexpress.gn=express.genenames[-attr(na.omit(matched.meta_E), "na.action")]
-colnames(testexpress)=testexpress.gn
+genotype_data=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
+simulated.Geno_meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
+M_metadata=loadRData(imp.meta_M.final, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
+E_metadata=loadRData(imp.meta_E.final, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
+Edata=loadRData(testexpress, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
+Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/MethylData.RegressResids.Rdata")
 #-------------------------------------------------------------------------
 #=========================helper_function_1===============================
 
@@ -109,7 +95,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     
     #fileName
     fnM=paste("/mnt/ceph/jarredk/Methyl/cor_Lists_and_Tables/", 
-             paste0("M_chr_",i), "correlations.txt", sep = "")
+              paste0("M_chr_",i), "correlations.txt", sep = "")
     
     #initiate table
     write.table(init.table, file = fnM,
@@ -157,30 +143,16 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
 }
 
 start.time=Sys.time()
-trycors1=calc.corsV2(mmat = methyl.resids2,
-                   emat = testexpress,
-                   gmat = genos.mat, 
-                   GMInfo = imp.meta_M.final, 
-                   GEInfo = imp.meta_E.final, 
-                   genoInfo = simulated.meta, 
-                   chrs=c("1"),
-                   bp.range = 1000000)
+trycors1=calc.corsV2(mmat = Mdata,
+                     emat = Edata,
+                     gmat = genotype_data, 
+                     GMInfo = M_metadata, 
+                     GEInfo = E_metadata, 
+                     genoInfo = simulated.meta, 
+                     chrs=c("1"),
+                     bp.range = 1000000)
 end.time=Sys.time()
 
 print(end.time-start.time)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

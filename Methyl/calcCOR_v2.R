@@ -151,13 +151,13 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
             SNP.mat=SNP.mat, 
             bp.range=bp.range, 
             fn=fnE, 
-            verbose=TRUE )
+            verbose=FALSE )
     
   }
   
 }
 
-
+start.time=Sys.time()
 trycors1=calc.corsV2(mmat = methyl.resids2,
                    emat = testexpress,
                    gmat = genos.mat, 
@@ -166,9 +166,9 @@ trycors1=calc.corsV2(mmat = methyl.resids2,
                    genoInfo = simulated.meta, 
                    chrs=c("1"),
                    bp.range = 1000000)
+end.time=Sys.time()
 
-
-
+print(end.time-start.time)
 
 
 

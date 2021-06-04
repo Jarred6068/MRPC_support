@@ -24,11 +24,6 @@ calc.dens=function(data=NULL, mvec=NULL, sigvec=NULL, pvec=NULL, mix=NULL){
 
 
 
-
-
-
-
-
 EM=function(data=NULL, start.props=c(0.3, 0.7), start.mu=c(1, 19), start.sigmas=c(1,1), mixtures=2, conv.thresh=0.01){
   
   #initialize

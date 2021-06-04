@@ -16,10 +16,10 @@ loadRData <- function(fileName=NULL){
 #load in previously cleaned data
 genotype_data=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
 G_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
-M_metadata=loadRData(imp.meta_M.final, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
-E_metadata=loadRData(imp.meta_E.final, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
-Edata=loadRData(testexpress, file = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
-Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/MethylData.RegressResids.Rdata")
+M_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
+E_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
+Edata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
+Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Mdata.final.Rdata")
 #-------------------------------------------------------------------------
 #=========================helper_function_1===============================
 
@@ -37,7 +37,9 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
     write.table(add.tab, file = fn,
                 row.names = FALSE,
                 col.names = FALSE,
-                append = TRUE)
+                append = TRUE,
+                sep = "\t",
+                quote = FALSE)
     
     #if(isTRUE(verbose)){print(head(add.tab))}
   }
@@ -105,7 +107,9 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     
     #initiate table
     write.table(init.table, file = fnM,
-                row.names = FALSE)
+                row.names = FALSE,
+                sep = "\t",
+                quote = FALSE)
     
     #loop which writes correlations to above table
     cc.loop(probe.matched=chr.GM.matched, 
@@ -134,7 +138,9 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     #initiate table
     write.table(init.table2, 
                 file = fnE,
-                row.names = FALSE)
+                row.names = FALSE,
+                sep = "\t",
+                quote = FALSE)
     
     #loop which writes correlations to above table
     cc.loop(probe.matched=chr.GE.matched, 
@@ -158,7 +164,7 @@ trycors1=calc.corsV2(mmat = Mdata,
                      GMInfo = M_metadata, 
                      GEInfo = E_metadata, 
                      genoInfo = G_metadata, 
-                     chrs=c("1"),
+                     chrs=c("1","2","3"),
                      bp.range = 1000000)
 end.time=Sys.time()
 

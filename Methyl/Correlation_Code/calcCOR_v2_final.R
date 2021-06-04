@@ -31,7 +31,7 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
     snps.in.rangeM=which(abs(probe.matched[j,3]-Geno.matched[,2])<bp.range)
     Mprobe=rep(colnames(probe.mat)[j], length(snps.in.rangeM))
     SNP=colnames(SNP.mat)[snps.in.rangeM]
-    cors=as.vector(cor(probe.mat[,j], SNP.mat[, snps.in.rangeM], use = "complete.obs"))
+    cors=round(as.vector(cor(probe.mat[,j], SNP.mat[, snps.in.rangeM], use = "complete.obs")), 6)
     add.tab=cbind.data.frame(Mprobe, SNP, cors)
     
     write.table(add.tab, file = fn,
@@ -47,7 +47,7 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
 
 #=========================primary_function_1==============================
 
-calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, genoInfo=NULL, chrs=NULL, bp.range=1000000){
+calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, genoInfo=NULL, chrs=NULL, fn=NULL, bp.range=1000000){
   #SYNTAX:
   #mmat - the methylation matrix/df with column-names as probe ID's
   
@@ -95,15 +95,14 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     snps.in.rangeM=which(abs(chr.GM.matched[1,3]-chr.geno.matched[,2])<bp.range)
     Mprobe=rep(colnames(methyl.mat)[1], length(snps.in.rangeM))
     SNP=colnames(SNP.mat)[snps.in.rangeM]
-    cors=as.vector(cor(methyl.mat[,1], SNP.mat[, snps.in.rangeM], use = "complete.obs"))
+    cors=round(as.vector(cor(methyl.mat[,1], SNP.mat[, snps.in.rangeM], use = "complete.obs")),6)
     init.table=cbind.data.frame(Mprobe, SNP, cors)
     colnames(init.table)=c("Methyl_Probe_ID", "SNP_ID", "Cor")
     
-    print(dim(init.table))
+    #print(dim(init.table))
     
     #fileName
-    fnM=paste("/mnt/ceph/jarredk/Methyl/cor_Lists_and_Tables/", 
-              paste0("M_chr_",i), "correlations.txt", sep = "")
+    fnM=paste(fn, paste0("M_chr_",i), "correlations.txt", sep = "")
     
     #initiate table
     write.table(init.table, file = fnM,
@@ -125,15 +124,14 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     snps.in.rangeE=which(abs(chr.GE.matched[1,3]-chr.geno.matched[,2])<bp.range)
     Eprobe=rep(colnames(express.mat)[1], length(snps.in.rangeE))
     SNP=colnames(SNP.mat)[snps.in.rangeE]
-    cors2=as.vector(cor(express.mat[,1], SNP.mat[, snps.in.rangeE], use = "complete.obs"))
+    cors2=round(as.vector(cor(express.mat[,1], SNP.mat[, snps.in.rangeE], use = "complete.obs")),6)
     init.table2=cbind.data.frame(Eprobe, SNP, cors2)
     colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Cor")
     
-    print(dim(init.table2))
+    #print(dim(init.table2))
     
     #fileName
-    fnE=paste("/mnt/ceph/jarredk/Methyl/cor_Lists_and_Tables/", 
-              paste0("E_chr_",i), "correlations.txt", sep = "")
+    fnE=paste(fn, paste0("E_chr_",i), "correlations.txt", sep = "")
     
     #initiate table
     write.table(init.table2, 
@@ -164,7 +162,8 @@ trycors1=calc.corsV2(mmat = Mdata,
                      GMInfo = M_metadata, 
                      GEInfo = E_metadata, 
                      genoInfo = G_metadata, 
-                     chrs=c("1","2","3"),
+                     chrs=c("2"),
+                     fn="/mnt/ceph/jarredk/Methyl/cor_Lists_and_Tables/",
                      bp.range = 1000000)
 end.time=Sys.time()
 

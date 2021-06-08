@@ -1,9 +1,9 @@
-using calcCOR():
+using calcCOR_v2_final:
 
-1.) This function is a search algorithm which extracts the SNPs from the Genotype data which are in close proximity to each 
-probe in the Expression, and Methylation data sets and calculates the correlation between them. The Output are two tables 
-for each chromosome (one for methylation and one for expression) which are procedurally generated within the function. This 
-table contains three columns: Probe/Gene ID, SNP ID, and Correlation Coefficient Cor(SNP, Probe/Gene)
+1.) This set of functions works as a search algorithm which extracts the SNPs from the Genotype data which are in close 
+proximity to each probe in the Expression and Methylation data sets and calculates the correlation between them. The 
+Output are two tables for each chromosome (one for methylation and one for expression) which are procedurally generated 
+within the function. This table contains three columns: Probe/Gene ID, SNP ID, and Correlation Coefficient Cor(SNP, Probe/Gene)
 
 Example Expression output for chromosome 3
 
@@ -34,10 +34,68 @@ cg00013409      SNP_17563_chr_3 	0.0408202
 and subjects/patients as rows. Next are the 3 "meta data" matrices containing the chromosomal coordinate information
 for probes/Genes in all matrices. For the Expression and Methylation data, the corresponding metadata matrices should
 have probes/genes in rows and 3 columns: Probe_ID, Chromosome #, and coordinate (start). The metadata for the genotype 
-matrix should contain at two columns: chromosome # and coordinate
+matrix should contain two columns: chromosome # and coordinate (in that order). **It is important that each row of the genotype metadata
+matrix align with each column of the genotype data matrix** such as:
+
+(a) Ex genotype metadata
+
+              sim.chr sim.chrpos
+SNP_1_chr_16       16   76868343
+SNP_2_chr_8         8   97060256
+SNP_3_chr_14       14   77303865
+SNP_4_chr_19       19   22429168
+SNP_5_chr_6         6  102339318
+SNP_6_chr_14       14   88219023
+SNP_7_chr_X         X  100268374
+SNP_8_chr_13       13   12170231
+SNP_9_chr_4         4  148975113
+SNP_10_chr_18      18   67025553
+     .              .       .
+     .              .       .
+     .              .       .
+SNP_10000_chr_7     7   23543299
+
+
+(b) Ex genotype data
+
+        SNP_1_chr_16 SNP_2_chr_8 SNP_3_chr_14 SNP_4_chr_19 SNP_5_chr_6	   ...    SNP_10000_chr_7
+bsgs_1             2           2            2            1           2	   ...                  2
+bsgs_2             2           0            1            0           2	   ...                  1
+bsgs_3             2           2            0            1           0	   ...                  0
+bsgs_4             0           2            2            0           0     ...                  0
+bsgs_5             1           2            2            2           1     ...                  1
+bsgs_6             0           0            2            1           1     ...                  1
+bsgs_7             1           2            0            0           2     ...                  2
+bsgs_8             2           2            1            1           1     ...                  2
+bsgs_9             0           2            1            0           0     ...                  0
+bsgs_10            1           0            0            0           1     ...                  0
+                 
+
+Note that the rows in (a) match the columns in (b). 
 
 3.) Additional inputs for the function include the parameter "bp.range"  which is a user specified tolerance for the 
-maximum alotted distance between probes and SNPs for them to be considered close to one another. Lastly, the parameter
+maximum alotted distance between probes and SNPs for them to be considered "close" to one another. Lastly, the parameter
 "fn" gives the path directory for the output tables. 
 
-4.) A working example of the code can be found with the accompanying script EXcalcCOR.R 
+4.) The accompanying file Run_script.R is a simple script used to run the algorithm and is set to run the search on each 
+chromosome individually. As some of the generated tables may be quite large this script should help the user if they wish to 
+parallelize the operations. Note that the only input(s) the user must make is to enter the correct path for the variable(s)
+"load.location = /path/ " and "save.location = /path/ " which idenitfies the designated folder(s) for the input and output files.
+Additionally, the variable "bp.set.range=500000" is pre-set to allow a 500,000 bp tolerane on either side of the probe/gene start
+location, but it may be adjusted down as needed for memory purposes. 
+
+5.) A short example script EXrun.R is included as well as example .txt files for the genotype data and associated genotype meta data.
+The example runs quickly and therefore will allow the user to familiarize themselves with the code before use. There are also two 
+.txt files showing the output generated from EXrun.R : "M_chr1_correlations.txt" which is the output file for the methylation data 
+and "E_chr1_correlations.txt" for the expression data in the format described in (1.) above
+
+
+
+
+
+
+
+
+
+
+

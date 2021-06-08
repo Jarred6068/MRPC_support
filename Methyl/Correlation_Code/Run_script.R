@@ -1,22 +1,19 @@
 
-
-#load in search functions:
-
-load("/mnt/ceph/jarredk/Methyl/Correlation_Code/functions.Rdata")
-
-#load in Data
-genotype_data=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
-G_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
-M_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
-E_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
-Edata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
-Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Mdata.final.Rdata")
-
-
-
+#set the loading and saving locations and bp proximity
 
 bp.set.range=500000
+load.location="/mnt/ceph/jarredk/Methyl/Correlation_Code/"
 save.location="/mnt/ceph/jarredk/Methyl/cor_Lists_and_Tables/"
+
+#load in search functions:
+load(paste(load.location, "functions.Rdata", sep = ""))
+#load in Data
+genotype_data=loadRData(fileName = paste(load.location, "fakegenosBIG.Rdata", sep = ""))
+G_metadata=loadRData(fileName = paste(load.location, "fakegenoMeta.Rdata", sep = ""))
+M_metadata=loadRData(fileName = paste(load.location, "meta_M.final.Rdata", sep = ""))
+E_metadata=loadRData(fileName = paste(load.location, "meta_E.final.Rdata", sep = ""))
+Edata=loadRData(fileName = paste(load.location, "Expression_data_BM_aligned.final.Rdata", sep = ""))
+Mdata=loadRData(fileName = paste(load.location, "Mdata.final.Rdata", sep = ""))
 
 
 #Run for Chr 1

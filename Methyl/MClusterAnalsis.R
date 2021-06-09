@@ -146,7 +146,7 @@ colnames(P.values)=c("1v2 E", "1v2 V", "1v3 E", "1v3 V")
 dfs=c(2,4,4,7)
 
 for( i in 1:dim(W.GLRT)[2]){
-  P.values[,i]=pchisq(W.GLRT[,i], dfs[i])
+  P.values[,i]=1-pchisq(W.GLRT[,i], dfs[i])
 }
 
 

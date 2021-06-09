@@ -3,7 +3,7 @@ using calcCOR_v2_final:
 1.) This set of functions works as a search algorithm which extracts the SNPs from the Genotype data which are in close 
 proximity to each probe in the Expression and Methylation data sets and calculates the correlation between them. The 
 Output are two tables for each chromosome (one for methylation and one for expression) which are procedurally generated 
-within the function. This table contains three columns: Probe/Gene ID, SNP ID, and Correlation Coefficient Cor(SNP, Probe/Gene)
+within the function. The tables contain three columns: Probe/Gene ID, SNP ID, and Correlation Coefficient Cor(SNP, Probe/Gene)
 
 Example Expression output for chromosome 3
 
@@ -81,7 +81,7 @@ maximum alotted distance between probes and SNPs for them to be considered "clos
 chromosome individually. As some of the generated tables may be quite large this script should help the user if they wish to 
 parallelize the operations. Note that the only input(s) the user must make is to enter the correct path for the variable(s)
 "load.location = /path/ " and "save.location = /path/ " which idenitfies the designated folder(s) for the input and output files.
-Additionally, the variable "bp.set.range=500000" is pre-set to allow a 500,000 bp tolerane on either side of the probe/gene start
+Additionally, the variable "bp.set.range=500000" is pre-set to allow a 500,000 bp tolerance on either side of the probe/gene start
 location, but it may be adjusted down as needed for memory purposes. 
 
 5.) A short example script EXrun.R is included as well as example .txt files for the genotype data and associated genotype meta data.

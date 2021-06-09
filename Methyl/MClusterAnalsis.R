@@ -105,7 +105,7 @@ fake1=cbind.data.frame(a,b,c)
 colnames(fake1)=c("1G", "2G", "3G")
 
 
-
+Mdata=fake1
 
 #using Mclust
 

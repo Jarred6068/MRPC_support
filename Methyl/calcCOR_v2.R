@@ -19,12 +19,13 @@ genos.mat=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
 simulated.meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
 Mprobenames.final=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Used.Mprobes.final.Rdata")
 #load in methylation meta-data
-meta_M=read.csv(file = "/mnt/ceph/megheib/M_G_data/GPL13534_M.csv")
+#meta_M=read.csv(file = "/mnt/ceph/megheib/M_G_data/GPL13534_M.csv")
+meta_M=read.csv(file = "/mnt/ceph/jarredk/Methyl/GPL13534_HumanMethylation450_15017482_v.1.1.csv")
 #load in expression meta-data from biomart
 meta_E=read.table(file = "/mnt/ceph/jarredk/Methyl/mart_export.txt", sep = ",", header = T)
 
 #retrieve relevant metadata for the "In-Use" methylation probes:
-imp.meta_M=na.omit(cbind(meta_M[,c(1,15)], as.numeric(meta_M[,16])))
+imp.meta_M=na.omit(cbind(meta_M[,c(1,12)], as.numeric(meta_M[,13])))
 matched.meta_M=match(Mprobenames.final, imp.meta_M[,1])
 imp.meta_M.final=imp.meta_M[matched.meta_M,]
 #retrieve relevant metadata for the "In-Use" Expression probes:

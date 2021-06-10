@@ -83,13 +83,12 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     chr.geno.matched=genoInfo[Gidx,]
     chr.GM.matched=GMInfo[Midx,]
     chr.GE.matched=GEInfo[Eidx, ]
-    #print(chr.GE.matched)
     
     #reduce data matrices
     SNP.mat=gmat[,Gidx]
     methyl.mat=mmat[,Midx]
     express.mat=emat[,Eidx]
-    
+
     #-----------------------Methylation-Probes-------------------------
     
     snps.in.rangeM=which(abs(chr.GM.matched[1,3]-chr.geno.matched[,2])<bp.range)

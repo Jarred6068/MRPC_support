@@ -13,13 +13,13 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
-# #load in previously cleaned data
-# genotype_data=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
-# G_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
-# M_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
-# E_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
-# Edata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
-# Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Mdata.final.Rdata")
+#load in previously cleaned data
+genotype_data=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
+G_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
+M_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
+E_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
+Edata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
+Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Mdata.final.Rdata")
 #-------------------------------------------------------------------------
 #=========================helper_function_1===============================
 

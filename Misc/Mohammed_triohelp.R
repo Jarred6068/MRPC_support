@@ -6,13 +6,13 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
-# CNA=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.CNA.peer.RData")
-# EM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.exp.peer.fake.RData")
-# MM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/sub.n.n.TCGA.meth.t.2.RData")
+ CNA=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.CNA.peer.RData")
+ EM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.exp.peer.fake.RData")
+ MM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/sub.n.n.TCGA.meth.t.2.RData")
 
-CNA=loadRData(fileName="/mnt/ceph/jarredk/Misc/data.CNA.peer.RData")
-EM=loadRData(fileName="/mnt/ceph/jarredk/Misc/data.exp.peer.fake.RData")
-MM=loadRData(fileName="/mnt/ceph/jarredk/Misc/sub.n.n.TCGA.meth.t.2.RData")
+# CNA=loadRData(fileName="/mnt/ceph/jarredk/Misc/data.CNA.peer.RData")
+# EM=loadRData(fileName="/mnt/ceph/jarredk/Misc/data.exp.peer.fake.RData")
+# MM=loadRData(fileName="/mnt/ceph/jarredk/Misc/sub.n.n.TCGA.meth.t.2.RData")
 
 CNA.names=colnames(CNA)
 express.names=colnames(EM)

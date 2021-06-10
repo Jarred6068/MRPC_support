@@ -9,7 +9,7 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
-#read in expression data
+#read in expression data (Human Genome build 37)
 bsgs=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/new_data_GE_R2_bsgs_delete.RData")
 bsgs=as.data.frame(bsgs[,-1])
 #bsgs.Rdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/new_data_GE_R2_bsgs_delete.RData")

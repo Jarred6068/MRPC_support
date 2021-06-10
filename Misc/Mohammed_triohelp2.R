@@ -6,21 +6,24 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
+
+#load in real data
 # CNA.real=loadRData(fileName="/mnt/ceph/jarredk/Misc/CNA.data.Rdata")
 # EM.real=loadRData(fileName="/mnt/ceph/jarredk/Misc/EM.data.Rdata")
 # MM.real=loadRData(fileName="/mnt/ceph/jarredk/Misc/MM.data.Rdata")
 
 
 
+#load in example data
+CNA=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.CNA.peer.RData")
+EM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.exp.peer.fake.RData")
+MM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/sub.n.n.TCGA.meth.t.2.RData")
 
- CNA=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.CNA.peer.RData")
- EM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.exp.peer.fake.RData")
- MM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/sub.n.n.TCGA.meth.t.2.RData")
- 
- CNAgenes=colnames(CNA)
- CNA.names.ex=paste0("CNA","_", c(1:6481),":", CNAgenes)
- 
- colnames(CNA)=CNA.names.ex
+#make up unique CNA names to help visualize the CNA cols in the trios
+CNAgenes=colnames(CNA)
+CNA.names.ex=paste0("CNA","_", c(1:6481),":", CNAgenes)
+
+colnames(CNA)=CNA.names.ex
 
 # CNA=loadRData(fileName="/mnt/ceph/jarredk/Misc/data.CNA.peer.RData")
 # EM=loadRData(fileName="/mnt/ceph/jarredk/Misc/data.exp.peer.fake.RData")
@@ -29,7 +32,6 @@ loadRData <- function(fileName=NULL){
 express.names=colnames(EM)
 
 #remove Methyl columns with all or nearly all NA's
-
 idxc=NULL
 for(i in 1:dim(MM)[2]){if(sum(is.na(MM[,i]))>25){idxc[i]=i}else{idxc[i]=NA}}
 
@@ -65,7 +67,7 @@ match.gn.parsed=function(egn, mgnp){
 
 #===================================================================================
 
-
+#----------------------formatting example data--------------------------------
 try1=match.gn.parsed(express.names, methyl.names.list)
 
 #clean up matrices and align rows.
@@ -85,7 +87,7 @@ EM2=EM[na.omit(align.rows),]
 CNA2=CNA[na.omit(align.rows),]
 EM2[1:5,1:5]
 CNA2[1:5,1:5]
-
+#-------------------------------------------------------------------------------
 
 #first layer of trio constructions
 #====================================function=======================================
@@ -102,7 +104,7 @@ build.trios=function(emat=NULL, mmat=NULL, tbl=NULL, enames=NULL){
   checker=integer(0)
   
   for(i in 1:length(enames)){
-
+    
     
     if(identical(checker, tbl[[i]])){
       
@@ -126,7 +128,7 @@ build.trios=function(emat=NULL, mmat=NULL, tbl=NULL, enames=NULL){
       }
       
       names(trio.gl)=
-      trio.full.list[[i]]=trio.gl
+        trio.full.list[[i]]=trio.gl
       
     }
     
@@ -138,58 +140,7 @@ build.trios=function(emat=NULL, mmat=NULL, tbl=NULL, enames=NULL){
 }
 
 
-
-#====================================function=======================================
-
-#adds in genotype data to construct a list of full trios
-#run and view the output object to see the format
-
 bt=build.trios(emat=EM2, mmat=MM2, tbl=try1, enames=express.names)
-
-# 
-# build.trios2=function(gmat=NULL, emat=NULL, mmat=NULL, tbl=NULL, enames=NULL){
-#   
-#   trio.list.final=list()
-#   
-#   bt1=build.trios(emat = emat, mmat = mmat, tbl = tbl, enames = enames)
-#   
-#   #rm NaN's
-#   idx=NULL
-#   for(i in 1:length(bt1)){ if(any(is.na(bt1[[i]]))){ idx[i]=i}else{idx[i]=NA} }
-#   
-#   bt1=bt1[-na.omit(idx)]
-#   
-#   for(i in 1:dim(gmat)[2]){
-# 
-#     pairs1=list()
-# 
-#     for(j in 1:length(bt1)){
-# 
-#       pairs1[[j]]=lapply(bt1[[j]], cbind.data.frame, assign(colnames(gmat)[i], gmat[,i]))
-#       
-# 
-#     }
-#     
-#     names(pairs1)=names(bt1)
-#   
-#     trio.list.final[[i]]=pairs1
-# 
-#   }
-#   
-#   names(trio.list.final)=colnames(gmat)
-#   
-#   return(trio.list.final)
-#   
-# }
-# 
-# 
-# 
-# start.time=Sys.time()
-# bt2=build.trios2(gmat = CNA2, emat=EM2, mmat=MM2, tbl=try1, enames=express.names)
-# end.time=Sys.time()
-# 
-# print(end.time-start.time)
-
 
 
 
@@ -214,9 +165,9 @@ trios.comb=function(Gprobe=NULL, gmat=NULL, emat=NULL, mmat=NULL, tbl=NULL, enam
   #pre allocate space
   list1=list()
   list2=list()
-
+  
   for(i in 1:length(bt1)){
-   
+    
     for(j in 1:length(bt1[[i]])){
       
       #add in the probe to each pair of M and E data

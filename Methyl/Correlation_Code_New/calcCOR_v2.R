@@ -101,7 +101,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     #print(dim(init.table))
     
     #fileName
-    fnM=paste(fn, paste0("M_chr_",chrs[i]), "correlations.txt", sep = "")
+    fnM=paste(fn, paste0("M_chr",chrs[i]),"_", "correlations.txt", sep = "")
     
     #initiate table
     write.table(init.table, file = fnM,
@@ -129,7 +129,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     #print(dim(init.table2))
     
     #fileName
-    fnE=paste(fn, paste0("E_chr_",chrs[i]), "correlations.txt", sep = "")
+    fnE=paste(fn, paste0("E_chr",chrs[i]),"_", "correlations.txt", sep = "")
     
     #initiate table
     write.table(init.table2, 

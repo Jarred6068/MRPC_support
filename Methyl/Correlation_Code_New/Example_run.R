@@ -1,7 +1,7 @@
 
 
 ######################################################
-#A fast example using fake genotype data (~1000 SNPs)
+#A fast example using fake genotype data (~100 SNPs)
 ######################################################
 
 #####################

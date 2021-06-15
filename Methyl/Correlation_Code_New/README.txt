@@ -3,7 +3,7 @@
 #################################################
 ### Overview ######
 This folder contains three R scripts:
-- Example_run.R: to run a small example with just 1000 SNPs, which finishes in ~1 min
+- Example_run.R: to run a small example with just 100 SNPs, which finishes in ~1 min
 - Run_script.R: runs on all the SNPs for all the chromosomes
 - calcCOR_v2.R: contains the functions called by the above two R scripts
 
@@ -27,11 +27,11 @@ and "E_chr1_correlations.txt" for the expression data
 
 ** The accompanying file Run_script.R is a simple script used to run the algorithm and is set to run the search on each  
 chromosome individually. As some of the generated tables may be quite large this script should help the user if they wish to  
-parallelize the operations.Note that a folder labeled "Input" is included in the package and contains the Methylation, Expression, 
-Metadata, and Example input files. The user supplied Genotype data, once formatted, should be saved to this folder. The other 
-included folder, "Output", is an empty location for the output tables to saved. Note that the only input(s) the user must make 
-is to enter the correct path for the variable(s) "input.location = "/path/Correlation_Code" and "output.location = "/path/Correlation_Code"
-which idenitfies to the designated "Input" and "Output" folders. Additionally, the variable "bp.set.range=500000" is pre-set to allow a 
+parallelize the operations. Note that there are two subfolders within "/Correlation_Code/": a subfolder labeled "Input" contains 
+the Methylation, Expression, Metadata, and Example input files. The user supplied Genotype data, once formatted, should be saved 
+to this folder. The other included folder, "Output", is an empty location for the output tables to saved. Note that the only input(s) the user must make 
+is to enter the correct path for the variable(s) "input.location = "/path/Correlation_Code/" and "output.location = "/path/Correlation_Code/"
+which identifies the designated "Input" and "Output" subfolders. Additionally, the variable "bp.set.range=500000" is pre-set to allow a 
 500,000 bp tolerance on either side of the probe/gene start location, but it may be adjusted down as needed for memory purposes.  
 
 

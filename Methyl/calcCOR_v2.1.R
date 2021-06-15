@@ -29,7 +29,7 @@ imp.meta_M=na.omit(cbind(meta_M[,c(1,12)], as.numeric(meta_M[,13])))
 matched.meta_M=match(Mprobenames.final, imp.meta_M[,1])
 imp.meta_M.final=imp.meta_M[matched.meta_M,]
 #retrieve relevant metadata for the "In-Use" Expression probes:
-matched.meta_E=match(express.genenames, meta_E[,1])
+matched.meta_E=match(colnames(express.aligned), meta_E[,5])
 imp.meta_E.final=meta_E[na.omit(matched.meta_E), ]
 #filter out columns (genes) that didn't have chr position information according to BioMart
 testexpress=express.aligned[,-attr(na.omit(matched.meta_E), "na.action")]

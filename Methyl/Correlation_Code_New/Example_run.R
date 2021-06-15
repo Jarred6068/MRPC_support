@@ -1,8 +1,8 @@
 
 
-##########################################
-#A fast example using fake genotype data
-##########################################
+######################################################
+#A fast example using fake genotype data (~1000 SNPs)
+######################################################
 
 #####################
 #set the loading and saving locations and bp proximity
@@ -20,7 +20,7 @@ output.location = paste (filepath, "Example_Output/", sep='')
 source(file = paste(filepath, "calcCOR_v2.R", sep = ""))
 
 ####################
-#load in Data
+# load in Data
 # Note that only the methylation data file (Mdata.Rdata) takes ~30 sec to load
 # Other files are loaded quickly
 ####################

@@ -46,7 +46,8 @@ Example_script.R and Run_script.R call functions in this script.
 ###############################################
 - Data files in /Input/:
 * genotype data: a data matrix with individuals in the rows, and the SNPs in the columns.
-* genotype metadata: a data matrix with SNPs in the rows, and three columns: xx and xxx.
+* genotype metadata: a data matrix with SNPs in the rows, and two columns: Chromosome # and Chromosome Coordinate.
+* the genotype data should have columns named with the SNP ID's and the genotype metadata should have the rows named with the SNP ID's
 * gene expression data (Expression_data_BM_aligned.Rdata): a matrix of 606 individuals in rows and 20,578 genes/probes in columns
 * gene expression metadata (meta_E.Rdata): a meta data matrix of 20,578 probes in rows and 5 columns [gene_ID     chr    gene.start   gene.end   ILMN_ID]
 * methylation data (Mdata.Rdata): a matrix of 606 individuals in rows and 363,516 probes in columns

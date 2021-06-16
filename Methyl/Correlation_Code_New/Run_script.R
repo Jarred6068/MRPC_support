@@ -44,7 +44,7 @@ source(file = paste(filepath, "calcCOR_v2.R", sep = ""))
 genotype_data=read.table(file = paste(input.location, "filename1", sep = ""), sep="\t", header=T)
 # genotype metadata: a meta data matrix of 1000 SNPs in the rows and 2 columns [chr  coordinate]
 G_metadata=read.table(file = paste(input.location, "filename2", sep = ""), sep = "\t", header = T)
-# Methylation metadata: a meta data matrix of 363,516 probes and 3 columns [Ilmn_ID    chr    coordinate]
+# Methylation metadata: a meta data matrix of 363,516 probes and 3 columns [Probe_ID    chr    coordinate]
 M_metadata=loadRData(fileName = paste(input.location, "meta_M.Rdata", sep = ""))
 # Expression metadata: a meta data matrix of 20,578 probes in rows and 5 columns [gene_ID     chr    gene.start   gene.end   ILMN_ID]
 E_metadata=loadRData(fileName = paste(input.location, "meta_E.Rdata", sep = ""))

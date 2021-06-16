@@ -13,13 +13,6 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
-# #load in previously cleaned data
-# genotype_data=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
-# G_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
-# M_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_M.final.Rdata")
-# E_metadata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/meta_E.final.Rdata")
-# Edata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Expression_data_BM_aligned.final.Rdata")
-# Mdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Correlation_Code/Mdata.final.Rdata")
 #-------------------------------------------------------------------------
 #=========================helper_function_1===============================
 
@@ -40,8 +33,7 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
                 append = TRUE,
                 sep = "\t",
                 quote = FALSE)
-    
-    #if(isTRUE(verbose)){print(head(add.tab))}
+
   }
 }
 
@@ -98,7 +90,6 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     init.table=cbind.data.frame(Mprobe, SNP, cors)
     colnames(init.table)=c("Methyl_Probe_ID", "SNP_ID", "Cor")
     
-    #print(dim(init.table))
     
     #fileName
     fnM=paste(fn, paste0("M_chr",chrs[i]),"_", "correlations.txt", sep = "")
@@ -126,7 +117,6 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     init.table2=cbind.data.frame(Eprobe, SNP, cors2)
     colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Cor")
     
-    #print(dim(init.table2))
     
     #fileName
     fnE=paste(fn, paste0("E_chr",chrs[i]),"_", "correlations.txt", sep = "")
@@ -151,20 +141,5 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
 }
 
 
-# #Example Run
-# start.time=Sys.time()
-# 
-# trycors1=calc.corsV2(mmat = Mdata,
-#                      emat = Edata,
-#                      gmat = genotype_data, 
-#                      GMInfo = M_metadata, 
-#                      GEInfo = E_metadata, 
-#                      genoInfo = G_metadata, 
-#                      chrs=c("2"),
-#                      fn="/mnt/ceph/jarredk/Methyl/cor_Lists_and_Tables/",
-#                      bp.range = 1000000)
-# end.time=Sys.time()
-# 
-# print(end.time-start.time)
 
 

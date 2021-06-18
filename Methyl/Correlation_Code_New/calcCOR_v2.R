@@ -70,12 +70,14 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
   #   }
   
   #align all rows
-  idx=match(gmat[,1], row.names(mmat))
-  mmat=mmat[na.omit(idx),]
-  emat=emat[na.omit(idx),]
-  if(length(attr(na.omit(idx), "na.action"))>0){ gmat=gmat[-attr(na.omit(idx), "na.action"),] }
+  idx=match(row.names(mmat), colnames(gmat))
+  # mmat=mmat[na.omit(idx),]
+  # emat=emat[na.omit(idx),]
+  #if(length(attr(na.omit(idx), "na.action"))>0){ gmat=gmat[-attr(na.omit(idx), "na.action"),] }
   #remove subject_ID col
-  gmat=gmat[,-1]
+  gmat=gmat[,idx]
+  
+  print(dim(gmat))
   
   for(i in 1:length(chrs)){
     
@@ -94,8 +96,8 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     
     #reduce data matrices
     SNP.mat=gmat[, Gidx]
-    methyl.mat=mmat[,Midx]
-    express.mat=emat[,Eidx]
+    methyl.mat=mmat[, Midx]
+    express.mat=emat[, Eidx]
 
     #-----------------------Methylation-Probes-------------------------
     

@@ -38,12 +38,13 @@ simu.pos=function(genosmat=NULL, chr.vec=NULL){
   
 }
 
-names1=paste0("SNP","_",c(1:4000000),"_", sim.chr)
+names1=paste0("SNP","_",c(1:4000000),"_chr", sim.chr)
 
 sim.chrpos=simu.pos(genosmat = genos.mat, chr.vec = sim.chr)
-simulated.meta=cbind.data.frame(sim.chr, sim.chrpos)
+simulated.meta=cbind.data.frame(names1, sim.chr, sim.chrpos)
 
 colnames(genos.mat)=names1
+colnames(simulated.meta)=c("SNP_ID","CHR","Coordinate")
 
 genos.mat[1:10,1:5]
 sim.chr[1:5]

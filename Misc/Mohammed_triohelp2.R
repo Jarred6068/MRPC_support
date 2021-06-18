@@ -8,16 +8,16 @@ loadRData <- function(fileName=NULL){
 
 
 #load in real data
-# CNA.real=loadRData(fileName="/mnt/ceph/jarredk/Misc/CNA.data.Rdata")
-# EM.real=loadRData(fileName="/mnt/ceph/jarredk/Misc/EM.data.Rdata")
-# MM.real=loadRData(fileName="/mnt/ceph/jarredk/Misc/MM.data.Rdata")
+CNA=loadRData(fileName="/mnt/ceph/jarredk/Misc/CNA.data.Rdata")
+EM=loadRData(fileName="/mnt/ceph/jarredk/Misc/EM.data.Rdata")
+MM=loadRData(fileName="/mnt/ceph/jarredk/Misc/MM.data.Rdata")
 
 
 
-#load in example data
-CNA=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.CNA.peer.RData")
-EM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.exp.peer.fake.RData")
-MM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/sub.n.n.TCGA.meth.t.2.RData")
+# #load in example data
+# CNA=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.CNA.peer.RData")
+# EM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/data.exp.peer.fake.RData")
+# MM=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Misc/sub.n.n.TCGA.meth.t.2.RData")
 
 #make up unique CNA names to help visualize the CNA cols in the trios
 CNAgenes=colnames(CNA)

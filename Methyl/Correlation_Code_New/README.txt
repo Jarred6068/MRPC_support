@@ -7,15 +7,16 @@ Table of Contents
 - Input Data
 - Output Data
 
+
 #################################################
 # R scripts
 #################################################
 
 ### Overview ######
 This folder contains three R scripts:
-- Example_run.R: to run a small example with just 100 SNPs, which finishes in ~1 min
-- Run_script.R: runs on all the SNPs for all the chromosomes
-- calcCOR_v2.R: contains the functions called by the above two R scripts
+- Example_run.R: runs a small example with just 100 SNPs, which finishes in ~1 min.
+- Run_script.R: runs on all the SNPs for all the chromosomes.
+- calcCOR_v2.R: contains the functions called by the above two R scripts.
 
 ### Example_run.R ###
 ### Running the example and checking the output ######
@@ -35,45 +36,38 @@ The output files will be stored in the empty folder /Output/.
 Can be parallelized for efficiency (see description in Run_script.R).
 
 ### calcCOR_v2.R ###
-
 Example_script.R and Run_script.R call functions in this script.
-
-
 
 
 ###############################################
 # Input data
 ###############################################
 - Data files in /Input/:
-* genotype data: a data matrix with individuals in the rows, and the SNPs in the columns.
-* genotype metadata: a data matrix with SNPs in the rows, and two columns: Chromosome # and Chromosome Coordinate.
-* the genotype data should have columns named with the SNP ID's and the genotype metadata should have the rows named with the SNP ID's
-* gene expression data (Expression_data_BM_aligned.Rdata): a matrix of 606 individuals in rows and 20,578 genes/probes in columns
-* gene expression metadata (meta_E.Rdata): a meta data matrix of 20,578 probes in rows and 5 columns [gene_ID     chr    gene.start   gene.end   ILMN_ID]
-* methylation data (Mdata.Rdata): a matrix of 606 individuals in rows and 363,516 probes in columns
-* methylation metadata (meta_M.Rdata): a meta data matrix of 363,516 probes and 3 columns [Probe_ID    chr    coordinate]
+* gene expression data (Expression_data_BM_aligned.Rdata): a matrix of 606 individuals in rows and 20,578 genes/probes in columns.
+* gene expression metadata (meta_E.Rdata): a meta data matrix of 20,578 probes in rows and 5 columns: gene_ID, chr, gene.start, gene.end,   ILMN_ID].
+* methylation data (Mdata.Rdata): a matrix of 606 individuals in rows and 363,516 probes in columns.
+* methylation metadata (meta_M.Rdata): a meta data matrix of 363,516 probes and 3 columns: Probe_ID, chr, coordinate.
+* genotype data: a data matrix with individuals in the rows, and SNPs in the columns.
+* genotype metadata: a data matrix with SNPs in the rows, and 3 columns: SNP_ID, Chromosome #, and Chromosome Coordinate.
 
 - Format of the example genotype data file (/Input/Example_Genotype_data.txt):
 
-            ccSNP_1942635_chr_6    cSNP_2610867_chr_15      ...      SNP_2237944_chr_12
+Sample_ID    SNP_1942635_chr_6    SNP_2610867_chr_15        ...      SNP_2237944_chr_12
 bsgs_1                 2                  2                 ...               2
 bsgs_2                 0                  0                 ...               2
 bsgs_3                 1                  2                 ...               0
 bsgs_4                 1                  1                 ...               1
 bsgs_5                 0                  2                 ...               1
 
-
 - Format of the example genotype metadata file (/Input/Example_Genotype_Metadata.txt):
 
-
-                   sim.chr    sim.chrpos
+SNP_ID                  Chr    Coordinate
 SNP_1942635_chr_6        6     24423331
 SNP_2610867_chr_15      15     82155698
        .                 .        .
        .                 .        .
        .                 .        .
 SNP_2237944_chr_12      12     62931549
-
 
 
 ###################################
@@ -88,7 +82,6 @@ Express_Gene_ID	            SNP_ID	             Cor
 ILMN_1672389:HLA-DQB1	SNP_428936_chr_1	-0.037259
 ILMN_1683980:LOC644482	SNP_1287122_chr_1	-0.017493
 ILMN_1683990:LOC645914	SNP_1287122_chr_1	-0.054687
-
 
 - The format of M_chr1_correlations_Example.txt is shown below:
 

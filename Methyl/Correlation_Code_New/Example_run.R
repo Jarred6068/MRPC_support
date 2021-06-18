@@ -10,7 +10,7 @@
 # specify the size of the neighborhood
 bp.set.range=500000
 # specify the path to the input files and path to the output files
-filepath = "/mnt/ceph/jarredk/Methyl/Correlation_Code/"
+filepath = "/mnt/ceph/jarredk/Methyl/Correlation_Calculation/"
 input.location = paste (filepath, "Input/", sep='')
 output.location = paste (filepath, "Example_Output/", sep='')
 # This example generates two output files: filename1 and filename2
@@ -26,7 +26,7 @@ source(file = paste(filepath, "calcCOR_v2.R", sep = ""))
 ####################
 # genotype data: a data matrix of 606 individuals in the rows and 1000 SNPs in the columns
 genotype_data=read.table(file = paste(input.location, "Example_Genotype_data.txt", sep = ""), sep="\t", header=T)
-# genotype metadata: a meta data matrix of 1000 SNPs in the rows and 2 columns [chr  coordinate]
+# genotype metadata: a meta data matrix of 1000 SNPs in the rows and 3 columns [SNP_ID    chr  coordinate]
 G_metadata=read.table(file = paste(input.location, "Example_Genotype_Metadata.txt", sep = ""), sep = "\t", header = T)
 # Methylation metadata: a meta data matrix of 363,516 probes and 3 columns [Ilmn_ID    chr    coordinate]
 M_metadata=loadRData(fileName = paste(input.location, "meta_M.Rdata", sep = ""))

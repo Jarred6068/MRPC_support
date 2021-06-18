@@ -11,11 +11,9 @@ fake_genos=function(csize=NULL, rsize=NULL){
   
 }
 
-genos.mat=fake_genos(4000000, 606)
+genos.mat=fake_genos(4000000, 1000)
 
 genos.mat[1:10,1:5]
-
-
 
 sim.chr=sample(c(1:22,"X","Y"), dim(genos.mat)[2], replace = TRUE)
 
@@ -40,7 +38,7 @@ simu.pos=function(genosmat=NULL, chr.vec=NULL){
   
 }
 
-names1=paste0("SNP",c(1:4000000), sim.chr)
+names1=paste0("SNP","_",c(1:4000000),"_", sim.chr)
 
 sim.chrpos=simu.pos(genosmat = genos.mat, chr.vec = sim.chr)
 simulated.meta=cbind.data.frame(sim.chr, sim.chrpos)
@@ -50,7 +48,7 @@ colnames(genos.mat)=names1
 genos.mat[1:10,1:5]
 sim.chr[1:5]
 
-save(simulated.meta, file = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
+save(simulated.meta, file = "/mnt/ceph/jarredk/Methyl/fakegenoMeta_2.Rdata")
 #simulated.meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
 
-save(genos.mat, file = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
+save(genos.mat, file = "/mnt/ceph/jarredk/Methyl/fakegenosBIG_2.Rdata")

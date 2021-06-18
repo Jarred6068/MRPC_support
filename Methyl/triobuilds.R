@@ -9,7 +9,7 @@ loadRData <- function(fileName=NULL){
 #Example assembly of trios script
 
 #extract the two residual matrices and gene names:
-ex.genotypes=read.table(file="/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/BrainCerebellarHemisphere.snp.data.V8.txt")
+#ex.genotypes=read.table(file="/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/BrainCerebellarHemisphere.snp.data.V8.txt")
 methyl.resids=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/MethylData.RegressResids.Rdata")
 express.resids=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.RData")
 ex.genotypes=as.data.frame(ex.genotypes[-1,])
@@ -62,6 +62,7 @@ match.gn.parsed=function(egn, mgnp){
     vec11=vec1[unlist(lapply(loglist1, any))]
     
     indexlist1[[i]]=vec11
+    print(indexlist1[[i]])
     
   }
   

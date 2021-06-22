@@ -43,13 +43,17 @@ names1=paste0("SNP","_",c(1:4000000),"_chr", sim.chr)
 sim.chrpos=simu.pos(genosmat = genos.mat, chr.vec = sim.chr)
 simulated.meta=cbind.data.frame(names1, sim.chr, sim.chrpos)
 
-colnames(genos.mat)=names1
+#colnames(genos.mat)=names1
 colnames(simulated.meta)=c("SNP_ID","CHR","Coordinate")
 
-genos.mat[1:10,1:5]
+genos.mat=t(genos.mat)
+genos.mat.new=cbind.data.frame(names1, genos.mat)
+colnames(genos.mat.new)=c("SNP_ID", paste0("bsgs_", c(1:1000)))
+
+genos.mat.new[1:10,1:5]
 sim.chr[1:5]
 
 save(simulated.meta, file = "/mnt/ceph/jarredk/Methyl/fakegenoMeta_2.Rdata")
 #simulated.meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
 
-save(genos.mat, file = "/mnt/ceph/jarredk/Methyl/fakegenosBIG_2.Rdata")
+save(genos.mat.new, file = "/mnt/ceph/jarredk/Methyl/fakegenosBIG_2.Rdata")

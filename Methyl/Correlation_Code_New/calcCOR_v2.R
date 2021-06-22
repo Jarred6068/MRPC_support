@@ -24,7 +24,7 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
     snps.in.rangeM=which(abs(probe.matched[j,3]-Geno.matched[,3])<bp.range)
     Mprobe=rep(colnames(probe.mat)[j], length(snps.in.rangeM))
     SNP=colnames(SNP.mat)[snps.in.rangeM]
-    cors=round(as.vector(cor(probe.mat[,j], SNP.mat[, snps.in.rangeM], use = "complete.obs")), 6)
+    cors=round(as.vector(cor(probe.mat[,j], SNP.mat[,snps.in.rangeM], use = "complete.obs")), 6)
     add.tab=cbind.data.frame(Mprobe, SNP, cors)
     
     write.table(add.tab, file = fn,
@@ -61,23 +61,10 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
   #Chrs -- the chromosome(s) for which the script should be run can be
   #        can be a single or multi element vector
   
-  # if(dim(gmat)[1]>dim(gmat)[2]){ 
-  #   nam=row.names(gmat)
-  #   gmat.new=t(gmat[-1,]) 
-  #   gmat=cbind.data.frame(gmat[1,], apply(gmat.new,2,as.numeric))
-  #   colnames(gmat)=nam
-  #   print(gmat[1:5,1:5])
-  #   }
-  
   #align all rows
   idx=match(row.names(mmat), colnames(gmat))
-  # mmat=mmat[na.omit(idx),]
-  # emat=emat[na.omit(idx),]
-  #if(length(attr(na.omit(idx), "na.action"))>0){ gmat=gmat[-attr(na.omit(idx), "na.action"),] }
-  #remove subject_ID col
-  gmat=gmat[,idx]
-  
-  print(dim(gmat))
+  snp_ids=gmat[,1]
+  gmat=gmat[,na.omit(idx)]
   
   for(i in 1:length(chrs)){
     
@@ -85,26 +72,27 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     snps.in.range2=NULL
     
     #get the idx's for each mat for chr1 
-    Gidx=which(genoInfo[,2]==chrs[i])
-    Midx=which(GMInfo[,2]==chrs[i])
-    Eidx=which(GEInfo[,2]==chrs[i])
+    Gidx=which(genoInfo[,2] == chrs[i])
+    Midx=which(GMInfo[,2] == chrs[i])
+    Eidx=which(GEInfo[,2] == chrs[i])
     
     #reduce meta data matrices
     chr.geno.matched=genoInfo[Gidx,]
     chr.GM.matched=GMInfo[Midx,]
-    chr.GE.matched=GEInfo[Eidx, ]
+    chr.GE.matched=GEInfo[Eidx,]
     
     #reduce data matrices
-    SNP.mat=gmat[, Gidx]
-    methyl.mat=mmat[, Midx]
-    express.mat=emat[, Eidx]
+    SNP.mat=t(gmat[Gidx,])
+    colnames(SNP.mat)=snp_ids[Gidx]
+    methyl.mat=mmat[,Midx]
+    express.mat=emat[,Eidx]
 
     #-----------------------Methylation-Probes-------------------------
     
     snps.in.rangeM=which(abs(chr.GM.matched[1,3]-chr.geno.matched[,3])<bp.range)
     Mprobe=rep(colnames(methyl.mat)[1], length(snps.in.rangeM))
     SNP=colnames(SNP.mat)[snps.in.rangeM]
-    cors=round(as.vector(cor(methyl.mat[,1], SNP.mat[, snps.in.rangeM], use = "complete.obs")),6)
+    cors=round(as.vector(cor(methyl.mat[,1], SNP.mat[,snps.in.rangeM], use = "complete.obs")),6)
     init.table=cbind.data.frame(Mprobe, SNP, cors)
     colnames(init.table)=c("Methyl_Probe_ID", "SNP_ID", "Cor")
     
@@ -131,7 +119,7 @@ calc.corsV2=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, 
     snps.in.rangeE=which(abs(chr.GE.matched[1,3]-chr.geno.matched[,3])<bp.range)
     Eprobe=rep(colnames(express.mat)[1], length(snps.in.rangeE))
     SNP=colnames(SNP.mat)[snps.in.rangeE]
-    cors2=round(as.vector(cor(express.mat[,1], SNP.mat[, snps.in.rangeE], use = "complete.obs")),6)
+    cors2=round(as.vector(cor(express.mat[,1], SNP.mat[,snps.in.rangeE], use = "complete.obs")),6)
     init.table2=cbind.data.frame(Eprobe, SNP, cors2)
     colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Cor")
     

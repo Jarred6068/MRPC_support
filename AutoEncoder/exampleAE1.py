@@ -67,57 +67,41 @@ validate, test=train_test_split(validate,
 #                                 test_size=0.5, 
 #                                 random_state=2)
 
-
+#=============================================================================
+#----------------------Specialized-Non-Zero-Loss-Function---------------------
 #=============================================================================
 
-def create_encoder(hidden_units=[400], act='relu', opt='adam', ID=949, OD=200):
-    
-    '''creates the encoder'''
-    
-    myAE_encoder = keras.models.Sequential()
-    
-    myAE_encoder.add(keras.Input(shape=(ID,)))
-        
-    #2.2 build the output layer and use the softmax activation  
-    myAE_encoder.add(keras.layers.Dense(
-        units=hidden_units[0],
-        input_dim=ID,
-        kernel_initializer='glorot_uniform',
-        bias_initializer='zeros',
-        activation=act))
-    
-    myAE_encoder.add(keras.layers.Dense(
-        units=OD,
-        input_dim=hidden_units[0],
-        kernel_initializer='glorot_uniform',
-        bias_initializer='zeros',
-        activation=act))
-        
-        
-    #2.3 choose the optimizer, compile the network and return it. Use 'accuracy' as the metrics
-    if(opt=="rmsprop"):
-        optimizer = keras.optimizers.RMSprop(lr=0.003, decay=1e-7, momentum=.9)
-        
-    elif(opt=="adam"):
-        optimizer = keras.optimizers.Adam(lr=0.003)
-        
-    else:
-        optimizer = keras.optimizers.SGD(lr=0.003, decay=1e-7, momentum=.9)
-        
-    myAE_encoder.compile(optimizer=optimizer, loss=None,
-                 metrics=None)
-    
-    
-    return myAE_encoder
+def MSE_nz(input_mat, output_mat):
 
+    '''
+    
+    Loss Function described in Badsha et. al., 2020 : "Imputation of single-cell 
+    gene expression with an autoencoder neural network"  which describes the 
+    loss in terms of the mse between all non-zero values in the imputed and 
+    training matrices
+    
+    Parameters
+    ----------
+    ymat_true : The reference data.
+    ymat_pred : The predicted data.
 
-# myAE_encoder=create_encoder()
-# myAE_encoder.summary()
-# myAE_encoder.fit(train,
-#                  train,
-#                  batch_size=256, 
-#                  epochs=100)
+    Returns
+    -------
+    the loss array.
 
+    '''
+    # input_mat=input_mat.numpy()
+    # output_mat=output_mat.numpy()
+    omega = tf.sign(input_mat)
+    diff = tf.subtract(input_mat, output_mat)
+    square_err_ = tf.pow(diff, 2)
+    square_err_nz = tf.reduce_sum(tf.multiply(square_err_, omega), axis=1)
+    
+    return square_err_nz
+        
+
+#=============================================================================
+#-----------------------------Build-AutoEncoder-Model-------------------------
 #=============================================================================
 
 
@@ -177,12 +161,14 @@ def create_AE(hidden_layers = [400,200,400], act = 'relu', opt = 'adam',
     else:
         optimizer = keras.optimizers.SGD(lr=0.003, decay=1e-7, momentum=.9)
         
-    myAE.compile(optimizer=optimizer, loss='mse',
+    myAE.compile(optimizer=optimizer, loss=MSE_nz,
                  metrics='mse')
     
     
     return myAE
 
+
+#create and fit model
 myAE = create_AE()
 myAE.summary()
 
@@ -190,7 +176,7 @@ myAE.summary()
 myAE.fit(train,
          train,
          batch_size=256, 
-         epochs=1000)
+         epochs=100)
 
 
 

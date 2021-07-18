@@ -8,6 +8,8 @@ source("/mnt/ceph/jarredk/Reg_Net/AL_genetabV2.R")
 
 #create master df
 df=master.create()
+
+save(df, file = "/mnt/ceph/jarredk/Reg_Net/loaded_AL_datatables.Rdata")
 dim(df$lm1t1)
 dim(df$lm1t2)
 dim(df$am1t1)

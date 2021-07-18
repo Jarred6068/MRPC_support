@@ -23,6 +23,8 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8)
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 source("C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/AL_genetabV2.R")
 
+write.path.addis="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/Tables ADDIS/"
+
 loadRData <- function(fileName=NULL){
   #loads an RData file, and returns it
   load(fileName)
@@ -44,6 +46,7 @@ row.names(summary1)=c("Cis Only","Trans Only","Both Cis & Trans")
 
 library(knitr)
 kable(summary1, caption = "Total number of Cis and Trans genes identified as Mediators under MRPC-ADDIS")
+write.csv(summary1, file = paste0(write.path.addis, "Summary.Mediators.csv"), row.names = FALSE)
 
 unq.trans.med=unique(trans.med)
 unq.cis.med=unique(cis.med)
@@ -57,7 +60,7 @@ row.names(summary2)=c("Cis Only Unique", "Trans Only Unique","Both Cis & Trans")
 
 library(knitr)
 kable(summary2, caption = "Total number of Unqiue Cis and Trans genes identified as Mediators under MRPC-ADDIS")
-
+write.csv(summary2, file = paste0(write.path.addis, "Summary.Mediators.unique.csv"), row.names = FALSE)
 
 ```
 
@@ -177,6 +180,9 @@ kable(percent.ATasM.types, col.names="Percentage", caption="ADDIS Unique Trans M
 kable(percent.both.types[,c(1,2)], caption="ADDIS gene types for genes found as both Cis and Trans Mediators",
       col.names=c("Gene.Type", "Percent"),row.names = FALSE)
 
+write.csv(percent.ACasM.types, file = paste0(write.path.addis, "percent.unq.ACasM.types.csv"), row.names = FALSE)
+write.csv(percent.ATasM.types, file = paste0(write.path.addis, "percent.unq.ATasM.types.csv"), row.names = FALSE)
+write.csv(percent.both.types[,c(1,2)], file = paste0(write.path.addis, "percent.both.types.csv"), row.names = FALSE)
 
 ```
 
@@ -188,7 +194,7 @@ kable(percent.both.types[,c(1,2)], caption="ADDIS gene types for genes found as 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export.txt", sep=",", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
 
 types4table=function(input=NULL){
   
@@ -198,12 +204,15 @@ types4table=function(input=NULL){
   
     
   for(i in 1:length(test.strs)){
+    
+    print(i)
   
     for(j in 1:length(input)){
       
       idx[i,j]=ifelse(isTRUE(grepl(test.strs[i], input[j], fixed = TRUE)), j, NA)
       
     }
+
   }
   
   return(idx)
@@ -243,6 +252,10 @@ kable(table.am1t1, caption = "ADDIS Unique cis mediator gene types after groupin
 kable(table.am1t2, caption = "ADDIS Unique trans mediator gene types after grouping all gene types into 4 categories: pseudogene, protein_coding, lncRNA, and Others")
 
 kable(table.wholegenome, caption = "Gene types in the entire genome after grouping all gene types into 4 categories: pseudogene, protein_coding, lncRNA, and Others")
+
+write.csv(table.am1t1, file = paste0(write.path.addis, "am1t1.types.4cats.csv"), row.names = FALSE)
+write.csv(table.am1t2, file = paste0(write.path.addis, "am1t2.types.4cats.csv"), row.names = FALSE)
+write.csv(table.wholegenome, file = paste0(write.path.addis, "whole.genome.types.4cats.csv"), row.names = FALSE)
 
 ```
 
@@ -313,6 +326,7 @@ row.names(cont.table.disp)=c("non-pseudo", "pseudo", "row.total")
 
 kable(cont.table.disp, col.names = c("cis",'%cis',"trans",'%trans',"Col.Total"), caption = "2X2 contingency table comparing the cell counts of mediator position and gene_type:pseudogene")
 
+write.csv(cont.table.disp, file = paste0(write.path.addis, "pseudogene.comp.csv"), row.names = FALSE)
 
 # Py=cont.table.disp[3,1]/cont.table.disp[3,5]
 # Px=cont.table.disp[1,5]/cont.table.disp[3,5]
@@ -343,7 +357,7 @@ It is important to note that, because the test statistic in both tests is asympt
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 #Chi-square goodness of fit:
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export.txt", sep=",", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
 
 all.types=as.factor(BM$Gene.type)
 all.types.adj=pseudo(all.types)
@@ -361,7 +375,7 @@ colnames(mat1)=c("non-pseudo", '%non-pseudo',"pseudogene", '%pseudogene')
 row.names(mat1)=c("Observed","Genome")
 
 kable(mat1, caption = "Chi-Square GOF observed vs. expected proportions of trans gene types ADDIS: gene.type=Pseudogene", digits=4)
-
+write.csv(mat1, file = paste0(write.path.addis, "pseudogene.comp.wg.csv"), row.names = FALSE)
 
 ```
 
@@ -416,6 +430,8 @@ row.names(cont.table.disp2)=c("non-protein_coding", "protein_coding", "row.total
 
 kable(cont.table.disp2, col.names = c("cis",'%cis',"trans",'%trans',"Col.Total"), caption = "2X2 contingency table comparing the cell counts of mediator position and gene_type:protein coding")
 
+write.csv(cont.table.disp2, file = paste0(write.path.addis, "protein.coding.comp.csv"), row.names = FALSE)
+
 # 
 # 
 # Py=cont.table.disp2[3,1]/cont.table.disp2[3,5]
@@ -450,7 +466,9 @@ We further explored protein coding gene type enrichment among cis mediators by c
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 #Chi-square goodness of fit:
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export.txt", sep=",", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
+
+write.path.addis="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/Tables ADDIS/"
 
 all.types=as.factor(BM$Gene.type)
 all.types.adj=prot_code(all.types)
@@ -468,7 +486,7 @@ colnames(mat1)=c("non-protein_coding", '%non-protein_coding',"protein_coding", '
 row.names(mat1)=c("Observed","Genome")
 
 kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of cis gene types ADDIS: Type=Protein Coding", digits=4)
-
+write.csv(mat1, file = paste0(write.path.addis, "protein.coding.comp.wg.csv"), row.names = FALSE)
 
 ```
 
@@ -522,7 +540,7 @@ cont.table.disp3=cbind(cont.table.disp3, rowSums(cont.table.disp3[,c(1,3)]))
 row.names(cont.table.disp3)=c("non-lncRNA", "lncRNA", "row.total")
 
 kable(cont.table.disp3, col.names = c("cis",'%cis',"trans",'%trans',"Col.Total"), caption = "2X2 contingency table comparing the cell counts of mediator position and gene_type:lncRNA")
-
+write.csv(cont.table.disp3, file = paste0(write.path.addis, "lncRNA.comp.csv"), row.names = FALSE)
 
 # Py=cont.table.disp3[3,1]/cont.table.disp3[3,5]
 # Px=cont.table.disp3[1,5]/cont.table.disp3[3,5]
@@ -555,7 +573,7 @@ To Explore lncRNA gene type enrichment among trans mediators we conducted a Chi-
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 #Chi-square goodness of fit:
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export.txt", sep=",", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
 
 all.types=as.factor(BM$Gene.type)
 all.types.adj=lncrna(all.types)
@@ -573,7 +591,7 @@ colnames(mat1)=c("non-lncRNA", '%non-lncRNA',"lncRNA", '%lncRNA')
 row.names(mat1)=c("Observed","Genome")
 
 kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of gene types ADDIS: Type=lncRNA", digits=4)
-
+write.csv(mat1, file = paste0(write.path.addis, "lncRNA.comp.wg.csv"), row.names = FALSE)
 
 ```
 

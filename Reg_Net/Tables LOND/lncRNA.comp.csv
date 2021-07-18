@@ -1,0 +1,4 @@
+"cont.table3[, 1]","round(cont.table3[, 1]/sum(cont.table3[, 1]), 4)","cont.table3[, 2]","round(cont.table3[, 2]/sum(cont.table3[, 2]), 4)","rowSums(cont.table.disp3[, c(1, 3)])"
+261,0.2597,374,0.197,635
+744,0.7403,1524,0.803,2268
+1005,1,1898,1,2903

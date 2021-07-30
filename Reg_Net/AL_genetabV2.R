@@ -199,7 +199,7 @@ count=function(df=NULL, target=NULL){
 binit=function(df=NULL, target=NULL){
   
   cts=count(df=df, target = target)
-  unq.cts=unique(cts$Num.of.Tissues)
+  unq.cts=c(1:48)
   
   binner=rep(0, length(unq.cts))
   
@@ -211,7 +211,7 @@ binit=function(df=NULL, target=NULL){
   }
   
   binner=cbind.data.frame(binner, unq.cts)
-  colnames(binner)=c("Num.of.Genes", "Num.of.Shared")
+  colnames(binner)=c("Number of Genes", "Number of Tissues Shared")
   
   return(list(counts=cts, bins=binner))
   

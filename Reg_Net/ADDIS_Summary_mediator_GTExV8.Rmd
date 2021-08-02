@@ -194,7 +194,7 @@ write.csv(percent.both.types[,c(1,2)], file = paste0(write.path.addis, "percent.
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep="\t", header=T)
 
 types4table=function(input=NULL){
   
@@ -357,7 +357,7 @@ It is important to note that, because the test statistic in both tests is asympt
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 #Chi-square goodness of fit:
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep="\t", header=T)
 
 all.types=as.factor(BM$Gene.type)
 all.types.adj=pseudo(all.types)
@@ -466,7 +466,7 @@ We further explored protein coding gene type enrichment among cis mediators by c
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 #Chi-square goodness of fit:
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep="\t", header=T)
 
 write.path.addis="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/Tables ADDIS/"
 
@@ -573,7 +573,7 @@ To Explore lncRNA gene type enrichment among trans mediators we conducted a Chi-
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 #Chi-square goodness of fit:
-BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
+BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep="\t", header=T)
 
 all.types=as.factor(BM$Gene.type)
 all.types.adj=lncrna(all.types)

@@ -20,7 +20,7 @@ sort.gt2=function(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.
   names(master)=all.tissues
   
   #load in gene meta data from BIO-Mart
-  meta.data=read.table(file="/mnt/ceph/jarredk/Reg_Net/mart_export_merged.txt", sep="\t", header=T)
+  meta.data=read.table(file="/mnt/ceph/jarredk/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep="\t", header=T)
   meta.names=c("Gene.start.bp","Gene.end.bp","Gene.type","Gene.name","chr")
   
   #loading bar 2

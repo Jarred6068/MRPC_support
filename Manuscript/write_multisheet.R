@@ -3,6 +3,7 @@
 library('writexl', lib="/mnt/ceph/jarredk/Rpackages")
 
 tiss=read.csv("/mnt/ceph/jarredk/AddisReRunFiles/tissuenames.csv")
+library(writexl, lib="/mnt/ceph/jarredk/Rpackages")
 
 AM1T1=vector("list", 48)
 AM1T2=vector("list", 48)

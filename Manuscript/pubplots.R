@@ -233,6 +233,8 @@ loadRData <- function(fileName=NULL){
 #load the master summary table for M1 trios (found in ./Reg_Net)
 df=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/loaded_AL_datatables.Rdata")
 BM=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep="\t", header=T)
+test.strs=c("pseudogene", "protein_coding", "lncRNA")
+
 
 convert_cats=function(gene_types){
   test.strs=c("pseudogene", "protein_coding", "lncRNA")
@@ -244,34 +246,124 @@ convert_cats=function(gene_types){
     gene_types[logi]=test.strs[i]
   }
   
+  others=setdiff(c(1:length(gene_types)),
+                 c(which(gene_types==test.strs[1]), 
+                   which(gene_types==test.strs[2]), 
+                   which(gene_types==test.strs[3])))
+  
+  gene_types[others]="other"
+  
+  
   return(gene_types)
 
 }
 
-
-types_am1t2_idx=types4table(df$am1t2$trans.Gene.type)
-
-
-
-
-
-
+#Addis convert gene type categories
+df$am1t1$cis.Gene.type=convert_cats(df$am1t1$cis.Gene.type)
+df$am1t2$trans.Gene.type=convert_cats(df$am1t2$trans.Gene.type)
+#Lond convert gene type categories
+df$lm1t1$cis.Gene.type=convert_cats(df$lm1t1$cis.Gene.type)
+df$lm1t2$trans.Gene.type=convert_cats(df$lm1t2$trans.Gene.type)
 
 
 
+#Addis
+
+addis.data.t1=cbind.data.frame(df$am1t1$cis.Gene.type, df$am1t1$tissue, rep("via cis gene", dim(df$am1t1)[1]))
+addis.data.t2=cbind.data.frame(df$am1t2$trans.Gene.type, df$am1t2$tissue, rep("via trans gene", dim(df$am1t2)[1]))
+
+#Lond
+
+lond.data.t1=cbind.data.frame(df$lm1t1$cis.Gene.type, df$lm1t1$tissue, rep("via cis gene", dim(df$lm1t1)[1]))
+lond.data.t2=cbind.data.frame(df$lm1t2$trans.Gene.type, df$lm1t2$tissue, rep("via trans gene", dim(df$lm1t2)[1]))
+
+colnames(lond.data.t1)=c("Gene Type", "Tissue", "Type of Mediation")
+colnames(lond.data.t2)=c("Gene Type", "Tissue", "Type of Mediation")
+colnames(addis.data.t1)=c("Gene Type", "Tissue", "Type of Mediation")
+colnames(addis.data.t2)=c("Gene Type", "Tissue", "Type of Mediation")
+
+#convert to a counts table:
+
+#preallocate new tables
+gene.types.list=c("pseudogene", "protein_coding", "lncRNA", "other")
+
+count.at1=c()
+count.at2=c()
+count.lt1=c()
+count.lt2=c()
+
+#get the counts for type1 and type2 mediator gene types
+for(i in 1:4){
+  
+  minict.at1=rep(0, 48)
+  minict.at2=rep(0, 48)
+  minict.lt1=rep(0, 48)
+  minict.lt2=rep(0, 48)
+  
+  for(j in 1:48){
+    
+    #addis t1 and t2
+    minict.at1[j]=dim(subset(addis.data.t1, addis.data.t1$`Gene Type`==gene.types.list[i] & addis.data.t1$Tissue==tiss[j,2]))[1]
+    minict.at2[j]=dim(subset(addis.data.t2, addis.data.t2$`Gene Type`==gene.types.list[i] & addis.data.t2$Tissue==tiss[j,2]))[1]
+    #lond t1 and t2
+    minict.lt1[j]=dim(subset(lond.data.t1, lond.data.t1$`Gene Type`==gene.types.list[i] & lond.data.t1$Tissue==tiss[j,2]))[1]
+    minict.lt2[j]=dim(subset(lond.data.t2, lond.data.t2$`Gene Type`==gene.types.list[i] & lond.data.t2$Tissue==tiss[j,2]))[1]
+    
+  }
+  
+  #append addis
+  count.at1=c(count.at1, minict.at1)
+  count.at2=c(count.at2, minict.at2)
+  #append lond
+  count.lt1=c(count.lt1, minict.lt1)
+  count.lt2=c(count.lt2, minict.lt2)
+  
+}
+
+#complete table Addis
+addis.data.t1.new=cbind.data.frame(count.at1, expand.grid(tiss[,2], gene.types.list), rep("Mediation via cis gene", length(count.at1)))
+addis.data.t2.new=cbind.data.frame(count.at2, expand.grid(tiss[,2], gene.types.list), rep("Mediation via trans gene", length(count.at2)))
+colnames(addis.data.t1.new)=colnames(addis.data.t2.new)
+addis.final=rbind(addis.data.t1.new, addis.data.t2.new)
+#colnames
+colnames(addis.final)=c("Number of Genes", "Tissue", "Gene Type", "Type_Mediation")
+#complete table Lond
+lond.data.t1.new=cbind.data.frame(count.lt1, expand.grid(tiss[,2], gene.types.list), rep("Mediation via cis gene", length(count.lt1)))
+lond.data.t2.new=cbind.data.frame(count.lt2, expand.grid(tiss[,2], gene.types.list), rep("Mediation via trans gene", length(count.lt2)))
+colnames(lond.data.t1.new)=colnames(lond.data.t2.new)
+lond.final=rbind(lond.data.t1.new, lond.data.t2.new)
+#colnames
+colnames(lond.final)=c("Number of Genes", "Tissue", "Gene Type", "Type_Mediation")
 
 
 
+#plot for lond
+ggbarplot(lond.final, x = "Tissue", y = "Number of Genes",
+          fill = "Gene Type", color = "Gene Type", 
+          palette = c("red4","salmon1","cadetblue1", "navyblue"),
+          label = FALSE, ylab = FALSE, order = sort(tiss[,2], decreasing = T),
+          facet.by = "Type_Mediation")+
+  
+  theme(axis.text.x = element_text(size=10, hjust=0.5,vjust=0.7), 
+        axis.text.y = element_text(size=9))+
+  
+  scale_y_continuous(breaks = seq(0, 120, 10), lim = c(0, 120))+
+  
+  coord_flip()+
+  ggtitle("Distribution of Mediator Gene Types For each Tissue (LOND)")
 
 
-
-
-
-
-
-
-
-
-
-
-
+#plot for addis
+ggbarplot(addis.final, x = "Tissue", y = "Number of Genes",
+          fill = "Gene Type", color = "Gene Type", 
+          palette = c("red4","salmon1","cadetblue1", "navyblue"),
+          label = FALSE, ylab = FALSE, order = sort(tiss[,2], decreasing = T),
+          facet.by = "Type_Mediation")+
+  
+  theme(axis.text.x = element_text(size=10, hjust=0.5,vjust=0.7), 
+        axis.text.y = element_text(size=9))+
+  
+  scale_y_continuous(breaks = seq(0, 120, 10), lim = c(0, 120))+
+  
+  coord_flip()+
+  ggtitle("Distribution of Mediator Gene Types For each Tissue (ADDIS)")

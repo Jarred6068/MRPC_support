@@ -8,24 +8,17 @@
 #Muscle - Skeletal             
 source("/mnt/ceph/jarredk/HiC_Analyses/HiC_search.R")
 
-top5=c(1,6, 40, 48, 33)
+top5=c(1,6, 33, 40, 48)
 path='/mnt/ceph/jarredk/Reg_Net/'
 tissues.vec=tissue.names[top5, 2:3]
 
 
-run.GMAC=function(tissues.vec=tissue.vec, path.tables=path){
+run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'){
   
-  types=c('LM1T1','LM1T2','AM1T1', 'LM1T2')
-
-  for(t in 1:length(tissues.vec)){
+  #types=c('LM1T1','LM1T2','AM1T1', 'LM1T2')
   
-
-    lm1t1=read.csv(paste0(path.tables, types[1], '/', tissues.vec[t,1], '.csv'), header = T)
-    lm1t2=read.csv(paste0(path.tables, types[2], '/', tissues.vec[t,1], '.csv'), header = T)
-    am1t1=read.csv(paste0(path.tables, types[3], '/', tissues.vec[t,1], '.csv'), header = T)
-    am1t2=read.csv(paste0(path.tables, types[4], '/', tissues.vec[t,1], '.csv'), header = T)
-  
-  
+  for(t in 1:length(tissues.vec[,1])){
+    
     #load additional files
     file1=paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",
                 tissues.vec[t,1],"_AllPC/data.snp.cis.trans.final.",
@@ -35,118 +28,115 @@ run.GMAC=function(tissues.vec=tissue.vec, path.tables=path){
                 tissues.vec[t,1],"_AllPC/PCs.matrix.",
                 tissues.vec[t,1], ".RData", sep="")
     
-    # file3=paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",tissues.vec[t],
-    #             "_AllPC/List.significant.asso1.", tissues.vec[t,1], ".RData", sep="")
-    # 
-    # file4=paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/PEER_Files_V8/Peerdata.", 
-    #             tissues.vec[t,1], ".V8.RData", sep="")
-
-  
+    #load trio, pc, and confounders data
     trios=loadRData(fileName=file1)
     PCs=loadRData(fileName=file2)
     #sig.asso.pcs=loadRData(fileName=file3)
     #edata=loadRData(fileName=file4)
     confounders=read.table(paste0("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/GTEx_Analysis_v8_eQTL_covariates/", 
-                                 tissues.vec[t,2], '.v8.covariates.txt'), header = T, sep="\t", row.names = 1)[66:68,]
-
+                                  tissues.vec[t,2], '.v8.covariates.txt'), header = T, sep="\t", row.names = 1)[66:68,]
+    
     print(paste('data loaded for', tissues.vec[t,2], sep = ' '))
     
-    lm1t1.gmac.list=assemble.tables(trios, lm1t1, PCs, confounders)
-    lm1t2.gmac.list=assemble.tables(trios, lm1t2, PCs, confounders)
-    am1t1.gmac.list=assemble.tables(trios, am1t1, PCs, confounders)
-    am1t2.gmac.list=assemble.tables(trios, am1t2, PCs, confounders)
+    #run assemble tables function
+    tables.gmac.list=assemble.tables(trio.table=trios, PCmat = PCs, kc = confounders, which.imp = 'miss')
+
+    print('data.assembled...running.GMAC')
+    #run gmac analysis
+    if(mediation.type=='trans'){
+      
+      output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
+                     exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
+                     trios.idx = tables.gmac.list$trios.idx[,c(1,3,2)], nperm = 500, nominal.p = TRUE)
+      
+      
+    }else{
+      
+      output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
+                     exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
+                     trios.idx = tables.gmac.list$trios.idx, nperm = 500, nominal.p = TRUE)
+      
+      
+    }
     
     
-    output.lm1t1 <- gmac(known.conf = lm1t1.gmac.list$known.conf, cov.pool = lm1t1.gmac.list$cov.pool, 
-                         exp.dat = lm1t1.gmac.list$exp.dat, snp.dat.cis = lm1t1.gmac.list$snp.dat.cis, 
-                         trios.idx = lm1t1.gmac.list$trios.idx, nperm = 10000, nominal.p = TRUE)
-    print('lm1t1...done...saving')
-    save(output.lm1t1, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/lm1t1.output.Rdata'))
+    #reorganize output for saving
+    out.table=cbind.data.frame(tables.gmac.list$trio.ref, output[[1]], output[[2]])
+    colnames(out.table)=c(colnames(trio.ref), 
+                          paste0('pval_', colnames(output[[1]])), 
+                          paste0('effect_change_', colnames(output[[2]])))
+    
+    out.list=list(out.table, tables.gmac.list[[-6]], output[[3]])
+    names(out.list)=c("output.table", "input.list", "cov.indicator.list")
+    
+    
+
+    
+    #saving output
+    print('output...done...saving')
+    save(out.list, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/all_trios_output_', mediation.type, '.Rdata'))
     print('...done')
     
-    output.lm1t2 <- gmac(known.conf = lm1t2.gmac.list$known.conf, cov.pool = lm1t2.gmac.list$cov.pool, 
-                         exp.dat = lm1t2.gmac.list$exp.dat, snp.dat.cis = lm1t2.gmac.list$snp.dat.cis, 
-                         trios.idx = lm1t2.gmac.list$trios.idx, nperm = 10000, nominal.p = TRUE)
-    
-    print('lm1t2...done...saving')
-    save(output.lm1t2, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/lm1t2.output.Rdata'))
-    print('...done')
-    
-    output.am1t1 <- gmac(known.conf = am1t1.gmac.list$known.conf, cov.pool = am1t1.gmac.list$cov.pool, 
-                         exp.dat = am1t1.gmac.list$exp.dat, snp.dat.cis = am1t1.gmac.list$snp.dat.cis, 
-                         trios.idx = am1t1.gmac.list$trios.idx, nperm = 10000, nominal.p = TRUE)
-    
-    print('am1t1...done...saving')
-    save(output.am1t1, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/am1t1.output.Rdata'))
-    print('...done')
-    
-    output.am1t2 <- gmac(known.conf = am1t2.gmac.list$known.conf, cov.pool = am1t2.gmac.list$cov.pool, 
-                         exp.dat = am1t2.gmac.list$exp.dat, snp.dat.cis = am1t2.gmac.list$snp.dat.cis, 
-                         trios.idx = am1t2.gmac.list$trios.idx, nperm = 10000, nominal.p = TRUE)
-    
-    print('am1t2...done...saving')
-    save(output.am1t2, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/am1t2.output.Rdata'))
-    print('...done')
-    
-    
-    
-    
+
   }
   
 }
 
 
 
-assemble.tables=function(trio.table, meta.table, PCmat, kc, seed=222){
+#--------function to assemble data for GMAC function---------
+
+assemble.tables=function(trio.table, PCmat, kc, seed=222, which.imp='mice'){
   
-  set.seed(seed)
+  trio.ref=matrix(colnames(trio.table),nrow=length(colnames(trio.table))/3, ncol=3, byrow=T)
+  print(trio.ref[1:10,])
   
-  print("---SNPs---")
-  SNPmat=as.data.frame(trio.table[,match(meta.table$SNP, colnames(trio.table))])
-  print(dim(SNPmat))
-  omit=attr(na.omit(SNPmat),"na.action")
-  if (length(omit)>0){
+  SNPs=trio.table[,c(1:(dim(trio.table)[2]/3))*3-2]
+  
+  SNP.unique=as.data.frame(SNPs[,match(unique(colnames(SNPs)), colnames(SNPs))])
+  
+  if(length(attr(na.omit(SNP.unique), 'na.action')) > 0 ){
     
-    print(length(omit))
-    SNPfactors=apply.cfactor(SNPmat)
-    SNPmat=imputeMCA(SNPfactors, seed = seed)$completeObs
-    SNPmat=as.data.frame(apply(SNPmat, 2, as.numeric))
-    #print(SNPmat)
+    if(which.imp=='mice'){
+      
+      SNP.unique=complete(mice(SNP.unique, defaultMethod="polyreg"))
+      print("...imputation..complete")
+      
+    }else{
+      
+      SNP.factors=apply.cfactor(SNP.unique)
+      imp=imputeMCA(SNP.factors, seed=seed)
+      SNP.unique=as.data.frame(apply(imp$completeObs,2,as.numeric))
+      #colnames(SNP.unique)=colnames(SNP.factors)
+      print("...imputation..complete")
+      print(SNP.unique[1:5,1:5])
+      
+    }
+    
     
   }
   
-  print("---Cis-Expression---")
-  cis.exp=as.data.frame(trio.table[,match(meta.table$Cis.Gene.ID, colnames(trio.table))])
-  print(dim(cis.exp))
-  omit=attr(na.omit(cis.exp),"na.action")
-  if (length(omit)>0){
-    
-    print(length(omit))
-    imp=mice(cis.exp)
-    cis.exp=complete(imp)
-    print(cis.exp)
-    
-  }
   
-  print("---Trans-Expression---")
-  trans.exp=as.data.frame(trio.table[,match(meta.table$Trans.Gene.ID, colnames(trio.table))])
-  print(dim(trans.exp))
-  omit=attr(na.omit(trans.exp),"na.action")
-  if (length(omit)>0){
-    
-    print(length(omit))
-    imp=mice(trans.exp)
-    trans.exp=complete(imp)
-    print(trans.exp)
-    
-  }
+  expression.mat = trio.table[, -(c(1:(dim(trio.table)[2]/3))*3-2)]
+  express.unique = expression.mat[, match(unique(colnames(expression.mat)), colnames(expression.mat))]
   
-  trio.idx=cbind.data.frame(c(1:dim(SNPmat)[2]), c(1:dim(cis.exp)[2]), c( (dim(cis.exp)[2]+1):(dim(cis.exp)[2]*2)) )
+  # if(length(attr(na.omit(express.unique), 'na.action')) > 0 ){
+  #   
+  #   express.unique=mice(express.unique, defaultMethod='pmm')
+  #   
+  # }
+  
+  
+  trio.idx=build.triomap(trio.name.list = trio.ref, 
+                         express = express.unique, 
+                         genotype = SNP.unique)
+  
   colnames(trio.idx)=c('snp', 'cis', 'trans')
+  colnames(trio.ref)=c('snp', 'cis', 'trans')
   
-  
-  gmac.list=list(kc, t(PCmat), t(cbind.data.frame(cis.exp, trans.exp)), t(SNPmat), trio.idx)
-  names(gmac.list)=c("known.conf", "cov.pool", "exp.dat", "snp.dat.cis", "trios.idx")
+  #assemble into list and transpose necessary tables so samples are in columns 
+  gmac.list=list(kc, t(PCmat), t(express.unique), t(SNP.unique), trio.idx, trio.ref)
+  names(gmac.list)=c("known.conf", "cov.pool", "exp.dat", "snp.dat.cis", "trios.idx", 'trio.ref')
   
   
   return(gmac.list)
@@ -157,8 +147,10 @@ assemble.tables=function(trio.table, meta.table, PCmat, kc, seed=222){
 
 
 
-
+# converts all columns of a matrix to factors 
 apply.cfactor=function(dataframe){
+  
+  cnames=colnames(dataframe)
   
   for(i in 1:dim(dataframe)[2]){
     
@@ -166,7 +158,29 @@ apply.cfactor=function(dataframe){
     
   }
   
+  colnames(dataframe)=cnames
+  
   return(dataframe)
+  
+}
+
+
+#a function to construct the trio index map in the expression and genotype dataframes
+
+build.triomap = function(trio.name.list=NA, express, genotype){
+  
+  index.mat=as.data.frame(matrix(0, nrow=dim(trio.name.list)[1], ncol = 3))
+  
+  for(i in 1:dim(trio.name.list)[1]){
+    
+    
+    index.mat[i,1] = match(trio.name.list[i,1], colnames(genotype))
+    index.mat[i,2] = match(trio.name.list[i,2], colnames(express))
+    index.mat[i,3] = match(trio.name.list[i,3], colnames(express))
+    
+  }
+  
+  return(index.mat)
   
 }
 

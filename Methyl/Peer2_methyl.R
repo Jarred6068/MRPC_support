@@ -10,7 +10,7 @@ loadRData <- function(fileName=NULL){
 }
 
 #read in methylation data, bsgs/brisbane subject ID equivalents, and covariates
-methyl_original=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/new_data_M_average_delete.Rdata")
+methyl_original=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/new_data_M_average_delete.RData")
 geo.bsgs=read.csv(file = "/mnt/ceph/jarredk/Methyl/ExpressData/BSGS_GEO_Accession_data2.csv")
 geo_id_equivs=read.table(file = "/mnt/ceph/jarredk/Methyl/GSE53195_GSE56105_ID_equivalence.txt", header = T)
 methyl_original[1:10,1:5]

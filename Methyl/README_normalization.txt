@@ -41,8 +41,11 @@ Final Data Dim:  858 24317
 
 ==================================Methylation==========================================
 
-The BSGS expression data in file: 
+The BSGS Methylation data in file: 
 "/mnt/ceph/jarredk/Methyl/new_data_M_average_delete.csv"
+
+This data is from Mohamed after adding in the gene names for the probes (when available)
+The gene names are from: GPL13534_M_v.1.1. xlx
 
 related covariates obtained from web scrape of GEO in:
 /mnt/ceph/jarredk/Methyl/ExpressData/BSGS_GEO_Accession_data2.csv
@@ -52,7 +55,7 @@ The subject ID's key obtained from Australian Team in:
 
 original BSGS data reads in with probes in rows and subjects in columns (methylation and p-values)
 
-the first 3 columns of the feshly read-in data correspond to: Probe Reference ID, UCSC Gene Name, and Row Numbering
+the first 3 columns of the Original read-in data correspond to: Probe Reference ID, UCSC Gene Name, and Row Numbering
 which were removed. 
 
 data was broken into 2 matrices: one of pvalues and another with methylation data.
@@ -74,6 +77,8 @@ The data was normalized by regressing out the variation due to the available cov
 filtered methylation matrix. First each column was transformed using the logit transformation. values on the boundary 
 (beloning to exactly 0 or 1) were given adjusted by adding/subtracting a pseudocount: 0 --> 0.001, 1 --> 0.999. After 
 transformation, each column was regressed on age, sex, age^2, sex*age, and sex*age^2 and the residuals were retained.
+
+the number of subjects with available sex and age information is 607
 
 The trasnformed residuals/normalized methylation matrix is in:
 /mnt/ceph/jarredk/Methyl/MethylData.RegressResids.Rdata

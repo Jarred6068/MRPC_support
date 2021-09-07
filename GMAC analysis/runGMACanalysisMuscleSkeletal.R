@@ -6,6 +6,6 @@ library('missMDA', lib='/mnt/ceph/jarredk/Rpackages')
 
 source("/mnt/ceph/jarredk/GMACanalysis/GMACanalysis.R")
 
-run.GMAC(tissues.vec=tissues.vec[4, ], path.tables=path, mediation.type='cis')
+run.GMAC(tissues.vec=tissues.vec[3, ], path.tables=path, mediation.type='cis')
 
-run.GMAC(tissues.vec=tissues.vec[4, ], path.tables=path, mediation.type='trans')
+run.GMAC(tissues.vec=tissues.vec[3, ], path.tables=path, mediation.type='trans')

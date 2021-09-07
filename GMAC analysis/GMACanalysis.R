@@ -47,14 +47,14 @@ run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'
       
       output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
                      exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
-                     trios.idx = tables.gmac.list$trios.idx[,c(1,3,2)], nperm = 500, nominal.p = TRUE)
+                     trios.idx = tables.gmac.list$trios.idx[,c(1,3,2)], nperm = 50, nominal.p = TRUE)
       
       
     }else{
       
       output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
                      exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
-                     trios.idx = tables.gmac.list$trios.idx, nperm = 500, nominal.p = TRUE)
+                     trios.idx = tables.gmac.list$trios.idx, nperm = 50, nominal.p = TRUE)
       
       
     }
@@ -62,11 +62,11 @@ run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'
     
     #reorganize output for saving
     out.table=cbind.data.frame(tables.gmac.list$trio.ref, output[[1]], output[[2]])
-    colnames(out.table)=c(colnames(trio.ref), 
+    colnames(out.table)=c(colnames(tables.gmac.list$trio.ref), 
                           paste0('pval_', colnames(output[[1]])), 
                           paste0('effect_change_', colnames(output[[2]])))
     
-    out.list=list(out.table, tables.gmac.list[[-6]], output[[3]])
+    out.list=list(out.table, tables.gmac.list[1:5], output[[3]])
     names(out.list)=c("output.table", "input.list", "cov.indicator.list")
     
     

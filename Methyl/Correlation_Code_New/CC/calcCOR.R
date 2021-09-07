@@ -25,7 +25,7 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
     
     if(length(snps.in.rangeM)==0){
       
-      add.tab=c(colnames(probe.mat)[j], rep(NA,2))
+      add.tab=c(colnames(probe.mat)[j], rep(NA,4))
       
       write.table(t(add.tab), file = fn,
                   row.names = FALSE,
@@ -41,7 +41,11 @@ cc.loop=function(probe.matched=NULL, Geno.matched=NULL, probe.mat=NULL, SNP.mat=
       Mprobe=rep(colnames(probe.mat)[j], length(snps.in.rangeM))
       SNP=colnames(SNP.mat)[snps.in.rangeM]
       cors=round(as.vector(cor(probe.mat[,j], SNP.mat[,snps.in.rangeM], use = "complete.obs")), 6)
-      add.tab=cbind.data.frame(Mprobe, SNP, cors)
+      add.tab=cbind.data.frame(Mprobe, 
+                               SNP, 
+                               cors,
+                               Geno.matched$CountedAllele[snps.in.rangeM],
+                               Geno.matched$OtherAllele[snps.in.rangeM])
       
       
       
@@ -114,9 +118,9 @@ calc.cors=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, ge
     
     if(length(snps.in.rangeM)==0){
       
-      init.table=c(colnames(methyl.mat)[1], rep(NA, 2))
+      init.table=c(colnames(methyl.mat)[1], rep(NA, 4))
       
-      names(init.table)=c("Methyl_Probe_ID", "SNP_ID", "Cor")
+      names(init.table)=c("Methyl_Probe_ID", "SNP_ID", "Cor", "CountedAllele", "OtherAllele")
       
       
       #fileName
@@ -133,12 +137,16 @@ calc.cors=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, ge
       Mprobe=rep(colnames(methyl.mat)[1], length(snps.in.rangeM))
       SNP=colnames(SNP.mat)[snps.in.rangeM]
       cors=round(as.vector(cor(methyl.mat[,1], SNP.mat[,snps.in.rangeM], use = "complete.obs")),6)
-      init.table=cbind.data.frame(Mprobe, SNP, cors)
+      init.table=cbind.data.frame(Mprobe, 
+                                  SNP, 
+                                  cors, 
+                                  chr.geno.matched$CountedAllele[snps.in.rangeM],
+                                  chr.geno.matched$OtherAllele[snps.in.rangeM])
       
       
       
       
-      colnames(init.table)=c("Methyl_Probe_ID", "SNP_ID", "Cor")
+      colnames(init.table)=c("Methyl_Probe_ID", "SNP_ID", "Cor", "CountedAllele", "OtherAllele")
       
       
       #fileName
@@ -165,9 +173,9 @@ calc.cors=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, ge
     
     if(length(snps.in.rangeE)==0){
       
-      init.table=c(colnames(express.mat)[1], rep(NA, 2))
+      init.table=c(colnames(express.mat)[1], rep(NA, 4))
       
-      names(init.table)=c("Express_Gene_ID", "SNP_ID", "Cor")
+      names(init.table)=c("Express_Gene_ID", "SNP_ID", "Cor", "CountedAllele", "OtherAllele")
       
       
       #fileName
@@ -184,11 +192,15 @@ calc.cors=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, ge
       Eprobe=rep(colnames(express.mat)[1], length(snps.in.rangeE))
       SNP=colnames(SNP.mat)[snps.in.rangeE]
       cors2=round(as.vector(cor(express.mat[,1], SNP.mat[,snps.in.rangeE], use = "complete.obs")),6)
-      init.table2=cbind.data.frame(Eprobe, SNP, cors2)
+      init.table2=cbind.data.frame(Eprobe, 
+                                   SNP, 
+                                   cors2, 
+                                   chr.geno.matched$CountedAllele[snps.in.rangeE],
+                                   chr.geno.matched$OtherAllele[snps.in.rangeE])
       
       
       
-      colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Cor")
+      colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Cor", "CountedAllele", "OtherAllele")
       
       
       #fileName

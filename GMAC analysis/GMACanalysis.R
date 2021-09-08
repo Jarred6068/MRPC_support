@@ -47,14 +47,14 @@ run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'
       
       output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
                      exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
-                     trios.idx = tables.gmac.list$trios.idx[,c(1,3,2)], nperm = 50, nominal.p = TRUE)
+                     trios.idx = tables.gmac.list$trios.idx[,c(1,3,2)], nperm = 500, nominal.p = TRUE)
       
       
     }else{
       
       output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
                      exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
-                     trios.idx = tables.gmac.list$trios.idx, nperm = 50, nominal.p = TRUE)
+                     trios.idx = tables.gmac.list$trios.idx, nperm = 500, nominal.p = TRUE)
       
       
     }

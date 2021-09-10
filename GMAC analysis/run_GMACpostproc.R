@@ -17,7 +17,7 @@ print(dim(out1$unmatched.trans[[1]]))
 #count the intersect of the unmatched cis and trans trios
 row.match(out1$unmatched.cis[[1]],out1$unmatched.trans[[1]])
 
-
+#run now for LOND
 # out2=match.trios(tissues=tissues.vec[,1], which.mrpc="LOND")
 # #this table shows the overlapping cis and trans mediation trios between LOND and GMAC
 # out2$table
@@ -46,10 +46,11 @@ dev.off()
 
 #lookup the ADDIS and LOND inferred models for the first non-matching trio index
 #outputs the correlation, lond, and addis edge matrices
-Lond2Addis.lookup(trio.index=l1[[1]]$index.in.trio.mat[1], tissue.name="WholeBlood", with.pc=FALSE)[2:4]
+Lond2Addis.lookup(trio.index=9, tissue.name="WholeBlood", with.pc=FALSE)[2:4]
 
+#look at the regressions for the two models:
 
-
+cross.regress(tissue="WholeBlood", trio.ind=9, mod.type="cis", addis.pcs=NULL)
 
 
 

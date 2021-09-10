@@ -262,6 +262,7 @@ cross.analyze=function(tissues=tissues.vec[,1], which.type="cis", save=FALSE,
 }
 
 
+#plots the distribution of M types for non-overlapping trios classified as mediation in GMAC
 
 plot.dist=function(class.vec.cis=NULL, class.vec.trans=NULL){
   
@@ -302,8 +303,60 @@ plot.dist=function(class.vec.cis=NULL, class.vec.trans=NULL){
 
 
 
+#a function to look at the regression on the trans gene in GMAC
 
 
+cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis.pcs=NULL){
+  
+  if(mod.type=="cis"){
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis.Rdata'))
+    
+  }else{
+    
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_trans.Rdata'))
+    
+  }
+  
+  trio.loc=as.matrix(out.data$input.list$trios.idx)[trio.ind,]
+  SNP=t(as.data.frame(out.data$input.list$snp.dat.cis)[trio.loc[1],])
+  GE=t(as.data.frame(out.data$input.list$exp.dat)[trio.loc[-1],])
+  which.covs=which(out.data$cov.indicator.list[trio.ind,]==1)
+  sel.cov.pool=as.data.frame(out.data$input.list$cov.pool)[which.covs,]
+  
+  print("-----------GMAC-Selected-PCs--------------")
+  print(row.names(sel.cov.pool))
+  
+  sel.cov.pool=t(sel.cov.pool)
+  
+  data.mat=cbind.data.frame(GE, SNP, sel.cov.pool)
+  which.covs.addis=match(addis.pcs, row.names(out.data$input.list$cov.pool))
+  addis.data=cbind.data.frame(GE, SNP, t(out.data$input.list$cov.pool[which.covs.addis,]))
+  
+  if(mod.type=="cis"){
+    
+    colnames(data.mat)=c("cis.gene", "trans.gene", "SNP", colnames(sel.cov.pool))
+    colnames(addis.data)=c("cis.gene", "trans.gene", "SNP", addis.pcs)
+    
+  }else{
+    
+    colnames(data.mat)=c("trans.gene", "cis.gene", "SNP", colnames(sel.cov.pool))
+    colnames(addis.data)=c("trans.gene", "cis.gene", "SNP", addis.pcs)
+    
+  }
+  
+
+  
+  
+  
+  model.GMAC=lm(trans.gene~., data = data.mat)
+  print("--------------------------GMAC------------------------------")
+  print(summary(model.GMAC))
+  model.ADDIS=lm(trans.gene~., data = addis.data)
+  print("--------------------------ADDIS------------------------------")
+  print(summary(model.ADDIS))
+  
+  
+}
 
 
 

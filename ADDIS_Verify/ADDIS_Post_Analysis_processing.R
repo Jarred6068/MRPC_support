@@ -261,7 +261,7 @@ Lond2Addis.lookup=function(trio.index=NULL, tissue.name=NULL, run.models=TRUE, w
       MRPC.fit.lond.table=as(MRPC.fit.FDR.lond@graph, "matrix")
       MRPC.fit.addis.table=as(MRPC.fit.FDR.addis@graph, "matrix")
       
-      return(list(trio.with.pc=trio.pc, correlation=r, MRPC.table.LOND=MRPC.fit.lond.table, 
+      return(list(trio=trio, correlation=r, MRPC.table.LOND=MRPC.fit.lond.table, 
                   MRPC.table.ADDIS=MRPC.fit.addis.table))
       
     }else{

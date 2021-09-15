@@ -160,6 +160,7 @@ Lond2Addis.lookup=function(trio.index=NULL, tissue.name=NULL, run.models=TRUE, w
     pcs=pc.matrix[,sig.asso.pcs]
     trio=snps[,(trio.index-1)*3+(1:3)]
     trio.pc=cbind(trio, pcs)
+    colnames(trio.pc)=c(colnames(trio), colnames(pc.matrix)[sig.asso.pcs])
     
     #----correlation--option----
     if(correlation==TRUE){

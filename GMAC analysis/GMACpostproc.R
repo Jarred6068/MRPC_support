@@ -3,10 +3,11 @@ source("/mnt/ceph/jarredk/HiC_Analyses/HiC_search.R")
 
 library('qvalue', lib="/mnt/ceph/jarredk/Rpackages")
 library('MRPC', lib="/mnt/ceph/jarredk/Rpackages")
+library('permute', lib="/mnt/ceph/jarredk/Rpackages")
 
 source("/mnt/ceph/jarredk/ADDIS_verify/ADDIS_Post_Analysis_processing.R")
 
-top5=c(1,6, 33, 40, 48)
+top5=c(1, 6, 33, 40, 48)
 path='/mnt/ceph/jarredk/Reg_Net/'
 tissues.vec=tissue.names[top5, 2:3]
 
@@ -91,7 +92,7 @@ run.postproc=function(output.pvals=NULL, trio.ref=NULL){
 
 
 
-write.csv(result.table, file="/mnt/ceph/jarredk/GMACanalysis/final_result_table.csv")
+#write.csv(result.table, file="/mnt/ceph/jarredk/GMACanalysis/final_result_table.csv")
 
 
 
@@ -318,6 +319,7 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
   }
   
   trio.loc=as.matrix(out.data$input.list$trios.idx)[trio.ind,]
+  known.conf=t(out.data$input.list$known.conf)
   SNP=t(as.data.frame(out.data$input.list$snp.dat.cis)[trio.loc[1],])
   GE=t(as.data.frame(out.data$input.list$exp.dat)[trio.loc[-1],])
   which.covs=which(out.data$cov.indicator.list[trio.ind,]==1)
@@ -328,25 +330,30 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
   
   sel.cov.pool=t(sel.cov.pool)
   
-  data.mat=cbind.data.frame(GE, SNP, sel.cov.pool)
+  data.mat=cbind.data.frame(GE, SNP, sel.cov.pool, known.conf)
   which.covs.addis=match(addis.pcs, row.names(out.data$input.list$cov.pool))
   addis.data=cbind.data.frame(GE, SNP, t(out.data$input.list$cov.pool[which.covs.addis,]))
   
   if(mod.type=="cis"){
     
-    colnames(data.mat)=c("cis.gene", "trans.gene", "SNP", colnames(sel.cov.pool))
+    colnames(data.mat)=c("cis.gene", "trans.gene", "SNP", colnames(sel.cov.pool), colnames(known.conf))
     colnames(addis.data)=c("cis.gene", "trans.gene", "SNP", addis.pcs)
     
   }else{
     
-    colnames(data.mat)=c("trans.gene", "cis.gene", "SNP", colnames(sel.cov.pool))
+    colnames(data.mat)=c("trans.gene", "cis.gene", "SNP", colnames(sel.cov.pool), colnames(known.conf))
     colnames(addis.data)=c("trans.gene", "cis.gene", "SNP", addis.pcs)
     
   }
   
-
-  
-  
+  data.mat2=data.mat
+  addis.data2=addis.data
+  #convert.factors
+  #data.mat$SNP=as.factor(data.mat$SNP)
+  data.mat$pcr=as.factor(data.mat$pcr)
+  data.mat$sex=as.factor(data.mat$sex)
+  data.mat$platform=as.factor(data.mat$platform)
+  #addis.data$SNP=as.factor(addis.data$SNP)
   
   model.GMAC=lm(trans.gene~., data = data.mat)
   print("--------------------------GMAC------------------------------")
@@ -355,13 +362,95 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
   print("--------------------------ADDIS------------------------------")
   print(summary(model.ADDIS))
   
+  return(list(addis=addis.data2, GMAC=data.mat2))
   
 }
 
 
+#a function to recreate the permutation regression from GMAC
 
-
-
+run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL){
+  
+  wald.stat=NULL
+  
+  trio2=trio
+  #convert.factors
+  #trio2$SNP=as.factor(trio2$SNP)
+  trio2$pcr=as.factor(trio2$pcr)
+  trio2$sex=as.factor(trio2$sex)
+  trio2$platform=as.factor(trio2$platform)
+  
+  test.wald=summary(lm(trans.gene~., data=trio2))$coefficients[2,3]
+  
+  for(i in 1:nperms){
+    
+    #conditioning on each genotype
+    trio0=trio[which(trio$SNP==0),]
+    trio1=trio[which(trio$SNP==1),]
+    trio2=trio[which(trio$SNP==2),]
+    
+    #permute
+    trio0$cis.gene=trio0$cis.gene[shuffle(trio0$cis.gene)]
+    trio1$cis.gene=trio1$cis.gene[shuffle(trio1$cis.gene)]
+    trio2$cis.gene=trio2$cis.gene[shuffle(trio2$cis.gene)]
+    
+    #print(trio0$cis.gene[shuffle(trio0$cis.gene)][1:5])
+    
+    trio.permuted=rbind.data.frame(trio0, trio1, trio2)
+    #print(i)
+    #print(head(trio.permuted))
+    
+    #trio.permuted$SNP=as.factor(trio.permuted$SNP)
+    trio.permuted$pcr=as.factor(trio.permuted$pcr)
+    trio.permuted$sex=as.factor(trio.permuted$sex)
+    trio.permuted$platform=as.factor(trio.permuted$platform)
+    
+    wald.stat[i]=summary(lm(trans.gene~., data=trio.permuted))$coefficients[2,3]
+    
+    
+  }
+  
+  cmap=c(rep(0, dim(trio0)[1]), rep(1, dim(trio1)[1]), rep(2, dim(trio2)[1]))
+  
+  if(plot==TRUE){
+    
+    
+    png(filename = filename)
+    
+    par(mfrow=c(2,2))
+    plot(trio.permuted$cis.gene,
+         trio.permuted$trans.gene,
+         xlab="Permuted Cis Gene",
+         ylab="Trans Gene",
+         col=as.factor(cmap), 
+         bg=as.factor(cmap), 
+         pch=21)
+    
+    legend("topleft", c("Gt=0", "Gt=1","Gt=2"), col = c(1,2,3), pch=c(21,21,21), fill=c(1,2,3))
+    
+    plot(trio$cis.gene,
+         trio$trans.gene,
+         xlab="Cis Gene",
+         ylab="Trans Gene",
+         col=as.factor(trio$SNP), 
+         bg=as.factor(trio$SNP), 
+         pch=21)
+    
+    hist(wald.stat)
+    
+    par(mfrow=c(1,1))
+    
+    dev.off()
+    
+    
+    
+  }
+  
+  p.value=sum(abs(wald.stat)>abs(test.wald))/length(wald.stat)
+  
+  return(list(p.value=p.value, null.wald.stats=wald.stat, obs.wald.stat=test.wald))
+  
+}
 
 
 

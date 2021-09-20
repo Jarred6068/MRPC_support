@@ -59,3 +59,27 @@ for(i in 1:greps){
   
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#read in postprocessing functions
+source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+
+
+
+
+

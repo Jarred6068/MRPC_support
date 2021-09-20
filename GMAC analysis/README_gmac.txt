@@ -4,13 +4,14 @@ Background: Both MRPC-LOND and MRPC-ADDIS techniques inferred a large number of 
 previously identified but not typically thought to be the common mediation model for the relationship between an eQTL, a cis transcript and and trans 
 transcript. Since this result is surprising relative to the existing literature, we sought to apply another method for inferring mediation on the 
 trios we tested in GTEx. The Genomic Medaition analysis with Adaptive Confounding (GMAC) algorithm allows for adaptive selection of potential 
-confounders from a large pool of known and unknown potentially confounding variables for each mediation test and, like MRPC, GMAC also assumes the 
-principle of mendelian randomization
+confounders from a large pool of known and unknown potentially confounding variables for each mediation test and. Like MRPC, GMAC also assumes the 
+principle of mendelian randomization for the SNP
 
 Goals:
 1. Run GMAC on a selected number of tissues and compare the number of inferred mediation trios to that of MRPC-LOND and MRPC-ADDIS
 	- each tissue was ran twice in GMAC: first with the cis probes as mediators and second with trans probes as mediators
 2. determine the number of specific Cis and Trans mediated trios that all three methods had in common (if any)
+3. Identify and understand differences in inferred model types between the two methods
 
 #####################Methods##############################
 
@@ -72,10 +73,28 @@ WholeBlood			   8823		             552	             484	             131	      1
 
 
 
+Checking Numerical Stability of GMAC Results by Simulation of the Mediation Test
 
+* Mediation Test refers to the regression of the trans gene with the full set of confounders by GMAC:
 
+		Tj = b0 + b1Ci + b2Li + AXij + e
 
+* The numerical stability of the coefficients for the SNP and Cis gene was checked by simulation for mediation models inferred by GMAC that 
+  were not inferred to be mediation by ADDIS
 
+* for each mediation test using all the adaptively selected and known confounders the coefficients, b, and residual standard error, sigma,
+  were retained and the trans gene was simulated via
+
+		Tnew = b0 + b1Ci + b2Li + AXij + e
+
+where 
+
+		e ~ norm( 0, sigma)
+
+		
+
+* a new regression was conducted using the simulated trans gene as the response.
+* this process was repeated 1000 times and distribution of the estimated coefficients were retained.
 
 
 

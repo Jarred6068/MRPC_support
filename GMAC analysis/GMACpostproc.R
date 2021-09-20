@@ -32,11 +32,11 @@ run.postproc=function(output.pvals=NULL, trio.ref=NULL){
 
 # #load in output for the cis trios:
 # 
-# output.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_cis.Rdata')
-# output.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_cis.Rdata')
-# output.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_cis.Rdata')
-# output.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_cis.Rdata')
-# output.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_cis.Rdata')
+output.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_cis.Rdata')
+output.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_cis.Rdata')
+output.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_cis.Rdata')
+output.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_cis.Rdata')
+output.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_cis.Rdata')
 # 
 # #post process GMAC-cis-mediated
 # result.WB=run.postproc(output.pvals = output.WB$output.table[,5], trio.ref = output.WB$output.table[,1:3])
@@ -50,11 +50,11 @@ run.postproc=function(output.pvals=NULL, trio.ref=NULL){
 # 
 # #load in output for the cis trios:
 # 
-# output.t.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_trans.Rdata')
-# output.t.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_trans.Rdata')
-# output.t.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_trans.Rdata')
-# output.t.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_trans.Rdata')
-# output.t.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_trans.Rdata')
+output.t.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_trans.Rdata')
+output.t.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_trans.Rdata')
+output.t.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_trans.Rdata')
+output.t.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_trans.Rdata')
+output.t.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_trans.Rdata')
 # 
 # result.t.WB=run.postproc(output.pvals = output.t.WB$output.table[,5], trio.ref = output.t.WB$output.table[,1:3])
 # result.t.AS=run.postproc(output.pvals = output.t.AS$output.table[,5], trio.ref = output.t.AS$output.table[,1:3])
@@ -96,11 +96,18 @@ run.postproc=function(output.pvals=NULL, trio.ref=NULL){
 
 
 
+#a function to match which trios are found in the AM1T1/T2 and LM1T1/T2 tables and which have 
+#inferred model types that differ
+
 match.trios=function(tissues=tissues.vec[,1], which.mrpc="ADDIS"){
   
   library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
-  matched.cis=NULL
-  matched.trans=NULL
+  
+  num.matched.cis=NULL
+  num.matched.trans=NULL
+  
+  matched.cis=vector("list", length = length(tissues))
+  matched.trans=vector("list", length = length(tissues))
   
   unmatched.cis=vector("list", length = length(tissues))
   unmatched.trans=vector("list", length = length(tissues))
@@ -109,8 +116,8 @@ match.trios=function(tissues=tissues.vec[,1], which.mrpc="ADDIS"){
     
     
     #read in GMAC results
-    output.cis=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_cis50.Rdata', sep = ""))
-    output.trans=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_trans50.Rdata', sep=""))
+    output.cis=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_cis.Rdata', sep = ""))
+    output.trans=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_trans.Rdata', sep=""))
     
     #process 
     postproc.cis=run.postproc(output.pvals = output.cis$output.table[,5], 
@@ -132,11 +139,14 @@ match.trios=function(tissues=tissues.vec[,1], which.mrpc="ADDIS"){
     }
     
     
-    matched.cis[i]=length(na.omit(row.match(m1t1[,2:4],postproc.cis$sig.trios)))
-    matched.trans[i]=length(na.omit(row.match(m1t2[,2:4],postproc.trans$sig.trios)))
+    num.matched.cis[i]=length(na.omit(row.match(m1t1[,2:4],postproc.cis$sig.trios)))
+    num.matched.trans[i]=length(na.omit(row.match(m1t2[,2:4],postproc.trans$sig.trios)))
     
     unmatched.cis[[i]]=postproc.cis$sig.trios[-c(na.omit(row.match(m1t1[,2:4],postproc.cis$sig.trios))),]
     unmatched.trans[[i]]=postproc.trans$sig.trios[-c(na.omit(row.match(m1t2[,2:4],postproc.trans$sig.trios))),]
+    
+    matched.cis[[i]]=postproc.cis$sig.trios[c(na.omit(row.match(m1t1[,2:4],postproc.cis$sig.trios))),]
+    matched.trans[[i]]=postproc.trans$sig.trios[c(na.omit(row.match(m1t2[,2:4],postproc.trans$sig.trios))),]
     
 
     
@@ -145,10 +155,17 @@ match.trios=function(tissues=tissues.vec[,1], which.mrpc="ADDIS"){
   names(unmatched.cis)=tissues
   names(unmatched.trans)=tissues
   
-  table1=cbind.data.frame(tissues, matched.cis, matched.trans)
+  names(matched.cis)=tissues
+  names(matched.trans)=tissues
+  
+  table1=cbind.data.frame(tissues, num.matched.cis, num.matched.trans)
   colnames(table1)=c("tissue","cis.common", "trans.common")
   
-  return(list(table=table1, unmatched.cis=unmatched.cis, unmatched.trans=unmatched.trans))
+  return(list(table=table1, 
+              unmatched.cis=unmatched.cis, 
+              unmatched.trans=unmatched.trans,
+              matched.cis=matched.cis,
+              matched.trans=matched.trans))
     
     
 }
@@ -214,10 +231,13 @@ which.class=function(ind=NULL, classes.list=NULL){
 cross.analyze=function(tissues=tissues.vec[,1], which.type="cis", save=FALSE, 
                        path="/mnt/ceph/jarredk/GMACanalysis/"){
   
-  out1=match.trios(tissues=tissues, which.mrpc="ADDIS")
-  final.list=vector("list", length = length(tissues))
+  
+  final.list.unmatched=vector("list", length = length(tissues))
+  final.list.matched=vector("list", length = length(tissues))
   
   for(i in 1:length(tissues)){
+    
+    out1=match.trios(tissues=tissues[i], which.mrpc="ADDIS")
     
     addis.classes=loadRData(fileName=paste("/mnt/ceph/jarredk/AddisReRunFiles/List.models.", tissues[i], ".all.RData" ,sep=""))
     
@@ -230,19 +250,29 @@ cross.analyze=function(tissues=tissues.vec[,1], which.type="cis", save=FALSE,
     
     if(which.type=="cis"){
       
-      indices=locate.trio(out1$unmatched.cis[[i]], trios)
+      indices=locate.trio(out1$unmatched.cis[[1]], trios)
+      indices2=locate.trio(out1$matched.cis[[1]], trios)
       classes=which.class(ind = indices, classes.list = addis.classes)
-      tab=cbind.data.frame(out1$unmatched.cis[[i]], indices, classes)
-      colnames(tab)=c(colnames(out1$unmatched.cis[[i]]), "index.in.trio.mat","Addis.infer.Class")
-      final.list[[i]]=tab
+      classes2=which.class(ind = indices2, classes.list = addis.classes)
+      tab=cbind.data.frame(out1$unmatched.cis[[1]], indices, classes)
+      tab2=cbind.data.frame(out1$matched.cis[[1]], indices2, classes2)
+      colnames(tab)=c(colnames(out1$unmatched.cis[[1]]), "index.in.trio.mat","Addis.infer.Class")
+      colnames(tab2)=c(colnames(out1$matched.cis[[1]]), "index.in.trio.mat","Addis.infer.Class")
+      final.list.unmatched[[i]]=tab
+      final.list.matched[[i]]=tab2
       
     }else{
       
       indices=locate.trio(out1$unmatched.trans[[i]], trios)
+      indices2=locate.trio(out1$matched.trans[[i]], trios)
       classes=which.class(ind = indices, classes.list = addis.classes)
+      classes2=which.class(ind = indices2, classes.list = addis.classes)
       tab=cbind.data.frame(out1$unmatched.trans[[i]], indices, classes)
+      tab2=cbind.data.frame(out1$matched.trans[[i]], indices2, classes2)
       colnames(tab)=c(colnames(out1$unmatched.trans[[i]]), "index.in.trio.mat","Addis.infer.Class")
-      final.list[[i]]=tab
+      colnames(tab2)=c(colnames(out1$matched.trans[[i]]), "index.in.trio.mat","Addis.infer.Class")
+      final.list.unmatched[[i]]=tab
+      final.list.matched[[i]]=tab2
       
     }
     
@@ -254,11 +284,12 @@ cross.analyze=function(tissues=tissues.vec[,1], which.type="cis", save=FALSE,
   
   if(save==TRUE){
     
-    save(final.list, file = paste0(path, "GMAC.to.Addis.Class.List.",which.type, ".RData"))
+    save(final.list.unmatched, file = paste0(path, "GMAC.to.Addis.Class.List.Unmatched.",which.type, ".RData"))
+    save(final.list.matched, file = paste0(path, "GMAC.to.Addis.Class.List.Matched",which.type, ".RData"))
     
   }
   
-  return(final.list)
+  return(list(fl.unm=final.list.unmatched, fl.m=final.list.matched))
   
 }
 
@@ -362,7 +393,23 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
   print("--------------------------ADDIS------------------------------")
   print(summary(model.ADDIS))
   
-  return(list(addis=addis.data2, GMAC=data.mat2))
+  model.matrix.addis=model.matrix(model.ADDIS)
+  model.matrix.gmac=model.matrix(model.GMAC)
+  b.gmac=summary(model.GMAC)$coefficients[,1]
+  b.addis=summary(model.ADDIS)$coefficients[,1]
+  sigma.gmac=summary(model.GMAC)$sigma
+  sigma.addis=summary(model.ADDIS)$sigma
+  
+  return(list(addis=addis.data2, 
+              GMAC=data.mat2, 
+              Regress=list(X.addis=model.matrix.addis,
+                           X.gmac=model.matrix.gmac,
+                           b.gmac=b.gmac,
+                           b.addis=b.addis,
+                           sigma.gmac=sigma.gmac,
+                           sigma.addis=sigma.addis)))
+  
+
   
 }
 
@@ -454,12 +501,144 @@ run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL){
 
 
 
+#simple function used in check.ns.gmac() for coefficient
+#simulation matrix to longform for plotting
 
+longform=function(iters=NULL,varvec1=NULL, cutdata=NULL){
+  
+  var1=rep(varvec1, iters)
+  
+  long=cbind.data.frame(Coef=var1, Value=as.vector(as.matrix(cutdata)))
+  return(long)
+  
+}
 
+#a function to check the numerical stability of the regression using all adaptively selected pcs
+#in GMAC, and using the coefficients and residual standard error obtained from the regression of a 
+#specific trio (the output of cross.regress). The trans gene is simulated by randomly sampling the noise
+#at each iteration and running the regression on the simulated trans gene
 
+#output: indicator matrix for which regressions had significant SNP (col 1) and significant cis.gene (col 2)
 
+check.ns.gmac=function(input.list.data=NULL, iters=1, alpha=0.01, print.it=FALSE, which.mod="GMAC",
+                       plot.it=FALSE, save.name=NULL){
+  
+  sig.snp=NULL
+  sig.cis=NULL
+  if(which.mod=="GMAC"){
+    
+    X=as.matrix(input.list.data$Regress$X.gmac)
+    b=input.list.data$Regress$b.gmac
+    sigma=input.list.data$Regress$sigma.gmac
+    
+  }else{
+    
+    X=as.matrix(input.list.data$Regress$X.addis)
+    b=input.list.data$Regress$b.addis
+    sigma=input.list.data$Regress$sigma.addis
+    
+  }
 
+  simu.coefs=as.data.frame(matrix(0, nrow=length(b), ncol=iters))
+  row.names(simu.coefs)=names(b)
+  colnames(simu.coefs)=paste0("iter", c(1:iters))
+  
+  for(i in 1:iters){
+    
+    if(which.mod=="GMAC"){
+      new.data=input.list.data$GMAC
+    }else{
+      new.data=input.list.data$addis
+    }
+    
+    trans.gene.new=X%*%b+rnorm(dim(X)[1], mean = 0, sd = sigma)
+    #print(trans.gene.new)
+    
+    new.data$trans.gene=trans.gene.new
+    if(which.mod=="GMAC"){
+      new.data$pcr=as.factor(new.data$pcr)
+      new.data$sex=as.factor(new.data$sex)
+      new.data$platform=as.factor(new.data$platform)
+      #new.data$SNP=as.factor(new.data$SNP)
+    }
+    
+    reg=summary(lm(trans.gene~., data = new.data))
+    if(print.it==TRUE){print(reg)}
+    coef=as.data.frame(reg$coefficient)
+    p.snp=coef$`Pr(>|t|)`[3]
+    p.cis=coef$`Pr(>|t|)`[2]
+    
+    sig.snp[i]=ifelse(p.snp<alpha, 1, 0)
+    sig.cis[i]=ifelse(p.cis<alpha, 1, 0)
+    
+    simu.coefs[,i]=coef$Estimate
+    
+  }
+  
+  
+  if(plot.it==TRUE){
+    
+    
+    library('ggplot2', lib="/mnt/ceph/jarredk/Rpackages")
+    library('ggridges', lib="/mnt/ceph/jarredk/Rpackages")
+    
+    if(which.mod=="GMAC"){
+      rm.c=match(c("(Intercept)", "pcr1", "platform1","sex2"),row.names(simu.coefs))
+    }else{
+      rm.c=match(c("(Intercept)"),row.names(simu.coefs))
+    }
 
+    long.data=longform(iters = iters, 
+                       varvec1 = row.names(simu.coefs)[-c(rm.c)], 
+                       cutdata = simu.coefs[-c(rm.c),])
+    
+    act.data=cbind.data.frame(Coef=names(b)[-rm.c], Value=b[-rm.c])
+    
+    if(which.mod=="GMAC"){
+      fn1=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/GMAC.ridgeline.trio.", save.name, ".png")
+      fn2=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/GMAC.boxplot.trio.", save.name, ".png")
+    }else{
+      fn1=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/ADDIS.ridgeline.trio.", save.name, ".png")
+      fn2=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/ADDIS.boxplot.trio.", save.name, ".png")
+    }
+    
+    png(fn1)
+    
+    p=ggplot(long.data, aes(x = Value, y = Coef)) +
+      geom_density_ridges() +
+      geom_point(data=act.data, mapping=aes(x = Value, y = Coef, color = "red"))+
+      theme_ridges() + 
+      #scale_x_continuous(breaks = seq(-0.2,0.2,0.01), lim = c(-0.2, 0.2))+
+      theme(legend.position = "none")
+    
+    print(p)
+    
+    dev.off()
+    
+    
+    
+    png(fn2)
+    
+    p=ggplot(long.data, aes(x = Value, y = Coef,)) + 
+      geom_boxplot() +
+      geom_point(data=act.data, mapping=aes(x = Value, y = Coef, color = "red"))+
+      #scale_x_continuous(breaks = seq(-0.2,0.2,0.01), lim = c(-0.2, 0.2))+
+      
+      theme(legend.position = "none")
+    
+    print(p)
+    
+    dev.off()
+    
+    
+    
+  }
+  
+  sig.ind=cbind.data.frame(sig.snp, sig.cis)
+  
+  return(list(sig.indicator.mat=sig.ind, simu.coefs=simu.coefs, act.coefs=b))
+  
+}
 
 
 

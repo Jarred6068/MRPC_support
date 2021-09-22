@@ -335,7 +335,7 @@ plot.dist=function(class.vec.cis=NULL, class.vec.trans=NULL){
 
 
 
-#a function to look at the regression on the trans gene in GMAC
+#a function to look at the regression on the trans gene in GMAC and ADDIS
 
 
 cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis.pcs=NULL){
@@ -641,7 +641,131 @@ check.ns.gmac=function(input.list.data=NULL, iters=1, alpha=0.01, print.it=FALSE
 }
 
 
+# A helper function to get the adjacency matrix from a trio 
+get.adj=function(gmac.data=NULL, verbose=FALSE){
+  
+  adj=matrix(0, nrow=2, ncol=2)
+  p.trans=summary(lm(trans.gene~., data = gmac.data))$coefficients[2:3,4]
+  #print(summary(lm(trans.gene~., data = gmac.data)))
+  p.cis=summary(lm(cis.gene~., data = gmac.data))$coefficients[2:3,4]
+  if(verbose==TRUE){print(summary(lm(cis.gene~., data = gmac.data)));
+    print(summary(lm(trans.gene~., data = gmac.data)))}
+  
+  p.ind.trans=ifelse(p.trans<0.01, 1, 0)
+  #print(p.ind.trans)
+  adj[2,2]=p.ind.trans[2]
+  adj[1,2]=p.ind.trans[1]
+  p.ind.cis=ifelse(p.cis<0.01, 1, 0)
+  #print(p.ind.cis)
+  adj[1,1]=p.ind.cis[1]
+  
+  return(list(adj=adj, p.mediation=p.trans[2]))
+  
+}
 
+
+# A helper function that can classify an adjaceny matrix as one M0, M2, or M4 
+# (to be used on unmatched gmac trios therefore no need for M1 or M3)
+class.adj=function(adj.mat=NULL){
+  type=NA
+  M4=matrix(c(1,1,0,1), nrow = 2, ncol = 2, byrow = T)
+  M0.1=matrix(c(1,0,0,0), nrow = 2, ncol = 2, byrow = T)
+  M0.2=matrix(c(0,1,0,0), nrow = 2, ncol = 2, byrow = T)
+  M2.1=matrix(c(0,1,0,1), nrow = 2, ncol = 2, byrow = T)
+  M2.2=matrix(c(1,0,0,1), nrow = 2, ncol = 2, byrow = T)
+  M3=matrix(c(1,1,0,0), nrow = 2, ncol = 2, byrow = T)
+  
+  if(isTRUE(all.equal(M4, adj.mat, check.attributes=FALSE))){type="M4"}
+  if(isTRUE(all.equal(M0.1, adj.mat, check.attributes=FALSE)) || isTRUE(all.equal(M0.2, adj.mat, check.attributes=FALSE))){type="M0"}
+  if(isTRUE(all.equal(M2.1, adj.mat, check.attributes=FALSE)) || isTRUE(all.equal(M2.2, adj.mat, check.attributes=FALSE))){type="M2"}
+  if(isTRUE(all.equal(M3, adj.mat, check.attributes=FALSE))){type="M3"}
+  
+  return(type)
+  
+}
+
+
+# A function to reclassify all significant GMAC trios according to possible ADDIS model
+# classifications M0:M4 based on the mediation regression 
+#
+#                       Tj = b0 + b1Ci + b2Li + AXij + e
+#
+# Results are a table of GMAC model types and Addis model types side by side
+
+
+reclass=function(tissue="WholeBlood", trio.ind.vec=NULL, mod.type="cis", verbose=FALSE){
+  
+  #read in data
+  if(mod.type=="cis"){
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis.Rdata'))
+    
+  }else{
+    
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_trans.Rdata'))
+    
+  }
+  
+  #allocate space:
+  
+  mod.type.gmac=NULL
+  all.data=vector("list", length=length(trio.ind.vec))
+  pvals=NULL
+  
+  #loop for all trios
+  for(i in 1:length(trio.ind.vec)){
+  
+    trio.loc=as.matrix(out.data$input.list$trios.idx)[trio.ind.vec[i],]
+    known.conf=t(out.data$input.list$known.conf)
+    SNP=t(as.data.frame(out.data$input.list$snp.dat.cis)[trio.loc[1],])
+    GE=t(as.data.frame(out.data$input.list$exp.dat)[trio.loc[-1],])
+    which.covs=which(out.data$cov.indicator.list[trio.ind.vec[i],]==1)
+    sel.cov.pool=as.data.frame(out.data$input.list$cov.pool)[which.covs,]
+  
+    if(verbose==TRUE){
+      print("-----------GMAC-Selected-PCs--------------");print(row.names(sel.cov.pool))
+    }
+  
+    sel.cov.pool=t(sel.cov.pool)
+  
+    data.mat=cbind.data.frame(SNP, GE, sel.cov.pool, known.conf)
+
+    
+  
+    if(mod.type=="cis"){
+    
+      colnames(data.mat)=c("SNP","cis.gene", "trans.gene", colnames(sel.cov.pool), colnames(known.conf))
+      #colnames(addis.data)=c("cis.gene", "trans.gene", "SNP", paste0("PC", sig.asso.pcs))
+    
+    }else{
+    
+      colnames(data.mat)=c("SNP", "trans.gene", "cis.gene", colnames(sel.cov.pool), colnames(known.conf))
+      #colnames(addis.data)=c("trans.gene", "cis.gene", "SNP", addis.pcs)
+    
+    }
+  
+    #addis.data2=addis.data
+    #convert.factors
+    #data.mat$SNP=as.factor(data.mat$SNP)
+    data.mat$pcr=as.factor(data.mat$pcr)
+    data.mat$sex=as.factor(data.mat$sex)
+    data.mat$platform=as.factor(data.mat$platform)
+    #addis.data$SNP=as.factor(addis.data$SNP)
+    
+    ot=get.adj(data.mat, verbose=verbose)
+    adj=ot$adj
+    pvals[i]=ot$p.mediation
+    if(verbose==TRUE){print(paste0("Trio_Num_",trio.ind.vec[i]));print(adj);print(pvals[i])}
+    mod.type.gmac[i]=class.adj(adj)
+    all.data[[i]]=data.mat
+  
+  }
+  
+  mod.inf=cbind.data.frame(mod.type.gmac, trio.ind.vec, pvals)
+  colnames(mod.inf)=c("Inferred.Model", "Trio", "Pvalue")
+  return(list(mod.inf=mod.inf, all.data=all.data))
+  
+  
+}
 
 
 

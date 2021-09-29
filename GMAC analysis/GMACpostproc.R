@@ -4,6 +4,8 @@ source("/mnt/ceph/jarredk/HiC_Analyses/HiC_search.R")
 library('qvalue', lib="/mnt/ceph/jarredk/Rpackages")
 library('MRPC', lib="/mnt/ceph/jarredk/Rpackages")
 library('permute', lib="/mnt/ceph/jarredk/Rpackages")
+library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
+library('ppcor', lib="/mnt/ceph/jarredk/Rpackages")
 
 source("/mnt/ceph/jarredk/ADDIS_verify/ADDIS_Post_Analysis_processing.R")
 
@@ -21,7 +23,7 @@ run.postproc=function(output.pvals=NULL, trio.ref=NULL){
   qvals=qvalue(output.pvals, fdr.level = 0.1)
   
   num.inferred=sum(qvals$significant)
-  
+  #print(qvals$significant)
   sig.trios=trio.ref[qvals$significant,]
   
   result=cbind.data.frame(qvals$qvalue[qvals$significant], output.pvals[qvals$significant])
@@ -32,11 +34,11 @@ run.postproc=function(output.pvals=NULL, trio.ref=NULL){
 
 # #load in output for the cis trios:
 # 
-output.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_cis.Rdata')
-output.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_cis.Rdata')
-output.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_cis.Rdata')
-output.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_cis.Rdata')
-output.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_cis.Rdata')
+output.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_cis500.Rdata')
+output.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_cis500.Rdata')
+output.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_cis500.Rdata')
+output.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_cis500.Rdata')
+output.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_cis500.Rdata')
 # 
 # #post process GMAC-cis-mediated
 # result.WB=run.postproc(output.pvals = output.WB$output.table[,5], trio.ref = output.WB$output.table[,1:3])
@@ -50,11 +52,11 @@ output.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all
 # 
 # #load in output for the cis trios:
 # 
-output.t.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_trans.Rdata')
-output.t.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_trans.Rdata')
-output.t.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_trans.Rdata')
-output.t.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_trans.Rdata')
-output.t.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_trans.Rdata')
+output.t.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_trans500.Rdata')
+output.t.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_trans500.Rdata')
+output.t.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_trans500.Rdata')
+output.t.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_trans500.Rdata')
+output.t.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_trans500.Rdata')
 # 
 # result.t.WB=run.postproc(output.pvals = output.t.WB$output.table[,5], trio.ref = output.t.WB$output.table[,1:3])
 # result.t.AS=run.postproc(output.pvals = output.t.AS$output.table[,5], trio.ref = output.t.AS$output.table[,1:3])
@@ -99,7 +101,7 @@ output.t.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/a
 #a function to match which trios are found in the AM1T1/T2 and LM1T1/T2 tables and which have 
 #inferred model types that differ
 
-match.trios=function(tissues=tissues.vec[,1], which.mrpc="ADDIS"){
+match.trios=function(tissues=tissues.vec[,1]){
   
   library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
   
@@ -116,30 +118,26 @@ match.trios=function(tissues=tissues.vec[,1], which.mrpc="ADDIS"){
     
     
     #read in GMAC results
-    output.cis=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_cis.Rdata', sep = ""))
-    output.trans=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_trans.Rdata', sep=""))
+    output.cis=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_cis500.Rdata', sep = ""))
+    output.trans=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_trans500.Rdata', sep=""))
     
     #process 
     postproc.cis=run.postproc(output.pvals = output.cis$output.table[,5], 
                             trio.ref = output.cis$output.table[,1:3])
+    #print(dim(postproc.cis$sig.trios))
     
     postproc.trans=run.postproc(output.pvals = output.trans$output.table[,5], 
                               trio.ref = output.trans$output.table[,1:3])
-    
-    if(which.mrpc=="ADDIS"){
+    #print(dim(postproc.trans$sig.trios))
       
-      m1t1=read.csv(file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T1/", tissues[i], ".csv", sep = ""))
-      m1t2=read.csv(file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T2/", tissues[i], ".csv", sep = ""))
-      
-    }else{
-      
-      m1t1=read.csv(file = paste("/mnt/ceph/jarredk/Reg_Net/LM1T1/", tissues[i], ".csv", sep = ""))
-      m1t2=read.csv(file = paste("/mnt/ceph/jarredk/Reg_Net/LM1T2/", tissues[i], ".csv", sep = ""))
-      
-    }
+    m1t1=read.csv(file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T1/", tissues[i], ".csv", sep = ""),
+                  header = T, sep = ",")
+    m1t2=read.csv(file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T2/", tissues[i], ".csv", sep = ""),
+                  header = T, sep = ",")
     
     
-    num.matched.cis[i]=length(na.omit(row.match(m1t1[,2:4],postproc.cis$sig.trios)))
+    num.matched.cis[i]=length(na.omit(row.match(postproc.cis$sig.trios,m1t1[,2:4])))
+    #print(num.matched.cis)
     num.matched.trans[i]=length(na.omit(row.match(m1t2[,2:4],postproc.trans$sig.trios)))
     
     unmatched.cis[[i]]=postproc.cis$sig.trios[-c(na.omit(row.match(m1t1[,2:4],postproc.cis$sig.trios))),]
@@ -228,16 +226,31 @@ which.class=function(ind=NULL, classes.list=NULL){
 
 
 #cross analyze mediation test results with ADDIS trios
-cross.analyze=function(tissues=tissues.vec[,1], which.type="cis", save=FALSE, 
-                       path="/mnt/ceph/jarredk/GMACanalysis/"){
+cross.analyze=function(tissues=tissues.vec[,1], save=FALSE, path="/mnt/ceph/jarredk/GMACanalysis/"){
   
   
-  final.list.unmatched=vector("list", length = length(tissues))
-  final.list.matched=vector("list", length = length(tissues))
+  tables.list=vector("list", length = length(tissues))
+  bk.tbl=as.data.frame(matrix(0, nrow=length(tissues), ncol=6))
+  colnames(bk.tbl)=c("MO","M1","M2","M3","M4","Other")
+  row.names(bk.tbl)=tissues
+  
+  unq.table=as.data.frame(matrix(0, nrow = length(tissues), ncol = 3))
+  colnames(unq.table)=c("Unq.Cis", "Unq.Trans", "Both")
+  row.names(unq.table)=tissues
   
   for(i in 1:length(tissues)){
     
-    out1=match.trios(tissues=tissues[i], which.mrpc="ADDIS")
+    #read in GMAC results
+    output.cis=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_cis500.Rdata', sep = ""))
+    output.trans=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_trans500.Rdata', sep=""))
+    
+    #process 
+    postproc.cis=run.postproc(output.pvals = output.cis$output.table[,5], 
+                              trio.ref = output.cis$output.table[,1:3])
+    #print(dim(postproc.cis$sig.trios))
+    
+    postproc.trans=run.postproc(output.pvals = output.trans$output.table[,5], 
+                                trio.ref = output.trans$output.table[,1:3])
     
     addis.classes=loadRData(fileName=paste("/mnt/ceph/jarredk/AddisReRunFiles/List.models.", tissues[i], ".all.RData" ,sep=""))
     
@@ -248,48 +261,70 @@ cross.analyze=function(tissues=tissues.vec[,1], which.type="cis", save=FALSE,
     
     trios=loadRData(fileName=file1)
     
-    if(which.type=="cis"){
-      
-      indices=locate.trio(out1$unmatched.cis[[1]], trios)
-      indices2=locate.trio(out1$matched.cis[[1]], trios)
-      classes=which.class(ind = indices, classes.list = addis.classes)
-      classes2=which.class(ind = indices2, classes.list = addis.classes)
-      tab=cbind.data.frame(out1$unmatched.cis[[1]], indices, classes)
-      tab2=cbind.data.frame(out1$matched.cis[[1]], indices2, classes2)
-      colnames(tab)=c(colnames(out1$unmatched.cis[[1]]), "index.in.trio.mat","Addis.infer.Class")
-      colnames(tab2)=c(colnames(out1$matched.cis[[1]]), "index.in.trio.mat","Addis.infer.Class")
-      final.list.unmatched[[i]]=tab
-      final.list.matched[[i]]=tab2
-      
+    d1=dim(postproc.cis$sig.trios)[1]
+    d2=dim(postproc.trans$sig.trios)[1]
+    
+    unq.cis=which(is.na(row.match(postproc.cis$sig.trios, postproc.trans$sig.trios)))
+    unq.trans=which(is.na(row.match(postproc.trans$sig.trios, postproc.cis$sig.trios)))
+    
+    if(isTRUE(d1>d2)){
+      unq.common=na.omit(row.match(postproc.cis$sig.trios, postproc.trans$sig.trios))
+      common=postproc.cis$sig.trios[unq.common,]
+      perm.reg.p.common=output.cis$output.table[row.match(common, output.cis$output.table[,1:3]),5]
     }else{
-      
-      indices=locate.trio(out1$unmatched.trans[[i]], trios)
-      indices2=locate.trio(out1$matched.trans[[i]], trios)
-      classes=which.class(ind = indices, classes.list = addis.classes)
-      classes2=which.class(ind = indices2, classes.list = addis.classes)
-      tab=cbind.data.frame(out1$unmatched.trans[[i]], indices, classes)
-      tab2=cbind.data.frame(out1$matched.trans[[i]], indices2, classes2)
-      colnames(tab)=c(colnames(out1$unmatched.trans[[i]]), "index.in.trio.mat","Addis.infer.Class")
-      colnames(tab2)=c(colnames(out1$matched.trans[[i]]), "index.in.trio.mat","Addis.infer.Class")
-      final.list.unmatched[[i]]=tab
-      final.list.matched[[i]]=tab2
-      
+      unq.common=na.omit(row.match(postproc.trans$sig.trios, postproc.cis$sig.trios))
+      common=postproc.trans$sig.trios[unq.common]
+      perm.reg.p.common=output.trans$output.table[row.match(common, output.trans$output.table[,1:3]),5]
     }
     
+    pr.p.unq.cis=output.cis$output.table[row.match(postproc.cis$sig.trios[unq.cis,], 
+                                                   output.cis$output.table[,1:3]),5]
+    
+    pr.p.unq.trans=output.cis$output.table[row.match(postproc.trans$sig.trios[unq.trans,], 
+                                                     output.trans$output.table[,1:3]),5]
+    #catorize direction
+    found=c(rep("Both", dim(common)[1]), 
+            rep("Cis.Med", dim(postproc.cis$sig.trios[unq.cis,])[1]),
+            rep("Trans.Med", dim(postproc.trans$sig.trios[unq.trans,])[1]))
+    
+    #bind all information into a single table
+    table.pp=rbind.data.frame(common, postproc.cis$sig.trios[unq.cis,], postproc.trans$sig.trios[unq.trans,])
+    table2.pp=cbind.data.frame(table.pp, 
+                               Mediation.type=found,
+                               Perm.rep.p=c(perm.reg.p.common, pr.p.unq.cis, pr.p.unq.trans))
+    
+    #get the trio indicies and Addis M class
+    trio.idx=locate.trio(input=table2.pp[,1:3], trio.mat = trios)
+    Mtype=which.class(ind = trio.idx, classes.list = addis.classes)
+    
+    #get final table
+    table.final=cbind.data.frame(table2.pp, Trio.Num=trio.idx, Addis.Class=Mtype)
+    
+    tables.list[[i]]=table.final
     
     
+    bk.tbl[i,]=c(dim(tables.list[[i]][which(tables.list[[i]]$Addis.Class=="MO"),])[1],
+                 dim(tables.list[[i]][which(tables.list[[i]]$Addis.Class=="M1"),])[1],
+                 dim(tables.list[[i]][which(tables.list[[i]]$Addis.Class=="M2"),])[1],
+                 dim(tables.list[[i]][which(tables.list[[i]]$Addis.Class=="M3"),])[1],
+                 dim(tables.list[[i]][which(tables.list[[i]]$Addis.Class=="M4"),])[1],
+                 dim(tables.list[[i]][which(tables.list[[i]]$Addis.Class=="Other"),])[1])
     
+    unq.table[i,]=c(dim(tables.list[[i]][which(tables.list[[i]]$Mediation.type=="Cis.Med"),])[1],
+                    dim(tables.list[[i]][which(tables.list[[i]]$Mediation.type=="Trans.Med"),])[1],
+                    dim(tables.list[[i]][which(tables.list[[i]]$Mediation.type=="Both"),])[1])
     
   }
   
   if(save==TRUE){
     
-    save(final.list.unmatched, file = paste0(path, "GMAC.to.Addis.Class.List.Unmatched.",which.type, ".RData"))
-    save(final.list.matched, file = paste0(path, "GMAC.to.Addis.Class.List.Matched",which.type, ".RData"))
+    save(tables.list, file = paste0(path, "GMAC.results.final.table.RData"))
     
   }
   
-  return(list(fl.unm=final.list.unmatched, fl.m=final.list.matched))
+  bk.tbl$`Total GMAC Inferred`=rowSums(bk.tbl)
+  
+  return(list(final.tables=tables.list, breakdown.tab=bk.tbl, unique.tab=unq.table))
   
 }
 
@@ -341,11 +376,11 @@ plot.dist=function(class.vec.cis=NULL, class.vec.trans=NULL){
 cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis.pcs=NULL){
   
   if(mod.type=="cis"){
-    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis.Rdata'))
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis500.Rdata'))
     
   }else{
     
-    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_trans.Rdata'))
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_trans500.Rdata'))
     
   }
   
@@ -362,8 +397,15 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
   sel.cov.pool=t(sel.cov.pool)
   
   data.mat=cbind.data.frame(GE, SNP, sel.cov.pool, known.conf)
-  which.covs.addis=match(addis.pcs, row.names(out.data$input.list$cov.pool))
-  addis.data=cbind.data.frame(GE, SNP, t(out.data$input.list$cov.pool[which.covs.addis,]))
+  if(length(addis.pcs)>1){
+    which.covs.addis=match(addis.pcs, row.names(out.data$input.list$cov.pool))
+    addis.data=cbind.data.frame(GE, SNP, t(out.data$input.list$cov.pool[which.covs.addis,]))
+  }else if(length(addis.pcs)==1){
+    which.covs.addis=which(row.names(out.data$input.list$cov.pool)==addis.pcs)
+    addis.data=cbind.data.frame(GE, SNP, out.data$input.list$cov.pool[which.covs.addis,])
+  }else{
+    addis.data=cbind.data.frame(GE, SNP)
+  }
   
   if(mod.type=="cis"){
     
@@ -376,6 +418,7 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
     colnames(addis.data)=c("trans.gene", "cis.gene", "SNP", addis.pcs)
     
   }
+  
   
   data.mat2=data.mat
   addis.data2=addis.data
@@ -416,16 +459,19 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
 
 #a function to recreate the permutation regression from GMAC
 
-run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL){
+run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL, Alg="GMAC"){
   
   wald.stat=NULL
   
   trio2=trio
   #convert.factors
   #trio2$SNP=as.factor(trio2$SNP)
-  trio2$pcr=as.factor(trio2$pcr)
-  trio2$sex=as.factor(trio2$sex)
-  trio2$platform=as.factor(trio2$platform)
+  if(Alg=="GMAC"){
+    trio2$pcr=as.factor(trio2$pcr)
+    trio2$sex=as.factor(trio2$sex)
+    trio2$platform=as.factor(trio2$platform)
+  }
+
   
   test.wald=summary(lm(trans.gene~., data=trio2))$coefficients[2,3]
   
@@ -448,10 +494,11 @@ run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL){
     #print(head(trio.permuted))
     
     #trio.permuted$SNP=as.factor(trio.permuted$SNP)
-    trio.permuted$pcr=as.factor(trio.permuted$pcr)
-    trio.permuted$sex=as.factor(trio.permuted$sex)
-    trio.permuted$platform=as.factor(trio.permuted$platform)
-    
+    if(Alg=="GMAC"){
+      trio.permuted$pcr=as.factor(trio.permuted$pcr)
+      trio.permuted$sex=as.factor(trio.permuted$sex)
+      trio.permuted$platform=as.factor(trio.permuted$platform)
+    }
     wald.stat[i]=summary(lm(trans.gene~., data=trio.permuted))$coefficients[2,3]
     
     
@@ -595,11 +642,11 @@ check.ns.gmac=function(input.list.data=NULL, iters=1, alpha=0.01, print.it=FALSE
     act.data=cbind.data.frame(Coef=names(b)[-rm.c], Value=b[-rm.c])
     
     if(which.mod=="GMAC"){
-      fn1=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/GMAC.ridgeline.trio.", save.name, ".png")
-      fn2=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/GMAC.boxplot.trio.", save.name, ".png")
+      fn1=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/GMAC.ridgeline.trio.", save.name, ".png")
+      fn2=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/GMAC.boxplot.trio.", save.name, ".png")
     }else{
-      fn1=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/ADDIS.ridgeline.trio.", save.name, ".png")
-      fn2=paste0("/mnt/ceph/jarredk/GMACanalysis/permreg_plots/ADDIS.boxplot.trio.", save.name, ".png")
+      fn1=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/ADDIS.ridgeline.trio.", save.name, ".png")
+      fn2=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/ADDIS.boxplot.trio.", save.name, ".png")
     }
     
     png(fn1)
@@ -697,11 +744,11 @@ reclass=function(tissue="WholeBlood", trio.ind.vec=NULL, mod.type="cis", verbose
   
   #read in data
   if(mod.type=="cis"){
-    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis.Rdata'))
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis500.Rdata'))
     
   }else{
     
-    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_trans.Rdata'))
+    out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_trans500.Rdata'))
     
   }
   
@@ -779,6 +826,57 @@ reclass=function(tissue="WholeBlood", trio.ind.vec=NULL, mod.type="cis", verbose
 
 
 
+#a utility function combining many of the above for ease of use
+
+
+runit=function(data=l1$final.tables[[5]] ,trio.number=NULL, mtype="", pcs=NULL){
+  
+  
+  #trio 133 ADDIS:M3
+  types=reclass(tissue="WholeBlood", 
+                trio.ind.vec=trio.number, 
+                mod.type="cis", 
+                verbose=FALSE)
+  
+  
+  
+  list.data=cross.regress(tissue="WholeBlood", trio.ind=trio.number, mod.type="cis", addis.pcs=pcs)
+  
+  
+  fname1=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/GMAC.nomatch.permutedREG.trio",
+                trio.number,".png")
+  out.permreg=run.permuted.reg(trio=list.data$GMAC, nperms=10000, plot=TRUE, filename=fname1)
+  print("GMAC")
+  print(out.permreg$p.value)
+  print(out.permreg$obs.wald.stat)
+  
+  fname2=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/GMAC.nomatch.permutedREG.trio",
+                trio.number,".addis.png")
+  out.permreg=run.permuted.reg(trio=list.data$addis, nperms=10000, plot=TRUE, Alg="ADDIS", filename=fname2)
+  
+  print("ADDIS")
+  print(out.permreg$p.value)
+  print(out.permreg$obs.wald.stat)
+  
+  r=check.ns.gmac(input.list.data=list.data, 
+                  iters=1000, 
+                  alpha=0.01, 
+                  print.it=FALSE, 
+                  which.mod="GMAC",
+                  plot.it=TRUE, 
+                  save.name=paste0(trio.number, mtype))
+  
+  ra=check.ns.gmac(input.list.data=list.data, 
+                   iters=1000, 
+                   alpha=0.01, 
+                   print.it=FALSE, 
+                   which.mod="ADDIS",
+                   plot.it=TRUE, 
+                   save.name=paste0(trio.number, mtype, "_A"))  
+  
+  return(list.data)
+  
+}
 
 
 

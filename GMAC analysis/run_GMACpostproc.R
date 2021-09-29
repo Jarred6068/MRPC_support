@@ -1,44 +1,20 @@
 
 #read in postprocessing functions
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+#post process the significant mediation test pvalues by qvalue method
 
-#this function compares inferred trios in GMAC and 
-out1=match.trios(tissues=tissues.vec[,1], which.mrpc="ADDIS")
-#this table shows the overlapping cis and trans mediation trios between ADDIS and GMAC
-out1$table
-#the first five non-overlapping trios inferred to be cis mediation by GMAC
-out1$unmatched.cis$WholeBlood[1:5,]
-#print dimension
-print(dim(out1$unmatched.cis$WholeBlood))
-#the first five non-overlapping trios inferred to be trans mediation by GMAC
-out1$unmatched.trans$WholeBlood[1:5,]
-#print dimension
-print(dim(out1$unmatched.trans$WholeBlood))
-#count the intersect of the unmatched cis and trans trios
-row.match(out1$unmatched.cis$WholeBlood,out1$unmatched.trans$WholeBlood)
-
-#run now for LOND
-# out2=match.trios(tissues=tissues.vec[,1], which.mrpc="LOND")
-# #this table shows the overlapping cis and trans mediation trios between LOND and GMAC
-# out2$table
-# #the first five non-overlapping trios inferred to be cis mediation by GMAC
-# out2$unmatched.cis[[1]][1:5,]
-# #the first five non-overlapping trios inferred to be trans mediation by GMAC
-# out2$unmatched.trans[[1]][1:5,]
 
 
 #cross analysis for GMAC inferred cis and trans trios (l1, l2, respectively) that did not match/overlap the 
 #ADDIS inferred M1T1 and M1T2 trios
 #run for WholeBlood
-l1=cross.analyze(tissues="WholeBlood", which.type="cis", save=TRUE)
-#view the first 10 non-overlapping cis mediated trios and their model type under ADDIS
-l1$fl.unm[[1]][1:10,]
-l1$fl.m[[1]][1:10,]
+l1=cross.analyze(tissues=tissues.vec[,1], save=TRUE)
+#view the breakdown of GMAC inferred significant trios across Tissues and Addis Model Class 
+print(l1$breakdown.tab)
 
-l2=cross.analyze(tissues="WholeBlood", which.type="trans", save=TRUE)
-#view the first 10 non-overlapping trans trios and their model type under ADDIS
-l2$fl.unm[[1]][1:10,]
-l1$fl.m[[1]][1:10,]
+#look at first 10 entries of table for wholeblood
+l1$final.tables[[5]][1:10,]
+
 
 #Look at the addis inferred classes acr0ss at the intersection of the gmac inferred cis and trans models that 
 #are unmatched with addis

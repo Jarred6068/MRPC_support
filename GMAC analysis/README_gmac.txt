@@ -25,7 +25,7 @@ File Usage and Data Assembly:
 
    - the tisses selected for analysis were the first 5 tissues with the largest sample sizes (see table 1)
 
-2. The GMAC algorithm requires input of both known and unknown potential confounders. We used the known confounders of sex, age, and pcr test
+2. The GMAC algorithm requires input of both known and unknown potential confounders. We used the known confounders of sex, platform, and pcr test
    as the known set of confounders and the full set of principle components obtained from the PCA on the expression matrix for each tissue as the 
    pool of unknown potential confounders
 
@@ -46,9 +46,14 @@ GMAC Settings:
 
 *GMAC was run on all 5 tissues using first 50 permutations (nperm = 50) and later 500 (as the algorithm is slow for such a large data set). 
 *The return p-values were the nomial p-values (nominal.p = TRUE)
-*fdr_filter which is the fdr threshold at which common child and intermediate variables are filtered (left default at fdr_filter=0.1)
+*fdr_filter which is the fdr threshold at which common child and intermediate variables are filtered left default value (fdr_filter=0.1)
 *fdr which is the fdr rate used to select confounders was left at default (fdr=0.05)
 *all other settings were left to their default values
+
+5. GMAC was run twice on each set of trios:
+	*Firstly run with the cis gene as the mediator
+	*Second run with the trans gene as the mediator
+
 
 Post-Processing Results:
 
@@ -56,10 +61,11 @@ Post-Processing Results:
    selected covariates (adjusted for any/all selected PC's) we used only the latter
 
 2. The rate of type 1 errors for the p-values retained in (1.) was controlled using an FDR of 10% and the resulting q-values were returned
+   (i.e the function run.postproc() in GMACpostproc.R)
 
 3. based on the q-values, the number of remaining significant tests were counted and the significant trios were kept and non-significant removed.
 
-4. the significant trios retained were matched against the mediation trios in LOND and ADDIS to see how many were in common with GMAC
+4. the significant trios retained were matched against the mediation (M1T1 and M2T2) trios in LOND and ADDIS to see how many were in common with GMAC
 
 
 TABLE 1. - 
@@ -73,17 +79,18 @@ WholeBlood			   8823		             552	             484	             131	      1
 
 
 
-Checking Numerical Stability of GMAC Results by Simulation of the Mediation Test
+Checking Numerical Stability of GMAC Results by Simulation of the Mediation Test:
 
 * Mediation Test refers to the regression of the trans gene with the full set of confounders by GMAC:
 
 		Tj = b0 + b1Ci + b2Li + AXij + e
 
-* The numerical stability of the coefficients for the SNP and Cis gene was checked by simulation for mediation models inferred by GMAC that 
+* The numerical stability of the coefficients for the SNP and Cis gene were checked by simulation for mediation models inferred by GMAC that 
   were not inferred to be mediation by ADDIS
 
-* for each mediation test using all the adaptively selected and known confounders the coefficients, b, and residual standard error, sigma,
-  were retained and the trans gene was simulated via
+* Each mediation test (regression) was done using all the adaptively selected and known confounders. 
+
+* From each regression, the coefficients, b, and residual standard error, sigma, were retained and the expression of the trans gene was simulated via
 
 		Tnew = b0 + b1Ci + b2Li + AXij + e
 
@@ -94,11 +101,42 @@ where
 		
 
 * a new regression was conducted using the simulated trans gene as the response.
-* this process was repeated 1000 times and distribution of the estimated coefficients were retained.
+* this process was repeated 1000 times and the distribution of the estimated coefficients were retained.
+* plots of the trios tested are in the folder /mnt/ceph/jarredk/GMACanalysis/perm_regplots/
+* RESULT: instability was typically only visible in the SNP coefficient (sometimes the cis gene and sometimes both) 
+	  however, the wide distribution of coefficients was not reserved to the mediation test regression but was also
+	  visible in the addis regression using a much smaller set of covariates (inconclusive) 
+
+
+Further Post Processing Analysis and Notes:
+
+***We realized that GMAC reports significant mediation based only on the edge between the cis and trans gene: Ci ---> Tj
+   regardless of the possible effect from SNP to cis gene: Li ---> Ci or SNP to trans gene: Li ---> Tj. As a result, many of the 
+   the classifications for model types agree such as those reported M4 by ADDIS. This is because the M4 (fully connected) model
+   detects an undirected edge between the cis and trans gene Ci --- Tj. 
+
+***GMAC is unable to detect a true model 3 because model three lacks a Ci --- Tj edge and is therefore going to be classified as not significant
+   according to the mediation test 
+
+***The p-value obtained from the general regression (Tj = b0 + b1Ci + b2Li + AXij + e) can be larger (sometimes by an order of magnitude or two)
+   than the p-value observed from the permuted regression: This is the typical scenario causing differences between model classes based on the 
+   Ci ---> Tj edge
+
+***The regression under ADDIS selectes confounders from top 10 PCs of the expression matrix (those having a strong association with both the cis and trans) 
+   genes. Therefore, let this set of confounders be Zij such that it is a subset of Xij. The regression using adaptively selected confounders can
+   occasionally reverse the decision on a weakly positive edge between two nodes. An example are trios classified M3 under the ADDIS regression 
+							Tj = b0 + b1Ci + b2Li + BZij + e
+   
+   but classified as M0 under when using the full set of GMAC selected confounders. 
 
 
 
-
+                     MO M1 M2  M3  M4 Other Total GMAC Inferred
+AdiposeSubcutaneous 109 43  7 126 132     3                 420
+ArteryTibial         89 25  5 139 110     0                 368
+MuscleSkeletal      126 31  7 183 118     3                 468
+SkinSunExposed      106 33 12 185 138     0                 474
+WholeBlood          122 55 22 152 162     0                 513
 
 
 

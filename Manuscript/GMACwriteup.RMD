@@ -1,0 +1,98 @@
+---
+title: "A Comparison of GMAC and ADDIS"
+author: 
+-  Jarred Kvamme, University of Idaho
+date: "9/22/2021"
+output: pdf_document
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\section*{Overview}
+Both MRPC-LOND and MRPC-ADDIS techniques inferred a large number of trans mediated trios. The trans-mediation model has been previously identified, but is not the commonly ackowledged mode of mediation. Since this result is surprising relative to the existing literature, we sought to apply another method for inferring mediation on a subset of GTEx trios analyzed herein by MRPC. The Genomic Mediation analysis with Adaptive Confounding (GMAC) algorithm allows for a unique selection of a subset of potential confounders, ${\bf X_{ij}}$ from a larger covariate pool, ${\bf H}$, for each trio. By taking advantage of the Principle of Mendelian Randomization, the authors filter ${\bf H}$ by removing common child and intermediate confounding variables (e.g variables associated with the eQTL as well as the cis/trans genes). Post-filtering, GMAC preforms a mediation test on the edge between the cis gene and trans gene via the regression of the trans-gene $T_j$ on the cis-eQTL $L_i$, cis-gene $C_i$, and the set of adaptively selected confounders ${\bf X_{ij}}$:
+
+\[ T_j = \beta_0 + \beta_1 C_i + \beta_2 L_i + {\bf \Gamma} {\bf X}_{ij} + \epsilon \]
+
+The mediation statistic is the observed $t$-value of the cis-gene coefficient $\beta_1$. A null distribution for no-mediation is constructed by iteratively permuting the values of the cis-transcript conditioned on each genotype and repeating the above regression. The authors argue that the permutation of the cis-transcript within the genotypes of the cis-eQTL removes the association between the cis and trans gene transcripts while preserving the higher order associations with the cis-eQTL. The resulting mediation test compares the observed relationship between the trans and cis gene to a null distribution constructed from a model with no association and assuming that possible confounding has been well adjusted via the selected covariates. 
+
+It is important to note that the above mediation test describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider possible effects between the cis-eQTL and the cis-gene transcript ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene transcript ($L_i \rightarrow T_j$).
+
+\section*{2. Methods}
+
+To compare the GMAC and MRPC algorithms, we applied the GMAC algorithm to the top five GTEx tissues by sample size. Following with the creators of GMAC, we used the full set of principle components retained from the PCA of the expression matrix as the covariate pool, and three additional known confounders: the PCR used, the platform used, and sex of the individual in each sample [@yang2017identifying].    
+
+Consistent with @yang2017identifying, the analysis was preformed using a common child and intermediate variable filtering  FDR of $10\%$ and a confounder selection FDR of $5\%$ for each trio. Each trio supplied to GMAC consisted of the cis-QTL and the PEER normalized cis and trans gene transcripts with the highest association to the eQTL. To mitigate missing values in the eQTL matrix, multiple imputation of the matrix of unique cis-eQTLs was preformed via multiple correspondence analysis (MCA) prior to its use in the GMAC [@josse2016missmda]. The analysis was preformed twice on each trio, first with the cis gene as the mediator and second with the trans gene as the mediator. 
+   
+After applying GMAC to each tissue, the false discovery rate among the retained mediation p-values was controlled at the more liberal rate of $10\%$ [@yang2017identifying]. Each trio determined to have significant mediation after FDR filtering was compared with the regulatory network type inferred by MRPC-ADDIS. MRPC-ADDIS can infer three types of regulatory networks that contain an edge between the cis and trans gene (M1, M2, or M4). Since GMAC considers only the presence of the edge and not its direction, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).   
+ 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+cn=c("Adipose Subcutaneous","Artery Tibial","Muscle Skeletal","Skin Sun Exposed","Whole Blood")
+
+rn=c("Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max.")
+dat=matrix(0, nrow=6, ncol = 5)
+dat[,1]=c(0.000000, 0.000000, 0.000000, 0.006365, 0.003442, 0.156627)
+dat[,2]=c(0.000000, 0.000000, 0.000000, 0.006625, 0.003425, 0.159247)
+dat[,3]=c(0.000000, 0.000000, 0.000000, 0.006560, 0.002833, 0.158640)
+dat[,4]=c(0.000000, 0.000000, 0.000000, 0.006701, 0.003306, 0.160331)
+dat[,5]=c(0.000000, 0.000000, 0.000000, 0.006103, 0.002985, 0.155224)
+colnames(dat)=cn
+row.names(dat)=rn
+
+kable(dat, caption = "Descriptive statistics for the distribution of missing values across the eQTL's for each tissue used in GMAC" )
+
+```
+
+
+\section*{3. Results}
+
+At the $10\%$ false discovery rate, GMAC identified 2,243 trios with cis/trans mediation out of 55,446 total trios tested across the five tissues: Adipose subcutaneous, Tibial artery, Muscle skeletal, Sun exposed skin, and Whole blood. 653 of the trios were identified as cis mediation, 245 as trans mediation and 1,345 as both ($29.1\%, 10.9\%$, and $60\%$ respectivley). 
+
+Among the significant trios retained, we refer to the unique set of trios as the union of the non-disjoint sets of trios identified as cis-gene mediated or trans-gene mediated (see \textbf{ Table 3}). As can be seen from \textbf{Table 3}, the consistency in inferred mediation edges between the two methods varied between $33\%$ and $46\%$ of the trios across tissues. We observed two primary differences in the inference of the two algorithms; i) First, let ${\bf Z}_{ij}$ denote the set of confounding PC's used under ADDIS such that the columns $\{z_{ij} \} \subset \{x_{ij}\}$. The inclusion of a larger set of confounding variables as seen in GMAC could change the significance of the mediation p-value (prior to permutation). That is, the relationships   ii)     
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/final_result_table500_02.csv")
+table.final=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/summary.all.tissues.final.csv")
+
+table.final[,9]=(table.final$M1+table.final$M2+table.final$M4)/table.final[,8]
+colnames(table.final)=c("Tissue", paste0("M", c(0:4)), "Other", "Total GMAC Inferred", "Percentage In Common")
+
+kable(table.final, caption = "The breakdown of unqiue trios with inferred significant cis or trans mediation under GMAC across their respective ADDIS inferred regulatory networks. The column \"Percentage In Common\" is the proportion of significant trios that also contained a mediation edge in the regulatory network inferred under ADDIS", digits = 4)
+```
+
+
+
+
+
+
+
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/final_result_table500_02.csv")
+table.unique=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/GMAC.unique.trios.breakdown.csv")
+table3=cbind.data.frame(table.totals, table.unique[,-1])
+colnames(table3)=c("Tissue", "Total Trios", "Total Cis Mediated", "Total Trans Mediated", "Unique Cis Only", "Unique Trans Only", "Unique Both", "Unique Total")
+kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersect of columns 2 and 3")
+
+
+```
+
+
+
+
+
+
+
+
+
+\newpage
+\section*{References}

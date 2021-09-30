@@ -39,7 +39,7 @@ output.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous
 output.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_cis.Rdata')
 output.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_cis.Rdata')
 output.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_cis.Rdata')
-# 
+# # 
 # #post process GMAC-cis-mediated
 # result.WB=run.postproc(output.pvals = output.WB$output.table[,5], trio.ref = output.WB$output.table[,1:3])
 # result.AS=run.postproc(output.pvals = output.AS$output.table[,5], trio.ref = output.AS$output.table[,1:3])
@@ -55,9 +55,9 @@ output.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all
 output.t.WB=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/WholeBlood/all_trios_output_trans.Rdata')
 output.t.AS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/AdiposeSubcutaneous/all_trios_output_trans.Rdata')
 output.t.ArT=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/ArteryTibial/all_trios_output_trans.Rdata')
-output.t.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_trans500.Rdata')
+output.t.MS=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/MuscleSkeletal/all_trios_output_trans.Rdata')
 output.t.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/all_trios_output_trans.Rdata')
-# 
+# # 
 # result.t.WB=run.postproc(output.pvals = output.t.WB$output.table[,5], trio.ref = output.t.WB$output.table[,1:3])
 # result.t.AS=run.postproc(output.pvals = output.t.AS$output.table[,5], trio.ref = output.t.AS$output.table[,1:3])
 # result.t.ArT=run.postproc(output.pvals = output.t.ArT$output.table[,5], trio.ref = output.t.ArT$output.table[,1:3])
@@ -91,10 +91,10 @@ output.t.SSE=loadRData(fileName='/mnt/ceph/jarredk/GMACanalysis/SkinSunExposed/a
 #                          "GMAC.Total.M1T2",
 #                          "LOND.total.M1",
 #                          "ADDIS.total.M1")
-
-
-
-#write.csv(result.table, file="/mnt/ceph/jarredk/GMACanalysis/final_result_table.csv")
+# 
+# 
+# 
+# write.csv(result.table, file="/mnt/ceph/jarredk/GMACanalysis/master_tables/final_result_table10000.csv")
 
 
 
@@ -834,11 +834,11 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
   
   #space allocation
   cors=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 3))
-  colnames(cors)=c("cor(SNP,cis)", "cor(SNP, trans)", "cor(cis,trans)")
+  colnames(cors)=c("cor(SNP:cis)", "cor(SNP: trans)", "cor(cis:trans)")
   partial.cors.addis=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 3))
-  colnames(partial.cors.addis)=c("ADDIS.pcor(SNP,cis)", "ADDIS.pcor(SNP,trans)", "ADDIS.pcor(cis,trans)")
+  colnames(partial.cors.addis)=c("ADDIS.pcor(SNP:cis)", "ADDIS.pcor(SNP:trans)", "ADDIS.pcor(cis:trans)")
   partial.cors.gmac=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 3))
-  colnames(partial.cors.gmac)=c("GMAC.pcor(SNP,cis)", "GMAC.pcor(SNP,trans)", "GMAC.pcor(cis,trans)")
+  colnames(partial.cors.gmac)=c("GMAC.pcor(SNP:cis)", "GMAC.pcor(SNP:trans)", "GMAC.pcor(cis:trans)")
   perm.p.addis=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 2))
   colnames(perm.p.addis)=c("med.p.ADDIS", "med.stat.ADDIS")
   perm.p.gmac=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 2))
@@ -907,10 +907,30 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
                      which.mod="ADDIS",
                      plot.it=TRUE, 
                      save.name=paste0(trio.number[i], mtype, "_A")) 
-    pcor1=pcor(list.data$GMAC)$estimate[1:2,1:3]
-    partial.cors.gmac[i,]=c(pcor1[1,2:3], pcor1[2,3])
-    pcor2=pcor(list.data$addis)$estimate[1:2,1:3]
-    partial.cors.addis[i,]=c(pcor2[1,2:3], pcor2[2,3])
+    
+    an.error.occured <- FALSE
+    tryCatch( { pcor1 <- pcor(list.data$GMAC); print("------GMAC-pcors-----");print(pcor1$estimate) }
+              , error = function(e) {an.error.occured <<- TRUE})
+    
+    an.error.occured2 <- FALSE
+    tryCatch( { pcor2 <- pcor(list.data$addis); print("------ADDIS-pcors-----");print(pcor2$estimate) }
+              , error = function(e) {an.error.occured2 <<- TRUE})
+    
+    if(an.error.occured==TRUE){
+      partial.cors.gmac[i,]=rep(NA, 3)
+    }else{
+      pcor1=pcor(list.data$GMAC)$estimate[1:2,1:3]
+      partial.cors.gmac[i,]=c(pcor1[1,2:3], pcor1[2,3])
+    }
+    
+    
+    if(an.error.occured2==TRUE){
+      partial.cors.addis[i,]=rep(NA,3)
+    }else{
+      pcor2=pcor(list.data$addis)$estimate[1:2,1:3]
+      partial.cors.addis[i,]=c(pcor2[1,2:3], pcor2[2,3])
+    }
+
     
   }
   

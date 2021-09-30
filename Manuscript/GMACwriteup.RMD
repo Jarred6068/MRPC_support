@@ -54,14 +54,13 @@ kable(dat, caption = "Descriptive statistics for the distribution of missing val
 
 In light of the surprising number of trans-gene mediation trios inferred by MRPC, we sought to compare our results with GMAC by applying the GMAC method to the top five GTEx tissues by sample size. It is important to note that the test for mediation used by GMAC describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider the possible effects between the cis-eQTL and the cis-gene ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene ($L_i \rightarrow T_j$). Therefore, since GMAC considers only the presence of the mediation edge, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).
 
-At the $10\%$ false discovery rate, GMAC identified 2,243 trios with an edge between the cis and trans genes out of 55,446 total trios tested across the five selected tissues: Adipose subcutaneous, Tibial artery, Muscle skeletal, Sun exposed skin, and Whole blood. Of the trios with mediation edges, 653 were identified as the cis gene mediating the trans gene, 245 as trans gene mediating the cis gene and 1,345 as both ($29.1\%, 10.9\%$, and $60\%$ respectively). As can be seen from \textbf{Table 3}, the consistency in inferred mediation edges between the two methods varied between $33\%$ and $46\%$ of the trios across tissues. 
+At the $10\%$ false discovery rate, GMAC identified 2,243 trios with an edge between the cis and trans genes out of 55,446 total trios tested across the five selected tissues: Adipose subcutaneous, Tibial artery, Muscle skeletal, Sun exposed skin, and Whole blood. Of the trios with mediation edges, 653 were identified as the cis gene mediating the trans gene, 245 as trans gene mediating the cis gene and 1,345 as both ($29.1\%, 10.9\%$, and $60\%$ respectively). As can be seen from \textbf{Table 2}, the consistency in inferred mediation edges between the two methods varied between $35\%$ and $46\%$ of the trios across tissues. 
 
 To uncover the computational differences between MRPC and GMAC, we focused on trios with conflicting results between the two methods (trios inferred M0 or M3 under MRPC). The primary differences we observed between the two algorithms for these trios were that the inclusion of a larger set of confounding variables by GMAC often had the effect of strengthening the association between the cis and trans genes. That is, let ${\bf Z}_{ij}$ denote the set of confounding variables/PC's used under MRPC and ${\bf X}_{ij}$ the larger set used by GMAC such that the columns $\{z_{ij} \} \subset \{x_{ij}\}$. Because the confounding variables under GMAC are selected such that they have a significant association with both the cis and trans genes, the partial correlation between the cis gene and trans gene tends to strengthen as the column dimension of ${\bf Z}_{ij}$ approaches the column dimension of ${\bf X}_{ij}$. The result for GMAC is that under the mediation test, relatively weak associations ($0.1 \leq \rho \leq 0.2$) can be deemed significant. Conversely, for MRPC,  as the size of the network increases, the method becomes increasingly conservative. Therefore, when ${\bf Z}_{ij} = {\bf X}_{ij}$ MRPC tends to infer the null model unless the association between two nodes in the network is substantial.
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/final_result_table500_02.csv")
 table.final=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/summary.all.tissues.final.csv")
 
 table.final[,9]=(table.final$M1+table.final$M2+table.final$M4)/table.final[,8]
@@ -81,9 +80,9 @@ kable(table.final, caption = "The breakdown of unqiue trios with inferred signif
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/final_result_table500_02.csv")
+table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/final_result_table10000.csv")
 table.unique=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/GMAC.unique.trios.breakdown.csv")
-table3=cbind.data.frame(table.totals, table.unique[,-1])
+table3=cbind.data.frame(table.totals[,1:4], table.unique[,-1], rowSums(table.unique[,-1]))
 colnames(table3)=c("Tissue", "Total Trios", "Total Cis Mediated", "Total Trans Mediated", "Unique Cis Only", "Unique Trans Only", "Unique Both", "Unique Total")
 kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersect of columns 2 and 3")
 

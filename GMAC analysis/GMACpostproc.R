@@ -373,7 +373,8 @@ plot.dist=function(class.vec.cis=NULL, class.vec.trans=NULL){
 #a function to look at the regression on the trans gene in GMAC and ADDIS
 
 
-cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis.pcs=NULL){
+cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis.pcs=NULL, plot.it=FALSE,
+                       mtype=""){
   
   if(mod.type=="cis"){
     out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis.Rdata'))
@@ -430,9 +431,25 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
   #addis.data$SNP=as.factor(addis.data$SNP)
   
   model.GMAC=lm(trans.gene~., data = data.mat)
+  if(plot.it==TRUE){
+    png(paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/Reg_assump_plots/GMAC/",
+               "GMAC",mod.type,mtype,trio.ind,".png"))
+    par(mfrow=c(2,2))
+    plot(model.GMAC)
+    par(mfrow=c(1,1))
+    dev.off()
+  }
   print("--------------------------GMAC------------------------------")
   print(summary(model.GMAC))
   model.ADDIS=lm(trans.gene~., data = addis.data)
+  if(plot.it==TRUE){
+    png(paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/Reg_assump_plots/MRPC/",
+               "ADDIS",mod.type,mtype,trio.ind,".png"))
+    par(mfrow=c(2,2))
+    plot(model.ADDIS)
+    par(mfrow=c(1,1))
+    dev.off()
+  }
   print("--------------------------ADDIS------------------------------")
   print(summary(model.ADDIS))
   
@@ -834,11 +851,11 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
   
   #space allocation
   cors=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 3))
-  colnames(cors)=c("cor(SNP:cis)", "cor(SNP: trans)", "cor(cis:trans)")
+  colnames(cors)=c("cor.SNP.cis", "cor.SNP.trans", "cor.cis.trans")
   partial.cors.addis=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 3))
-  colnames(partial.cors.addis)=c("ADDIS.pcor(SNP:cis)", "ADDIS.pcor(SNP:trans)", "ADDIS.pcor(cis:trans)")
+  colnames(partial.cors.addis)=c("ADDIS.pcor.SNP.cis", "ADDIS.pcor.SNP.trans", "ADDIS.pcor.cis.trans")
   partial.cors.gmac=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 3))
-  colnames(partial.cors.gmac)=c("GMAC.pcor(SNP:cis)", "GMAC.pcor(SNP:trans)", "GMAC.pcor(cis:trans)")
+  colnames(partial.cors.gmac)=c("GMAC.pcor.SNP.cis", "GMAC.pcor.SNP.trans", "GMAC.pcor.cis.trans")
   perm.p.addis=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 2))
   colnames(perm.p.addis)=c("med.p.ADDIS", "med.stat.ADDIS")
   perm.p.gmac=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 2))
@@ -868,7 +885,8 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
     print("--------------ADDIS-PCs--------------")
     print(addis.pcs)
   
-    list.data=cross.regress(tissue="WholeBlood", trio.ind=trio.number[i], mod.type="cis", addis.pcs=addis.pcs)
+    list.data=cross.regress(tissue="WholeBlood", trio.ind=trio.number[i], mod.type="cis", addis.pcs=addis.pcs,
+                            mtype = mtype, plot.it = TRUE)
     
     num.pcs[i,2]=length(colnames(list.data$GMAC)[-c(1:2,(length(colnames(list.data$GMAC))-3):length(colnames(list.data$GMAC)))])
     
@@ -909,7 +927,7 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
                      save.name=paste0(trio.number[i], mtype, "_A")) 
     
     an.error.occured <- FALSE
-    tryCatch( { pcor1 <- pcor(list.data$GMAC); print("------GMAC-pcors-----");print(pcor1$estimate) }
+    tryCatch( { pcor1 <- pcor(list.data$GMAC); print("------GMAC-pcors-----");print(pcor1$estimate[1:3,1:3]) }
               , error = function(e) {an.error.occured <<- TRUE})
     
     an.error.occured2 <- FALSE
@@ -919,24 +937,48 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
     if(an.error.occured==TRUE){
       partial.cors.gmac[i,]=rep(NA, 3)
     }else{
-      pcor1=pcor(list.data$GMAC)$estimate[1:2,1:3]
-      partial.cors.gmac[i,]=c(pcor1[1,2:3], pcor1[2,3])
+      pcor1=pcor(list.data$GMAC)$estimate[1:3,1:3]
+      partial.cors.gmac[i,]=c(pcor1[3,1:2], pcor1[1,2])
     }
     
     
     if(an.error.occured2==TRUE){
       partial.cors.addis[i,]=rep(NA,3)
     }else{
-      pcor2=pcor(list.data$addis)$estimate[1:2,1:3]
-      partial.cors.addis[i,]=c(pcor2[1,2:3], pcor2[2,3])
+      pcor2=pcor(list.data$addis)$estimate[1:3,1:3]
+      partial.cors.addis[i,]=c(pcor2[3,1:2], pcor2[1,2])
     }
 
     
+    temp.tab=c(trio=trio.number[i], SNP=indata$snp[i], Cis.Gene=indata$cis[i], Trans.Gene=indata$trans[i],
+               Class=indata$Addis.Class[i], Type=indata$Mediation.type[i], num.pcs[i,], perm.p.gmac[i,],
+               perm.p.addis[i,], GMAC.pcor=partial.cors.gmac$GMAC.pcor.cis.trans[i], 
+               ADDIS.pcor=partial.cors.addis$ADDIS.pcor.cis.trans[i])
+    
+    if(i==1){
+      write.table(temp.tab, 
+                  file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/trios.pcors.summary.table",mtype,".txt"), 
+                  quote = FALSE, 
+                  row.names = FALSE,
+                  col.names = TRUE,
+                  sep = "\t")
+    }else{
+    
+      write.table(temp.tab, 
+                  file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/trios.pcors.summary.table",mtype,".txt"), 
+                  quote = FALSE, 
+                  row.names = FALSE, 
+                  col.names = FALSE,
+                  append = TRUE, 
+                  sep = "\t")
+    }
   }
   
   final.table=cbind.data.frame(trio=trio.number, SNP=indata$snp, Cis.Gene=indata$cis, Trans.Gene=indata$trans,
                                Class=indata$Addis.Class, Type=indata$Mediation.type, num.pcs, cors, perm.p.gmac,
                                perm.p.addis, partial.cors.gmac, partial.cors.addis)
+  
+  save(final.table, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/trios.pcors.summary.table",mtype,".Rdata"))
   
   return(list(datalist=list.data, table=final.table))
   

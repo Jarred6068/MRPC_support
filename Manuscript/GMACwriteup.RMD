@@ -54,14 +54,14 @@ kable(dat, caption = "Descriptive statistics for the distribution of missing val
 
 In light of the surprising number of trans-gene mediation trios inferred by MRPC, we sought to compare our results with GMAC by applying the GMAC method to the top five GTEx tissues by sample size. It is important to note that the test for mediation used by GMAC describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider the possible effects between the cis-eQTL and the cis-gene ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene ($L_i \rightarrow T_j$). Therefore, since GMAC considers only the presence of the mediation edge, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).
 
-At the $10\%$ false discovery rate, GMAC identified 2,243 trios with an edge between the cis and trans genes out of 55,446 total trios tested across the five selected tissues: Adipose subcutaneous, Tibial artery, Muscle skeletal, Sun exposed skin, and Whole blood. Of the trios with mediation edges, 653 were identified as the cis gene mediating the trans gene, 245 as trans gene mediating the cis gene and 1,345 as both ($29.1\%, 10.9\%$, and $60\%$ respectively). As can be seen from \textbf{Table 2}, the consistency in inferred mediation edges between the two methods varied between $35\%$ and $46\%$ of the trios across tissues. 
+At the $10\%$ false discovery rate, GMAC identified $2,160$ trios with an edge between the cis and trans genes out of $55,446$ total trios tested across the five selected tissues: Adipose subcutaneous, Tibial artery, Muscle skeletal, Sun exposed skin, and Whole blood. Of the trios with mediation edges, 653 were identified as the cis gene mediating the trans gene, 245 as trans gene mediating the cis gene and 1,345 as both ($29.1\%, 10.9\%$, and $60\%$ respectively). As can be seen from \textbf{Table 2}, the consistency in inferred mediation edges between the two methods varied between $35\%$ and $46\%$ of the trios across tissues. 
 
 To uncover the computational differences between MRPC and GMAC, we focused on trios with conflicting results between the two methods (trios inferred M0 or M3 under MRPC). The primary differences we observed between the two algorithms for these trios were that the inclusion of a larger set of confounding variables by GMAC often had the effect of strengthening the association between the cis and trans genes. That is, let ${\bf Z}_{ij}$ denote the set of confounding variables/PC's used under MRPC and ${\bf X}_{ij}$ the larger set used by GMAC such that the columns $\{z_{ij} \} \subset \{x_{ij}\}$. Because the confounding variables under GMAC are selected such that they have a significant association with both the cis and trans genes, the partial correlation between the cis gene and trans gene tends to strengthen as the column dimension of ${\bf Z}_{ij}$ approaches the column dimension of ${\bf X}_{ij}$. The result for GMAC is that under the mediation test, relatively weak associations ($0.1 \leq \rho \leq 0.2$) can be deemed significant. Conversely, for MRPC,  as the size of the network increases, the method becomes increasingly conservative. Therefore, when ${\bf Z}_{ij} = {\bf X}_{ij}$ MRPC tends to infer the null model unless the association between two nodes in the network is substantial.
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-table.final=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/summary.all.tissues.final.csv")
+table.final=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/summary.all.tissues.final.csv")
 
 table.final[,9]=(table.final$M1+table.final$M2+table.final$M4)/table.final[,8]
 colnames(table.final)=c("Tissue", paste0("M", c(0:4)), "Other", "Total GMAC Inferred", "Percentage In Common")
@@ -80,16 +80,57 @@ kable(table.final, caption = "The breakdown of unqiue trios with inferred signif
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/final_result_table10000.csv")
-table.unique=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/GMAC.unique.trios.breakdown.csv")
-table3=cbind.data.frame(table.totals[,1:4], table.unique[,-1], rowSums(table.unique[,-1]))
+table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/final_result_table10000.csv")
+table.unique=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/GMAC.unique.trios.breakdown.csv")
+table3=cbind.data.frame(table.totals[,2:5], table.unique[,-1], rowSums(table.unique[,-1]))
 colnames(table3)=c("Tissue", "Total Trios", "Total Cis Mediated", "Total Trans Mediated", "Unique Cis Only", "Unique Trans Only", "Unique Both", "Unique Total")
-kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersect of columns 2 and 3")
+kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersection of the columns \"Total Cis Mediated\" and \"Total Trans Mediated\" ")
 
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggpubr)
 
+table.pcorM3=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/trios.pcors.summary.tableM3.txt", sep = "\t", header = T)
+
+table.pcorM0=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/trios.pcors.summary.tableM0.txt", sep = "\t", header = T)
+
+pcors=c(table.pcorM3$GMAC.pcor, table.pcorM3$ADDIS.pcor)
+labels=c(rep('GMAC', length(table.pcorM3$GMAC.pcor)), rep("ADDIS", length(table.pcorM3$ADDIS.pcor)))
+
+dat1=cbind.data.frame(pcors=pcors, labels=labels)
+
+ggplot(data=dat1, aes(x=abs(pcors), fill=labels))+geom_density(alpha=0.5)
+
+#table.pcorM3$abs.diff=abs((table.pcorM3$GMAC.pcor) - (table.pcorM3$ADDIS.pcor))
+#table.pcorM3$diff.PCs=table.pcorM3$GMAC.num.pcs - table.pcorM3$ADDIS.num.pcs
+#ggplot(data=table.pcorM3, aes(x=abs.diff, fill=1))+geom_density(alpha=0.5, label=FALSE)
+#ggplot(data=table.pcorM3, aes(x=diff.PCs, y=abs.diff))+geom_point()
+
+# boxplot(cbind.data.frame(ADDIS=table.pcorM3$ADDIS.pcor,GMAC=table.pcorM3$GMAC.pcor),
+#         ylab="Partial Correlation")
+
+# plot(table.pcorM3$GMAC.num.pcs, 
+#      table.pcorM3$GMAC.pcor, 
+#      pch=21,
+#      bg="red",
+#      xlim = c(0,40))
+# points(table.pcorM3$ADDIS.num.pcs, 
+#        table.pcorM3$ADDIS.pcor,
+#        pch=21,
+#        bg="blue")
+# 
+# plot(table.pcorM3$GMAC.num.pcs-table.pcorM3$ADDIS.num.pcs,
+#      table.pcorM3$GMAC.pcor-table.pcorM3$ADDIS.pcor,
+#      xlab = "ADDIS Partial Correlation",
+#      ylab = "GMAC Partial Correlation")
+#points(table.pcorM0$ADDIS.pcor.cis.trans., 
+#     table.pcorM0$GMAC.pcor.cis.trans.,
+#     pch=21,
+#     bg="blue")
+
+```
 
 
 

@@ -6,6 +6,7 @@ library('MRPC', lib="/mnt/ceph/jarredk/Rpackages")
 library('permute', lib="/mnt/ceph/jarredk/Rpackages")
 library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
 library('ppcor', lib="/mnt/ceph/jarredk/Rpackages")
+library('car', lib = "/mnt/ceph/jarredk/Rpackages")
 
 source("/mnt/ceph/jarredk/ADDIS_verify/ADDIS_Post_Analysis_processing.R")
 
@@ -987,6 +988,61 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
 
 
 
+#a simple function to identify possible suppressor variables in the set of confounding variables
+#included in a trio 
 
+id.suppress=function(data=NULL, verbose=FALSE){
+  
+  
+  supp.index=NULL
+  names1=NULL
+  #data$pcr=as.factor(data$pcr)
+  #data$platform=as.factor(data$platform)
+  #data$sex=as.factor(data$platform)
+  
+  for(i in 3:(dim(data)[2]-3)){
+    
+    modelx1=lm(trans.gene~., data=data[, c(1:3)])
+    modelx12=lm(trans.gene~., data=data[,c(1:3,i)])
+    modelx2=lm(trans.gene~., data=data[,c(2,i)])
+    
+    if(verbose==TRUE){
+      
+      print(paste0("========================================Models_", colnames(data)[i],"====================================="))
+      print(summary(modelx1))
+      print(summary(modelx2))
+      print(summary(modelx12))
+      
+    }
+    
+    regx1=anova(modelx1)
+    regx12=anova(modelx12)
+    regx2=anova(modelx2)
+    
+    ssr.x12=sum(regx12$`Sum Sq`[-length(regx12$`Sum Sq`)])
+    ssr.x1=sum(regx1$`Sum Sq`[-length(regx1$`Sum Sq`)])
+    ssr.x2.x1=ssr.x12-ssr.x1
+    ssr.x2=sum(regx2$`Sum Sq`[-length(regx2$`Sum Sq`)])
+    
+    if(verbose==TRUE){
+      
+      print("========================================SSRs=====================================")
+      print(paste0("SSR(Cis.Gene,",colnames(data)[i],")=",ssr.x12))
+      print(paste0("SSR(Cis.Gene)=",ssr.x1))
+      print(paste0("SSR(",colnames(data)[i],"| Cis.Gene)=",ssr.x2.x1))
+      print(paste0("SSR(",colnames(data)[i],")=",ssr.x2))
+      
+    }
+    
+    supp.index[i-2]=ssr.x2.x1/ssr.x2
+    
+    names1[i-2]=colnames(data)[i]
+  }
+  
+  names(supp.index)=names1
+  return(supp.index)
+  
+  
+}
 
 

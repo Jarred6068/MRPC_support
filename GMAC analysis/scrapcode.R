@@ -33,14 +33,47 @@ MRPC.fit.FDR.addis <- MRPC(test.data,
 as(MRPC.fit.FDR.addis@graph, "matrix")[1:3,1:3]
 
 
-Lond2Addis.lookup(trio.index=trio.number[i], tissue.name="WholeBlood", with.pc=TRUE)
+Lond2Addis.lookup(trio.index=17, tissue.name="WholeBlood", with.pc=TRUE)
 
-list.data=cross.regress(tissue="WholeBlood", trio.ind=trio.number[i], mod.type="cis", addis.pcs=NULL)
+list.data=cross.regress(tissue="WholeBlood", trio.ind=17, mod.type="cis", addis.pcs=NULL)
 
 
 fname1=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/GMAC.nomatch.permutedREG.trio",
               319,".png")
 out.permreg=run.permuted.reg(trio=list.data$GMAC, nperms=10000, plot=TRUE, filename=fname1)
+
+
+#========================================================================================
+##suppression analysis
+l1$final.tables[[1]][which(l1$final.tables[[1]]$Addis.Class=="M3"),]
+list.data=cross.regress(tissue="WholeBlood", trio.ind=17, mod.type="cis", addis.pcs=NULL)
+#get data & convert factors
+test.data=list.data$GMAC
+test.data$pcr=as.factor(test.data$pcr)
+test.data$platform=as.factor(test.data$platform)
+test.data$sex=as.factor(test.data$sex)
+
+test.mod=lm(trans.gene~., data=test.data)
+vif(test.mod)
+
+#look at suppression index for the first 2 independent variables
+id.suppress(list.data$GAMC[,1:7], verbose=TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

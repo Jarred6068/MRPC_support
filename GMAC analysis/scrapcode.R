@@ -45,7 +45,10 @@ out.permreg=run.permuted.reg(trio=list.data$GMAC, nperms=10000, plot=TRUE, filen
 
 #========================================================================================
 ##suppression analysis
-l1$final.tables[[1]][which(l1$final.tables[[1]]$Addis.Class=="M3"),]
+source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+l1=cross.analyze(tissues=tissues.vec[5,1], save=FALSE)
+all.m3=l1$final.tables[[1]][which(l1$final.tables[[1]]$Addis.Class=="M3"),]
+print(all.m3)
 list.data=cross.regress(tissue="WholeBlood", trio.ind=17, mod.type="cis", addis.pcs=NULL)
 #get data & convert factors
 test.data=list.data$GMAC
@@ -57,7 +60,7 @@ test.mod=lm(trans.gene~., data=test.data)
 vif(test.mod)
 
 #look at suppression index for the first 2 independent variables
-id.suppress(list.data$GAMC[,1:7], verbose=TRUE)
+id.suppress(list.data$GMAC[,1:7], verbose=TRUE)
 
 
 
@@ -70,8 +73,13 @@ id.suppress(list.data$GAMC[,1:7], verbose=TRUE)
 
 
 
-
-
+nn=10
+l1=cross.analyze(tissues="WholeBlood", save=FALSE)
+all.m0m3=l1$final.tables[[1]][c(which(l1$final.tables[[1]]$Addis.Class=="M3"), which(l1$final.tables[[1]]$Addis.Class=="MO")),]
+trios=sample(all.m0m3$Trio.Num, nn)
+ot1=run.simu12(tissue = "WholeBlood" ,trios=trios, 
+               mod.type.vec=all.m0m3$Mediation.type[match(trios, all.m0m3$Trio.Num)],
+               alpha=0.001, n=10)
 
 
 

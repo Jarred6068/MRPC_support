@@ -7,6 +7,9 @@ library('permute', lib="/mnt/ceph/jarredk/Rpackages")
 library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
 library('ppcor', lib="/mnt/ceph/jarredk/Rpackages")
 library('car', lib = "/mnt/ceph/jarredk/Rpackages")
+#library('Morpho', lib = "/mnt/ceph/jarredk/Rpackages")
+library('FactoMineR', lib="/mnt/ceph/jarredk/Rpackages")
+
 
 source("/mnt/ceph/jarredk/ADDIS_verify/ADDIS_Post_Analysis_processing.R")
 
@@ -375,7 +378,7 @@ plot.dist=function(class.vec.cis=NULL, class.vec.trans=NULL){
 
 
 cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis.pcs=NULL, plot.it=FALSE,
-                       mtype=""){
+                       mtype="", verbose=TRUE){
   
   if(mod.type=="cis"){
     out.data=loadRData(fileName=paste0('/mnt/ceph/jarredk/GMACanalysis/', tissue, '/all_trios_output_cis.Rdata'))
@@ -430,8 +433,14 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
   data.mat$sex=as.factor(data.mat$sex)
   data.mat$platform=as.factor(data.mat$platform)
   #addis.data$SNP=as.factor(addis.data$SNP)
+  if(mod.type=="cis"){
+    model.GMAC=lm(trans.gene~., data = data.mat)
+    model.ADDIS=lm(trans.gene~., data = addis.data)
+  }else{
+    model.GMAC=lm(cis.gene~., data = data.mat)
+    model.ADDIS=lm(cis.gene~., data = addis.data)
+  }
   
-  model.GMAC=lm(trans.gene~., data = data.mat)
   if(plot.it==TRUE){
     png(paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/Reg_assump_plots/GMAC/",
                "GMAC",mod.type,mtype,trio.ind,".png"))
@@ -440,9 +449,12 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
     par(mfrow=c(1,1))
     dev.off()
   }
-  print("--------------------------GMAC------------------------------")
-  print(summary(model.GMAC))
-  model.ADDIS=lm(trans.gene~., data = addis.data)
+  
+  if(verbose==TRUE){
+    print("--------------------------GMAC------------------------------")
+    print(summary(model.GMAC))
+  }
+
   if(plot.it==TRUE){
     png(paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/Reg_assump_plots/MRPC/",
                "ADDIS",mod.type,mtype,trio.ind,".png"))
@@ -451,15 +463,37 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
     par(mfrow=c(1,1))
     dev.off()
   }
-  print("--------------------------ADDIS------------------------------")
-  print(summary(model.ADDIS))
   
+  if(verbose==TRUE){
+    print("--------------------------ADDIS------------------------------")
+    print(summary(model.ADDIS))
+  }
+
+  #store relevant regression info
   model.matrix.addis=model.matrix(model.ADDIS)
   model.matrix.gmac=model.matrix(model.GMAC)
   b.gmac=summary(model.GMAC)$coefficients[,1]
   b.addis=summary(model.ADDIS)$coefficients[,1]
   sigma.gmac=summary(model.GMAC)$sigma
   sigma.addis=summary(model.ADDIS)$sigma
+  
+  if(mod.type=="cis"){
+    
+    p.addis=as.data.frame(summary(model.ADDIS)$coefficients)$`Pr(>|t|)`[which(row.names(as.data.frame(summary(model.ADDIS)$coefficients))=="cis.gene")]
+    p.gmac=as.data.frame(summary(model.GMAC)$coefficients)$`Pr(>|t|)`[which(row.names(as.data.frame(summary(model.GMAC)$coefficients))=="cis.gene")]
+    
+    bgcg=b.gmac[which(names(b.gmac)=="cis.gene")]
+    bacg=b.addis[which(names(b.addis)=="cis.gene")]
+    
+  }else{
+    
+    p.addis=as.data.frame(summary(model.ADDIS)$coefficients)$`Pr(>|t|)`[which(row.names(as.data.frame(summary(model.ADDIS)$coefficients))=="trans.gene")]
+    p.gmac=as.data.frame(summary(model.GMAC)$coefficients)$`Pr(>|t|)`[which(row.names(as.data.frame(summary(model.GMAC)$coefficients))=="trans.gene")]
+    bgcg=b.gmac[which(names(b.gmac)=="trans.gene")]
+    bacg=b.addis[which(names(b.addis)=="trans.gene")]
+  }
+
+  
   
   return(list(addis=addis.data2, 
               GMAC=data.mat2, 
@@ -468,7 +502,11 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
                            b.gmac=b.gmac,
                            b.addis=b.addis,
                            sigma.gmac=sigma.gmac,
-                           sigma.addis=sigma.addis)))
+                           sigma.addis=sigma.addis,
+                           p.gmac=p.gmac,
+                           p.addis=p.addis,
+                           b.gmac.cis.gene=bgcg,
+                           b.addis.cis.gene=bacg)))
   
 
   
@@ -991,7 +1029,7 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
 #a simple function to identify possible suppressor variables in the set of confounding variables
 #included in a trio 
 
-id.suppress=function(data=NULL, verbose=FALSE){
+id.suppress=function(data=NULL, verbose=FALSE, reg.compare=FALSE){
   
   
   supp.index=NULL
@@ -1037,12 +1075,392 @@ id.suppress=function(data=NULL, verbose=FALSE){
     supp.index[i-2]=ssr.x2.x1/ssr.x2
     
     names1[i-2]=colnames(data)[i]
+    
+    
   }
   
   names(supp.index)=names1
+  suppressors=names(supp.index[supp.index>1])
+  
+  if(reg.compare==TRUE){
+    
+    for(j in 1:2){
+      
+      if(j==1){
+        print("=============Regression With Only Suppressors=============")
+        supp.data=data[,match(suppressors, colnames(data))]
+      }else{
+        print("=============Regression Without Suppressors===============")
+        supp.data=data[,-match(suppressors, colnames(data))]
+      }
+      
+      supp.data$trans.gene=data$trans.gene
+      supp.data$cis.gene=data$cis.gene
+      supp.data$SNP=data$SNP
+      supp.data$pcr=as.factor(data$pcr)
+      supp.data$platform=as.factor(data$platform)
+      supp.data$sex=as.factor(data$sex)
+      
+      print(summary(lm(trans.gene~., data = supp.data)))
+    }
+    
+  }
+  
+  
   return(supp.index)
   
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#A function which simulates the trans gene of a given trio by 
+#                 Tj=a + b1 Ci + b2 Li + V + errors
+
+#where V represents the PCs significant at level alpha from the original regression of the trio using all
+#GMAC adaptively selected PCs
+
+
+simu1=function(data=NULL,alpha=0.001, verbose=TRUE){
+  
+  
+  
+  data$pcr=as.factor(data$pcr)
+  data$platform=as.factor(data$platform)
+  data$sex=as.factor(data$sex)
+  
+  mod=lm(trans.gene~., data=data)
+  
+  if(verbose==TRUE){
+    print("========================Results-for-original-Tj=======================")
+    print(summary(mod))
+  }
+  
+  X=model.matrix(mod)
+  #print(colnames(X))
+  b=as.data.frame(summary(mod)$coefficients)$Estimate
+  names(b)=row.names(as.data.frame(summary(mod)$coefficients))
+  idx=which(as.data.frame(summary(mod)$coefficients)$`Pr(>|t|)`[-c(1:3)]<alpha)+3
+  keep.pcs=row.names(as.data.frame(summary(mod)$coefficients))[idx]
+  
+  S=id.suppress(data, verbose=FALSE)
+  p=length(na.omit(match(keep.pcs, names(S[which(S>1)]))))/length(keep.pcs)
+  
+  if(verbose==TRUE){
+    print('Suppressors:')
+    print(S[which(S>1)])
+    print(paste("Sig.PCs:", paste(keep.pcs, collapse = "," )))
+    print(paste0("Proportion of Sig.PCs That Are Suppressors = ", p))
+  }
+  
+  b.gen=b[c(1:3, idx)]
+  #print(length(b.gen))
+  X.gen=X[,c(1:3, match(keep.pcs, colnames(X)[-1])+1)]
+  #print(dim(X.gen))
+  errors=rnorm(dim(X.gen)[1])
+  
+  Tj=X.gen%*%b.gen+errors
+  
+  data.new=data
+  data.new$trans.gene=Tj
+  
+  
+  
+  mod2=lm(trans.gene~., data = data.new)
+
+  if(verbose==TRUE){
+    print("==============coefficients-used-to-generate-Tj========================")
+    print(b.gen)
+    print("=====================model-matrix-for-Tj==============================")
+    print(head(X.gen))
+    print("========================Results-for-simulated-Tj======================")
+    print(summary(mod2))
+  }
+  
+  
+  sim.coef.mat=as.data.frame(summary(mod2)$coefficients)
+  sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+  sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  
+  #print(cor(data.new[, (length(colnames(data.new))-2):length(colnames(data.new))])[,1:3])
+  return(list(sim.data=data.new, GMAC.sim.p=sim.p, GMAC.sim.b=sim.b))
+  
+}
+
+
+#A function which simulates the trans gene of a given trio by 
+#                 Tj=a + b1 Ci + b2 Li + V + errors
+
+#where V represents the PC's not selected by addis or GMAC. The goal is to better understand the stability of the regression
+
+
+simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, n=10, verbose=TRUE){
+  
+  if(isFALSE(is.null(seed))){
+    set.seed(seed = seed)
+  }
+  
+  out.vec=rep(0, 6)
+  names(out.vec)=c("Num.PCs.GMAC", "Per.Var", "Med.pvalue.MRPC", "Med.coef.MRPC", "Med.pvalue.GMAC", "Med.coef.GMAC")
+  
+  
+  data$pcr=as.factor(data$pcr)
+  data$platform=as.factor(data$platform)
+  data$sex=as.factor(data$sex)
+  
+  file2=paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",
+              tissue,"_AllPC/PCs.matrix.",
+              tissue, ".RData", sep="")
+  
+  PCs=loadRData(fileName=file2)
+  match.pcs=na.omit(match(colnames(data), colnames(PCs)))
+  
+  out.vec[1]=length(match.pcs)
+  
+  PCs2=PCs[,-match.pcs]
+  
+  pcs.chosen=PCs2[,sample(c(1:dim(PCs2)[2]), n)]
+  
+  new.data=cbind.data.frame(data, pcs.chosen)
+  
+  #print(head(new.data))
+  
+  
+  if(mod.type.vec[i]=="Both"){
+    true.model=lm(trans.gene~., data=new.data)
+  }else if(mod.type.vec[i]=="Cis.Med"){
+    true.model=lm(trans.gene~., data=new.data)
+  }else{
+    true.model=lm(cis.gene~., data=new.data)
+  }
+  
+  
+  if(verbose==TRUE){
+    print("========================Results-for-generating-model-of-Tj===========================")
+    print(summary(true.model))
+  }
+  
+  X=model.matrix(true.model)
+  b=as.data.frame(summary(true.model)$coefficients)$Estimate
+  names(b)=row.names(as.data.frame(summary(true.model)$coefficients))
+  
+  if(verbose==TRUE){
+    print("==============coefficients-used-to-generate-Tj========================")
+    print(b)
+    print("=====================model-matrix-for-Tj==============================")
+    print(head(X))
+  }
+  errors=rnorm(dim(X)[1])
+  
+  Tj=X%*%b+errors
+  
+  data.new=data
+  data.new$trans.gene=Tj
+  
+  model2=lm(trans.gene~., data = data.new)
+  
+  if(mod.type.vec[i]=="Both"){
+    model2=lm(trans.gene~., data = data.new)
+  }else if(mod.type.vec[i]=="Cis.Med"){
+    model2=lm(trans.gene~., data = data.new)
+  }else{
+    model2=lm(cis.gene~., data = data.new)
+  }
+  
+  
+  if(verbose==TRUE){
+    print("========================Results-for-simulated-Tj======================")
+    print(summary(model2))
+  }
+  
+  
+  sim.coef.mat=as.data.frame(summary(model2)$coefficients)
+  
+  if(mod.type.vec[i]=="Both"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else if(mod.type.vec[i]=="Cis.Med"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else{
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="trans.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="trans.gene")]
+  }
+
+  
+  return(list(data.sim=data.new, GMAC.sim.p=sim.p, GMAC.sim.b=sim.b))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+#A function which wraps simu1, simu2 and cross.regress together
+
+run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.001, n=10, seed=222, verbose=FALSE){
+  
+  sim.sets=vector("list", length = length(trios))
+  orig.sets=vector("list", length = length(trios))
+  names(sim.sets)=paste0("trio",trios)
+  names(orig.sets)=paste0("trio",trios)
+  
+  #preallocate table
+  n1=c("Trio.Num", "MRPC.Addis.class", "Num.pcs.MRPC", "Per.var.MRPC", "Num.pcs.GMAC", "Per.var.GMAC", "Med.pvalue.MRPC", 
+       "Med.coef.MRPC", "Med.pvalue.GMAC", "Med.coef.GMAC", "STM.med.p", "STM.med.coef", "LTM.med.p", "LTM.med.coef")
+  out.mat=as.data.frame(matrix(0, nrow = length(trios), ncol=length(n1)))
+  colnames(out.mat)=n1
+  
+  #read in badsha peerdata.v8 file
+  Peerdata.V8=loadRData(paste0("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/PEER_Files_V8/Peerdata.",tissue,".V8.RData"))
+  
+  #preform PCA in same method as badsha and retain eigen values
+  Peerdata2 <- t(Peerdata.V8)
+  Peerdata3 <- Peerdata2[,apply(Peerdata2, 2, var, na.rm=TRUE) != 0]
+  # pca matrix
+  PCs<- prcomp(Peerdata3,scale=TRUE)
+  
+  evs=PCs$sdev^2
+  names(evs)=colnames(PCs$x)
+  
+  
+  for(i in 1:length(trios)){
+    if(verbose==TRUE){
+      print("***************************************************************************")
+      print(paste("*************************", "Trios Number ", trios[i],"******************************"))
+      print("***************************************************************************")
+    }
+    
+    L2A=Lond2Addis.lookup(trio.index=trios[i], tissue.name="WholeBlood", with.pc=TRUE)
+    
+    if(length(colnames(L2A$correlation))>3){
+      addis.pcs=colnames(L2A$correlation)[-c(1:3)]
+    }else{
+      addis.pcs=NULL
+    }
+    
+    
+    if(mod.type.vec[i]=="Both"){
+      
+      list.data=cross.regress(tissue=tissue, 
+                              trio.ind=trios[i], 
+                              mod.type="cis", 
+                              addis.pcs=addis.pcs, 
+                              verbose = FALSE)
+      
+    }else if(mod.type.vec[i]=="Cis.Med"){
+      
+      list.data=cross.regress(tissue="WholeBlood", 
+                              trio.ind=trios[i], 
+                              mod.type="cis", 
+                              addis.pcs=addis.pcs, 
+                              verbose = FALSE)
+    }else{
+      
+      list.data=cross.regress(tissue="WholeBlood", 
+                              trio.ind=trios[i], 
+                              mod.type="trans", 
+                              addis.pcs=addis.pcs, 
+                              verbose = FALSE)
+      
+    }
+    
+    
+    total.var=sum(evs)
+    addis.var.act=evs[match(addis.pcs, names(evs))]
+    gmac.var.act=evs[na.omit(match(colnames(list.data$GMAC), names(evs)))]
+    
+    if(verbose==TRUE){
+      print("-------------------variance-accounting---------------------")
+      print(paste0("GMAC = ", round(sum(gmac.var.act)/total.var, 6)*100, "%"))
+      print(paste0("ADDIS = ", round(sum(addis.var.act)/total.var, 6)*100, "%"))
+    }
+
+    
+    orig.sets[[i]]=list.data$GMAC
+    out=simu1(list.data$GMAC, alpha = alpha, mod.type=mod.type.vec[i], verbose=verbose)
+    sim.sets[[i]]=out
+    
+    
+    out2=simu2(tissue = tissue, data=list.data$GMAC, mode.type=mod.type.vec[i], seed=seed, n=n, verbose=verbose)
+    
+    print("############################################################################")
+    
+    
+    match.pcs=na.omit(match(colnames(list.data$GMAC), colnames(PCs$x)))
+    
+    
+
+    #store
+    out.mat$Trio.Num[i]=trios[i]
+    out.mat$Num.pcs.MRPC[i]=length(addis.pcs)
+    out.mat$Per.var.MRPC[i]=round(sum(addis.var.act)/total.var, 6)*100
+    out.mat$Num.pcs.GMAC[i]=length(match.pcs)
+    out.mat$Per.var.GMAC[i]=round(sum(gmac.var.act)/total.var, 6)*100
+    #regression values
+    out.mat$Med.pvalue.GMAC[i]=list.data$Regress$p.gmac
+    out.mat$Med.pvalue.MRPC[i]=list.data$Regress$p.addis
+    out.mat$Med.coef.GMAC[i]=list.data$Regress$b.addis.cis.gene
+    out.mat$Med.coef.MRPC[i]=list.data$Regress$b.gmac.cis.gene
+    #Small truth simulation
+    out.mat$STM.med.p[i]=out$GMAC.sim.p
+    out.mat$STM.med.coef[i]=out$GMAC.sim.b
+    #Large truth simulation
+    out.mat$LTM.med.p[i]=out2$GMAC.sim.p
+    out.mat$LTM.med.coef[i]=out2$GMAC.sim.b
+    
+    
+  }
+  
+  out.mat$MRPC.Addis.class=mod.type.vec
+  
+  return(list(data.sim=sim.sets, data.orig=orig.sets, out.mat=out.mat))
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

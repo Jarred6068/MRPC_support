@@ -21,12 +21,17 @@ The mediation statistic is the observed $t$-value of the cis-gene coefficient $\
 It is important to note that the above mediation test describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider possible effects between the cis-eQTL and the cis-gene transcript ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene transcript ($L_i \rightarrow T_j$).
 
 \section*{2. Methods}
+\subsection*{Applying GMAC to GTEx Trios}
 
 To compare the GMAC and MRPC algorithms, we applied the GMAC algorithm to the top five GTEx tissues by sample size. Following with the creators of GMAC, we used the full set of principle components retained from the PCA of the expression matrix as the covariate pool, and three additional known confounders: the PCR used, the platform used, and sex of the individual in each sample [@yang2017identifying].    
 
 Consistent with @yang2017identifying, the analysis was preformed using a common child and intermediate variable filtering  FDR of $10\%$ and a confounder selection FDR of $5\%$ for each trio. Each trio supplied to GMAC consisted of the cis-QTL and the PEER normalized cis and trans gene transcripts with the highest association to the eQTL. To mitigate missing values in the eQTL matrix, multiple imputation of the matrix of unique cis-eQTLs was preformed via multiple correspondence analysis (MCA) prior to its use in GMAC [@josse2016missmda]. The analysis was preformed twice on each trio, first with the cis gene as the mediator and second with the trans gene as the mediator. This allowed for GMAC inferred trios to be decomposed into the three groupings used under MRPC: 1) Cis-gene mediation, 2) Trans-gene mediation, 3) both (undirected). 
+
+\subsection*{Comparison of GMAC and MRPC Results}
    
 After applying GMAC to each tissue, the false discovery rate among the retained mediation p-values was controlled at the more liberal rate of $10\%$ [@yang2017identifying]. Each trio determined to have significant mediation after FDR filtering was compared with the regulatory network type inferred by MRPC-ADDIS. MRPC-ADDIS can infer three types of regulatory networks that contain an edge between the cis and trans gene (M1, M2, or M4). Since GMAC considers only the presence of the edge and not its direction, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).   
+
+\subsection*{Simulations}
  
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -49,14 +54,16 @@ kable(dat, caption = "Descriptive statistics for the distribution of missing val
 
 
 \section*{3. Results}
-
+\subsection*{3.1 Comparing GMAC and MRPC}
 
 
 In light of the surprising number of trans-gene mediation trios inferred by MRPC, we sought to compare our results with GMAC by applying the GMAC method to the top five GTEx tissues by sample size. It is important to note that the test for mediation used by GMAC describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider the possible effects between the cis-eQTL and the cis-gene ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene ($L_i \rightarrow T_j$). Therefore, since GMAC considers only the presence of the mediation edge, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).
 
 At the $10\%$ false discovery rate, GMAC identified $2,160$ trios with an edge between the cis and trans genes out of $55,446$ total trios tested across the five selected tissues: Adipose subcutaneous, Tibial artery, Muscle skeletal, Sun exposed skin, and Whole blood. Of the trios with mediation edges, 653 were identified as the cis gene mediating the trans gene, 245 as trans gene mediating the cis gene and 1,345 as both ($29.1\%, 10.9\%$, and $60\%$ respectively). As can be seen from \textbf{Table 2}, the consistency in inferred mediation edges between the two methods varied between $35\%$ and $46\%$ of the trios across tissues. 
 
-To uncover the computational differences between MRPC and GMAC, we focused on trios with conflicting results between the two methods (trios inferred M0 or M3 under MRPC). The primary differences we observed between the two algorithms for these trios were that the inclusion of a larger set of confounding variables by GMAC often had the effect of strengthening the association between the cis and trans genes. That is, let ${\bf Z}_{ij}$ denote the set of confounding variables/PC's used under MRPC and ${\bf X}_{ij}$ the larger set used by GMAC such that the columns $\{z_{ij} \} \subset \{x_{ij}\}$. Because the confounding variables under GMAC are selected such that they have a significant association with both the cis and trans genes, the partial correlation between the cis gene and trans gene tends to strengthen as the column dimension of ${\bf Z}_{ij}$ approaches the column dimension of ${\bf X}_{ij}$. The result for GMAC is that under the mediation test, relatively weak associations ($0.1 \leq \rho \leq 0.2$) can be deemed significant. Conversely, for MRPC,  as the size of the network increases, the method becomes increasingly conservative. Therefore, when ${\bf Z}_{ij} = {\bf X}_{ij}$ MRPC tends to infer the null model unless the association between two nodes in the network is substantial.
+To uncover the computational differences between MRPC and GMAC, we focused on trios with conflicting results between the two methods (trios inferred M0 or M3 under MRPC). The primary differences we observed between the two algorithms for these trios were that the inclusion of a larger set of confounding variables by GMAC often had the effect of strengthening the association between the cis and trans genes. That is, let ${\bf Z}_{ij}$ denote the set of confounding variables used under MRPC and ${\bf X}_{ij}$ the larger set used by GMAC such that the columns $\{z_{ij} \} \subset \{x_{ij}\}$. Because the confounding variables under GMAC are selected such that they have a significant association with both the cis and trans genes, the partial correlation between the cis gene and trans gene tends to strengthen as the column dimension of ${\bf Z}_{ij}$ approaches the column dimension of ${\bf X}_{ij}$. The result for GMAC is that under the mediation test, relatively weak associations ($0.1 \leq \rho \leq 0.2$) can be deemed significant. Conversely, for MRPC,  as the size of the network increases, the method becomes increasingly conservative. Therefore, when ${\bf Z}_{ij} = {\bf X}_{ij}$ MRPC tends to infer the null model unless the association between two nodes in the network is substantial.
+
+\subsection*{Simulation Results}
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}

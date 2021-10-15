@@ -62,7 +62,7 @@ data was broken into 2 matrices: one of pvalues and another with methylation dat
 
 after reading in the data was transposed so probes were in columns and subjects rows
 
-Data Dimension: 485577 1231
+Data Dimension: 1231 485577 
 
 --------------------------------filtering-Methylation----------------------------------
 

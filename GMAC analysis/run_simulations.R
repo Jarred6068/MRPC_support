@@ -21,6 +21,7 @@ for(i in 1:length(tissues.vec[,1])){
   trios=sample(all.m0m3$Trio.Num, nn)
   print("running Simulation 1...")
   ot1=run.simu12(tissue = tissues.vec[i,1] ,trios=trios, 
+                 l1.table=all.m0m3,
                  mod.type.vec=all.m0m3$Mediation.type[match(trios, all.m0m3$Trio.Num)],
                  alpha=0.001, n=10)
   print("...done")

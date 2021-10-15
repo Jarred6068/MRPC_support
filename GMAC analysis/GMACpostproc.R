@@ -31,6 +31,7 @@ run.postproc=function(output.pvals=NULL, trio.ref=NULL){
   sig.trios=trio.ref[qvals$significant,]
   
   result=cbind.data.frame(qvals$qvalue[qvals$significant], output.pvals[qvals$significant])
+  colnames(result)=c("Q.values","Out.p")
   
   
   return(list(total.inferred=num.inferred, sig.trios=sig.trios, pq.values=result))
@@ -274,19 +275,18 @@ cross.analyze=function(tissues=tissues.vec[,1], save=FALSE, path="/mnt/ceph/jarr
     if(isTRUE(d1>d2)){
       unq.common=na.omit(row.match(postproc.cis$sig.trios, postproc.trans$sig.trios))
       common=postproc.cis$sig.trios[unq.common,]
-      perm.reg.p.common=output.cis$output.table[row.match(common, output.cis$output.table[,1:3]),5]
+      perm.reg.p.common=postproc.trans$pq.values$Out.p[unq.common]
     }else{
       unq.common=na.omit(row.match(postproc.trans$sig.trios, postproc.cis$sig.trios))
       common=postproc.trans$sig.trios[unq.common]
-      perm.reg.p.common=output.trans$output.table[row.match(common, output.trans$output.table[,1:3]),5]
+      perm.reg.p.common=postproc.cis$pq.values$Out.p[unq.common]
     }
     
-    pr.p.unq.cis=output.cis$output.table[row.match(postproc.cis$sig.trios[unq.cis,], 
-                                                   output.cis$output.table[,1:3]),5]
+    pr.p.unq.cis=postproc.cis$pq.values$Out.p[unq.cis]
     
-    pr.p.unq.trans=output.cis$output.table[row.match(postproc.trans$sig.trios[unq.trans,], 
-                                                     output.trans$output.table[,1:3]),5]
-    #catorize direction
+    pr.p.unq.trans=postproc.trans$pq.values$Out.p[unq.trans]
+    
+    #categorize direction
     found=c(rep("Both", dim(common)[1]), 
             rep("Cis.Med", dim(postproc.cis$sig.trios[unq.cis,])[1]),
             rep("Trans.Med", dim(postproc.trans$sig.trios[unq.trans,])[1]))
@@ -1380,7 +1380,7 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
 
 #A function which wraps simu1, simu2 and cross.regress together
 
-run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.001, n=10, seed=222, verbose=FALSE){
+run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=NULL, alpha=0.001, n=10, seed=222, verbose=FALSE){
   # 
   # sim.sets=vector("list", length = length(trios))
   # orig.sets=vector("list", length = length(trios))
@@ -1388,7 +1388,7 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.0
   # names(orig.sets)=paste0("trio",trios)
   # 
   #preallocate table
-  n1=c("Trio.Num", "MRPC.Addis.class", "Num.pcs.MRPC", "Per.var.MRPC", "Num.pcs.GMAC", "Per.var.GMAC", "Med.pvalue.MRPC", 
+  n1=c("Trio.Num", "Num.pcs.MRPC", "Per.var.MRPC", "Num.pcs.GMAC", "Per.var.GMAC", "Med.pvalue.MRPC", 
        "Med.coef.MRPC", "Med.pvalue.GMAC", "Med.coef.GMAC", "STM.med.p", "STM.med.coef", "LTM.med.p", "LTM.med.coef")
   out.mat=as.data.frame(matrix(0, nrow = length(trios), ncol=length(n1)))
   colnames(out.mat)=n1
@@ -1498,7 +1498,10 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.0
     
   }
   
-  out.mat$MRPC.Addis.class=mod.type.vec
+  
+  out.mat$Med.type=mod.type.vec
+  out.mat$ADDIS.inf.Class=l1.table$final.tables[[1]]$Addis.Class[match(out.mat$Trio.Num,  l1.table$final.tables[[1]]$Trio.Num)]
+  out.mat$perm.reg.p=l1.table$final.tables[[1]]$Perm.rep.p[match(out.mat$Trio.Num,  l1.table$final.tables[[1]]$Trio.Num)]
   
   #return(list(data.sim=sim.sets, data.orig=orig.sets, out.mat=out.mat))
   return(out.mat=out.mat)

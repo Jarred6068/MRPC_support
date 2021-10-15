@@ -86,3 +86,34 @@ ot1=run.simu12(tissue = "WholeBlood" ,trios=trios,
 list.data=cross.regress(tissue="WholeBlood", trio.ind=121, mod.type="trans", addis.pcs=NULL)
 simu2(tissue = "WholeBlood", data=list.data$GMAC, seed=NULL, mod.type="Trans.Med", n=10, verbose=TRUE)
 simu1(data=list.data$GMAC,alpha=0.001, mod.type=NULL, verbose=TRUE)
+
+
+
+#generate table
+for(i in 1:length(tissues.vec[,1])){
+  l1=cross.analyze(tissues=tissues, save=FALSE)
+  
+}
+
+
+
+
+
+
+
+
+
+
+#looking at methyl cors
+V=NULL
+for(i in c(1:22, "X", "Y")){
+  A=read.table(file=paste0("/mnt/ceph/jarredk/Methyl/BSGS_Correlations/BSGS_Correlations_20210914/M_chr", 
+                           i,"_correlations.txt"), sep="\t", header=T)
+  #print(paste0("chr",i,"=",length(unique(A$Methyl_Probe_ID[which(is.na(A$Cor))]))))
+  print(paste0("Unique Probes for chr",i,"=",length(unique(A$Methyl_Probe_ID))))
+  
+  V[i]=length(unique(A$Methyl_Probe_ID))
+  
+}
+
+print(sum(V))

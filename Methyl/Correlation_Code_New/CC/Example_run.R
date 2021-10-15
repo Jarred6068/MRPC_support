@@ -27,7 +27,7 @@ source(file = paste(filepath, "calcCOR.R", sep = ""))
 # genotype data: a data matrix of 606 individuals in the rows and 1000 SNPs in the columns
 genotype_data=read.table(file = paste(input.location, "ExampleY_Genotype_data.txt", sep = ""), sep="\t", header=T)
 # genotype metadata: a meta data matrix of 1000 SNPs in the rows and 3 columns [SNP_ID    chr  coordinate]
-G_metadata=read.table(file = paste(input.location, "ExampleY_Genotype_Metadata_Walleles.txt", sep = ""), sep = "\t", header = T)
+G_metadata=read.table(file = paste(input.location, "ExampleY_Genotype_Metadata.txt", sep = ""), sep = "\t", header = T)
 # Methylation metadata: a meta data matrix of 363,516 probes and 3 columns [Ilmn_ID    chr    coordinate]
 M_metadata=loadRData(fileName = paste(input.location, "meta_M.Rdata", sep = ""))
 # Expression metadata: a meta data matrix of xxx probes and 3 columns [gene_ID     chr       coordinate]

@@ -9,30 +9,43 @@ bibliography: references.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=12, fig.height=8)
+library(latex2exp)
+library(gridExtra)
 ```
 
-\section*{Overview}
+\section*{1. Overview}
 Both MRPC-LOND and MRPC-ADDIS techniques inferred a large number of trans mediated trios. The trans-mediation model has been previously identified, but is not the commonly ackowledged mode of mediation. Since this result is surprising relative to the existing literature, we sought to apply another method for inferring mediation on a subset of GTEx trios analyzed herein by MRPC. The Genomic Mediation analysis with Adaptive Confounding (GMAC) algorithm allows for a unique selection of a subset of potential confounders, ${\bf X_{ij}}$ from a larger covariate pool, ${\bf H}$, for each trio. By taking advantage of the Principle of Mendelian Randomization, the authors filter ${\bf H}$ by removing common child and intermediate confounding variables (e.g variables associated with the eQTL as well as the cis/trans genes). Post-filtering, GMAC preforms a mediation test on the edge between the cis gene and trans gene via the regression of the trans-gene $T_j$ on the cis-eQTL $L_i$, cis-gene $C_i$, and the set of adaptively selected confounders ${\bf X_{ij}}$:
 
-\[ T_j = \beta_0 + \beta_1 C_i + \beta_2 L_i + {\bf \Gamma} {\bf X}_{ij} + \epsilon \]
+\begin{eqnarray} T_j = \beta_0 + \beta_1 C_i + \beta_2 L_i + {\bf \Gamma} {\bf X}_{ij} + \epsilon \end{eqnarray}
 
 The mediation statistic is the observed $t$-value of the cis-gene coefficient $\beta_1$. A null distribution for no-mediation is constructed by iteratively permuting the values of the cis-transcript within each genotype and repeating the above regression. The authors argue that the permutation of the cis-transcript within the genotypes of the cis-eQTL removes the association between the cis and trans gene transcripts while preserving the higher order associations with the cis-eQTL. The resulting mediation test compares the observed relationship between the trans and cis gene to a null distribution constructed from a model with no association and assuming that possible confounding has been well adjusted via the selected covariates. 
 
 It is important to note that the above mediation test describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider possible effects between the cis-eQTL and the cis-gene transcript ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene transcript ($L_i \rightarrow T_j$).
 
 \section*{2. Methods}
-\subsection*{Applying GMAC to GTEx Trios}
+\subsection*{2.1 Applying GMAC to GTEx Trios}
 
 To compare the GMAC and MRPC algorithms, we applied the GMAC algorithm to the top five GTEx tissues by sample size. Following with the creators of GMAC, we used the full set of principle components retained from the PCA of the expression matrix as the covariate pool, and three additional known confounders: the PCR used, the platform used, and sex of the individual in each sample [@yang2017identifying].    
 
 Consistent with @yang2017identifying, the analysis was preformed using a common child and intermediate variable filtering  FDR of $10\%$ and a confounder selection FDR of $5\%$ for each trio. Each trio supplied to GMAC consisted of the cis-QTL and the PEER normalized cis and trans gene transcripts with the highest association to the eQTL. To mitigate missing values in the eQTL matrix, multiple imputation of the matrix of unique cis-eQTLs was preformed via multiple correspondence analysis (MCA) prior to its use in GMAC [@josse2016missmda]. The analysis was preformed twice on each trio, first with the cis gene as the mediator and second with the trans gene as the mediator. This allowed for GMAC inferred trios to be decomposed into the three groupings used under MRPC: 1) Cis-gene mediation, 2) Trans-gene mediation, 3) both (undirected). 
 
-\subsection*{Comparison of GMAC and MRPC Results}
+\subsection*{2.2 Comparison of GMAC and MRPC Results}
    
 After applying GMAC to each tissue, the false discovery rate among the retained mediation p-values was controlled at the more liberal rate of $10\%$ [@yang2017identifying]. Each trio determined to have significant mediation after FDR filtering was compared with the regulatory network type inferred by MRPC-ADDIS. MRPC-ADDIS can infer three types of regulatory networks that contain an edge between the cis and trans gene (M1, M2, or M4). Since GMAC considers only the presence of the edge and not its direction, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).   
 
-\subsection*{Simulations}
- 
+\subsection*{2.3 Simulations}
+To further understand the conflicting behavior between MRPC-ADDIS and GMAC, we simulated the mediation test - the test for the $\beta_1$ coefficient in the presence of all adaptively selected confounders, ${\bf X}_{ij}$, as described by the regression in \textbf{eq (1)}. We simulated the trans gene of each trio using the linear relationship:
+
+\begin{eqnarray} T^{\ast}_{j} = \hat{\beta_0}+\hat{\beta_1}C_i + \hat{\beta_2}L_i + \hat{{\bf\Gamma}} {\bf W}_{ij} +\epsilon  \end{eqnarray}
+
+where $T^{\ast}_{j}$ is the simulated trans gene, the coefficients are replaced by their estimates from the regression in \textbf{eq (1)}, and ${\bf W}_{ij}$ is a subset of ${\bf X}_{ij}$ representing the "highly" significant GMAC confounders from \textbf{eq (1)} ($p<0.001$). Note that if the GMAC inferred mediation type was trans gene mediation only then the cis gene was simulated and the mediation test was preformed on the $\beta_1$ coefficient from $C_i = \beta_0 + \beta_1T_j + \beta_2L_i + {\bf \Gamma X}_{ij}+\epsilon$. 
+
+We refer to the trans-gene generating function in \textbf{(2)} as the small truth model (STM) as the simulated trans gene comes from a model that is a subset of of the model described in \textbf{(1)}. Therefore, the simulated mediation test can be decomposed as the test on the $\beta_1$ coefficient from:
+
+\begin{eqnarray} T_{j} = \beta_0+\beta_1C_i + \beta_2L_i + {\bf\Gamma}_1 {\bf W}_{ij} + {\bf \Gamma}_2{\bf M}_{ij} +\epsilon \end{eqnarray}
+
+where ${\bf M}_{ij}$ represents the additional confounders in ${\bf X}_{ij}$ that are not included in ${\bf W}_{ij}$. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(knitr)
@@ -63,7 +76,7 @@ At the $10\%$ false discovery rate, GMAC identified $2,160$ trios with an edge b
 
 To uncover the computational differences between MRPC and GMAC, we focused on trios with conflicting results between the two methods (trios inferred M0 or M3 under MRPC). The primary differences we observed between the two algorithms for these trios were that the inclusion of a larger set of confounding variables by GMAC often had the effect of strengthening the association between the cis and trans genes. That is, let ${\bf Z}_{ij}$ denote the set of confounding variables used under MRPC and ${\bf X}_{ij}$ the larger set used by GMAC such that the columns $\{z_{ij} \} \subset \{x_{ij}\}$. Because the confounding variables under GMAC are selected such that they have a significant association with both the cis and trans genes, the partial correlation between the cis gene and trans gene tends to strengthen as the column dimension of ${\bf Z}_{ij}$ approaches the column dimension of ${\bf X}_{ij}$. The result for GMAC is that under the mediation test, relatively weak associations ($0.1 \leq \rho \leq 0.2$) can be deemed significant. Conversely, for MRPC,  as the size of the network increases, the method becomes increasingly conservative. Therefore, when ${\bf Z}_{ij} = {\bf X}_{ij}$ MRPC tends to infer the null model unless the association between two nodes in the network is substantial.
 
-\subsection*{Simulation Results}
+\subsection*{3.2 Simulation Results}
 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
@@ -96,6 +109,7 @@ kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC a
 
 ```
 
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(ggpubr)
 
@@ -108,41 +122,60 @@ labels=c(rep('GMAC', length(table.pcorM3$GMAC.pcor)), rep("ADDIS", length(table.
 
 dat1=cbind.data.frame(pcors=pcors, labels=labels)
 
-ggplot(data=dat1, aes(x=abs(pcors), fill=labels))+geom_density(alpha=0.5)
+ggplot(data=dat1, aes(x=abs(pcors), fill=labels))+geom_density(alpha=0.5)+
+  labs(title = "Density of Absolute Partial Correlations",
+       x = expression(abs(rho)))
 
-#table.pcorM3$abs.diff=abs((table.pcorM3$GMAC.pcor) - (table.pcorM3$ADDIS.pcor))
-#table.pcorM3$diff.PCs=table.pcorM3$GMAC.num.pcs - table.pcorM3$ADDIS.num.pcs
-#ggplot(data=table.pcorM3, aes(x=abs.diff, fill=1))+geom_density(alpha=0.5, label=FALSE)
-#ggplot(data=table.pcorM3, aes(x=diff.PCs, y=abs.diff))+geom_point()
 
-# boxplot(cbind.data.frame(ADDIS=table.pcorM3$ADDIS.pcor,GMAC=table.pcorM3$GMAC.pcor),
-#         ylab="Partial Correlation")
 
-# plot(table.pcorM3$GMAC.num.pcs, 
-#      table.pcorM3$GMAC.pcor, 
-#      pch=21,
-#      bg="red",
-#      xlim = c(0,40))
-# points(table.pcorM3$ADDIS.num.pcs, 
-#        table.pcorM3$ADDIS.pcor,
-#        pch=21,
-#        bg="blue")
-# 
-# plot(table.pcorM3$GMAC.num.pcs-table.pcorM3$ADDIS.num.pcs,
-#      table.pcorM3$GMAC.pcor-table.pcorM3$ADDIS.pcor,
-#      xlab = "ADDIS Partial Correlation",
-#      ylab = "GMAC Partial Correlation")
-#points(table.pcorM0$ADDIS.pcor.cis.trans., 
-#     table.pcorM0$GMAC.pcor.cis.trans.,
-#     pch=21,
-#     bg="blue")
+```
+
+```{r, fig.cap="scatter plots for the number of PC's included by GMAC (top) and MRPC (bottom) and the percentage of total variation in expression the PC's summarize", echo=FALSE, message=FALSE, warning=FALSE}
+sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
+
+A=ggplot(data = sim, aes(x=Num.pcs.GMAC, y=Per.var.GMAC, color=Tissue))+
+  geom_point()+
+  ggtitle("%Var Accounted For by GMAC included PC's", subtitle = "GMAC")+
+  xlab("Number of PC's")+
+  ylab("%Total Variance In Expression")
+B=ggplot(data = sim, aes(x=Num.pcs.MRPC, y=Per.var.MRPC, color=Tissue))+
+  geom_point()+
+  ggtitle("%Var Accounted For by GMAC included PC's", subtitle = "MRPC")+
+  xlab("Number of PC's")+
+  ylab("%Total Variance In Expression")
+
+grid.arrange(A, B, nrow = 2)
+
+
+
 
 ```
 
 
+```{r, fig.cap="Scatter plots of the mediation test p-values obtained from the permutation test (red) and the regression of the trans gene as described in eq (1) (black) across the simulated p-values using as described in Methods 2.3", echo=FALSE, message=FALSE, warning=FALSE}
+sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
+
+A=ggplot(data = sim)+
+  geom_point(aes(x=perm.reg.p, y=STM.med.p, color="red"))+
+  geom_point(aes(x=Med.pvalue.GMAC, y=STM.med.p))+
+  theme(legend.position = "none")+
+  ggtitle("Scatter of Mediation P-values", subtitle = "Small True Model")+
+  ylab("Mediation P-values from Simulation")+
+  xlab("GMAC Mediation P-values")
+B=ggplot(data = sim)+
+  geom_point(aes(x=perm.reg.p, y=LTM.med.p, color="red"))+
+  geom_point(aes(x=Med.pvalue.GMAC, y=LTM.med.p))+
+  theme(legend.position = "none")+
+  ggtitle("Scatter of Mediation P-values", subtitle = "Small True Model")+
+  ylab("Mediation P-values from Simulation")+
+  xlab("GMAC Mediation P-values")
+
+grid.arrange(A, B, nrow = 2)
 
 
 
+
+```
 
 
 \newpage

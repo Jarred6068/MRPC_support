@@ -166,7 +166,16 @@ for(i in 1:length(EM.triolist)){
 
 
 
-
+genos.mat=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenosBIG.Rdata")
+EM.triolist=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/completedTrios1.Rdata")
+triobuildlist=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/triobuildlist.Rdata")
+simulated.meta=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/fakegenoMeta.Rdata")
+Mprobenames.final=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/Used.Mprobes.final.Rdata")
+meta_M=read.csv(file = "/mnt/ceph/megheib/M_G_data/GPL13534_M.csv")
+#retreive relevant metadata for the "In-Use" methylation probes:
+imp.meta_M=meta_M[,c(1,12,13)]
+matched.meta_M=match(Mprobenames.final, imp.meta_M[,1])
+imp.meta_M.final=imp.meta_M[matched.meta_M,]
 
 
 
@@ -207,58 +216,6 @@ names(cor_j)=colnames(genos.mat[,try1$Mprobes[[1]][[1]] ])
 
 
 
-
-
-time=40
-start.wage=20*40*4
-wages=NULL
-wages[1]=start.wage
-raises=NULL
-raises[1]=0.03*start.wage
-G.cont=NULL
-G.cont[1]=0.06*start.wage*12
-Busi.match=NULL
-Busi.match[1]=raises[1]*12
-return.on.investment=NULL
-return.on.investment[1]=0.03*sum(sum(G.cont)+sum(Busi.match))
-
-for(i in 2:time){
-  wages[i]=raises[i-1]+wages[i-1]
-  raises[i]=0.03*wages[i]
-  G.cont[i]=0.01*wages[i]*12
-  Busi.match[i]=raises[i]*12
-  return.on.investment[i]=0.03*sum(sum(G.cont)+sum(Busi.match))
-}
-
-par(mfrow=c(1,2))
-
-plot(c(1:time), wages, type = "b", lty="dotdash", col="red", lwd=2,
-     main="Grace Wages at New Job",
-     xlab = "Years at position",
-     ylab = "Dollars Pre-Tax (monthly)")
-
-plot(c(1:time), raises, type="b", col="blue", lwd=2,
-     main="Grace Raises at New Job",
-     xlab = "Years at Position",
-     ylab = "Dollars Pre-Tax (monthly)")
-
-par(mfrow=c(1,1))
-
-
-
-par(mfrow=c(1,2))
-
-plot(c(1:time), cumsum(G.cont), type = "b", lty="dotdash", col="red", lwd=2,
-     main="Grace 401(k) at New Job",
-     xlab = "Years at position",
-     ylab = "Total Value")
-
-plot(c(1:time), cumsum(Busi.match), type="b", col="blue", lwd=2,
-     main="Business match 401(k) at New Job",
-     xlab = "Years at Position",
-     ylab = "Total Value")
-
-par(mfrow=c(1,1))
 
 
 total.value = sum(sum(G.cont)+sum(Busi.match)+sum(return.on.investment))

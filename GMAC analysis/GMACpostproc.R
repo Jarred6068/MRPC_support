@@ -1135,6 +1135,10 @@ id.suppress=function(data=NULL, verbose=FALSE, reg.compare=FALSE){
 
 
 
+#===========================================================================
+#----------------------------Simulations------------------------------------
+#===========================================================================
+
 
 #A function which simulates the trans gene of a given trio by 
 #                 Tj=a + b1 Ci + b2 Li + V + errors
@@ -1143,7 +1147,7 @@ id.suppress=function(data=NULL, verbose=FALSE, reg.compare=FALSE){
 #GMAC adaptively selected PCs
 
 
-simu1=function(data=NULL,alpha=0.001, verbose=TRUE){
+simu1=function(data=NULL,alpha=0.001, mod.type=NULL, verbose=TRUE){
   
   
   
@@ -1151,7 +1155,15 @@ simu1=function(data=NULL,alpha=0.001, verbose=TRUE){
   data$platform=as.factor(data$platform)
   data$sex=as.factor(data$sex)
   
-  mod=lm(trans.gene~., data=data)
+  
+  
+  if(mod.type=="Both"){
+    mod=lm(trans.gene~., data=data)
+  }else if(mod.type=="Cis.Med"){
+    mod=lm(trans.gene~., data=data)
+  }else{
+    mod=lm(cis.gene~., data=data)
+  }
   
   if(verbose==TRUE){
     print("========================Results-for-original-Tj=======================")
@@ -1165,15 +1177,15 @@ simu1=function(data=NULL,alpha=0.001, verbose=TRUE){
   idx=which(as.data.frame(summary(mod)$coefficients)$`Pr(>|t|)`[-c(1:3)]<alpha)+3
   keep.pcs=row.names(as.data.frame(summary(mod)$coefficients))[idx]
   
-  S=id.suppress(data, verbose=FALSE)
-  p=length(na.omit(match(keep.pcs, names(S[which(S>1)]))))/length(keep.pcs)
+  #S=id.suppress(data, verbose=FALSE)
+  #p=length(na.omit(match(keep.pcs, names(S[which(S>1)]))))/length(keep.pcs)
   
-  if(verbose==TRUE){
-    print('Suppressors:')
-    print(S[which(S>1)])
-    print(paste("Sig.PCs:", paste(keep.pcs, collapse = "," )))
-    print(paste0("Proportion of Sig.PCs That Are Suppressors = ", p))
-  }
+  # if(verbose==TRUE){
+  #   print('Suppressors:')
+  #   print(S[which(S>1)])
+  #   print(paste("Sig.PCs:", paste(keep.pcs, collapse = "," )))
+  #   print(paste0("Proportion of Sig.PCs That Are Suppressors = ", p))
+  # }
   
   b.gen=b[c(1:3, idx)]
   #print(length(b.gen))
@@ -1184,11 +1196,25 @@ simu1=function(data=NULL,alpha=0.001, verbose=TRUE){
   Tj=X.gen%*%b.gen+errors
   
   data.new=data
-  data.new$trans.gene=Tj
   
+  #print(head(data.new))
   
+  if(mod.type=="Both"){
+    
+    data.new$trans.gene=Tj
+    mod2=lm(trans.gene~., data = data.new)
+
+  }else if(mod.type=="Cis.Med"){
+    
+    data.new$trans.gene=Tj
+    mod2=lm(trans.gene~., data = data.new)
+    
+  }else{
+    
+    data.new$cis.gene=Tj
+    mod2=lm(cis.gene~., data = data.new)
+  }
   
-  mod2=lm(trans.gene~., data = data.new)
 
   if(verbose==TRUE){
     print("==============coefficients-used-to-generate-Tj========================")
@@ -1201,13 +1227,37 @@ simu1=function(data=NULL,alpha=0.001, verbose=TRUE){
   
   
   sim.coef.mat=as.data.frame(summary(mod2)$coefficients)
-  sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
-  sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  
+  
+  if(mod.type=="Both"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else if(mod.type=="Cis.Med"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else{
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="trans.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="trans.gene")]
+  }
   
   #print(cor(data.new[, (length(colnames(data.new))-2):length(colnames(data.new))])[,1:3])
   return(list(sim.data=data.new, GMAC.sim.p=sim.p, GMAC.sim.b=sim.b))
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #A function which simulates the trans gene of a given trio by 
@@ -1216,7 +1266,7 @@ simu1=function(data=NULL,alpha=0.001, verbose=TRUE){
 #where V represents the PC's not selected by addis or GMAC. The goal is to better understand the stability of the regression
 
 
-simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, n=10, verbose=TRUE){
+simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10, verbose=TRUE){
   
   if(isFALSE(is.null(seed))){
     set.seed(seed = seed)
@@ -1248,9 +1298,9 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, n=10, verbose=TRUE){
   #print(head(new.data))
   
   
-  if(mod.type.vec[i]=="Both"){
+  if(mod.type=="Both"){
     true.model=lm(trans.gene~., data=new.data)
-  }else if(mod.type.vec[i]=="Cis.Med"){
+  }else if(mod.type=="Cis.Med"){
     true.model=lm(trans.gene~., data=new.data)
   }else{
     true.model=lm(cis.gene~., data=new.data)
@@ -1277,15 +1327,19 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, n=10, verbose=TRUE){
   Tj=X%*%b+errors
   
   data.new=data
-  data.new$trans.gene=Tj
   
-  model2=lm(trans.gene~., data = data.new)
-  
-  if(mod.type.vec[i]=="Both"){
+  if(mod.type=="Both"){
+    
+    data.new$trans.gene=Tj
     model2=lm(trans.gene~., data = data.new)
-  }else if(mod.type.vec[i]=="Cis.Med"){
+    
+  }else if(mod.type=="Cis.Med"){
+    
+    data.new$trans.gene=Tj
     model2=lm(trans.gene~., data = data.new)
   }else{
+    
+    data.new$cis.gene=Tj
     model2=lm(cis.gene~., data = data.new)
   }
   
@@ -1298,10 +1352,10 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, n=10, verbose=TRUE){
   
   sim.coef.mat=as.data.frame(summary(model2)$coefficients)
   
-  if(mod.type.vec[i]=="Both"){
+  if(mod.type=="Both"){
     sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
     sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
-  }else if(mod.type.vec[i]=="Cis.Med"){
+  }else if(mod.type=="Cis.Med"){
     sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
     sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
   }else{
@@ -1327,12 +1381,12 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, n=10, verbose=TRUE){
 #A function which wraps simu1, simu2 and cross.regress together
 
 run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.001, n=10, seed=222, verbose=FALSE){
-  
-  sim.sets=vector("list", length = length(trios))
-  orig.sets=vector("list", length = length(trios))
-  names(sim.sets)=paste0("trio",trios)
-  names(orig.sets)=paste0("trio",trios)
-  
+  # 
+  # sim.sets=vector("list", length = length(trios))
+  # orig.sets=vector("list", length = length(trios))
+  # names(sim.sets)=paste0("trio",trios)
+  # names(orig.sets)=paste0("trio",trios)
+  # 
   #preallocate table
   n1=c("Trio.Num", "MRPC.Addis.class", "Num.pcs.MRPC", "Per.var.MRPC", "Num.pcs.GMAC", "Per.var.GMAC", "Med.pvalue.MRPC", 
        "Med.coef.MRPC", "Med.pvalue.GMAC", "Med.coef.GMAC", "STM.med.p", "STM.med.coef", "LTM.med.p", "LTM.med.coef")
@@ -1359,7 +1413,7 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.0
       print("***************************************************************************")
     }
     
-    L2A=Lond2Addis.lookup(trio.index=trios[i], tissue.name="WholeBlood", with.pc=TRUE)
+    L2A=Lond2Addis.lookup(trio.index=trios[i], tissue.name=tissue, with.pc=TRUE)
     
     if(length(colnames(L2A$correlation))>3){
       addis.pcs=colnames(L2A$correlation)[-c(1:3)]
@@ -1378,14 +1432,14 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.0
       
     }else if(mod.type.vec[i]=="Cis.Med"){
       
-      list.data=cross.regress(tissue="WholeBlood", 
+      list.data=cross.regress(tissue=tissue, 
                               trio.ind=trios[i], 
                               mod.type="cis", 
                               addis.pcs=addis.pcs, 
                               verbose = FALSE)
     }else{
       
-      list.data=cross.regress(tissue="WholeBlood", 
+      list.data=cross.regress(tissue=tissue, 
                               trio.ind=trios[i], 
                               mod.type="trans", 
                               addis.pcs=addis.pcs, 
@@ -1405,12 +1459,16 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.0
     }
 
     
-    orig.sets[[i]]=list.data$GMAC
+    #orig.sets[[i]]=list.data$GMAC
+    print("running Simulation 1...")
     out=simu1(list.data$GMAC, alpha = alpha, mod.type=mod.type.vec[i], verbose=verbose)
-    sim.sets[[i]]=out
+    print("...done")
     
+    #sim.sets[[i]]=out
     
-    out2=simu2(tissue = tissue, data=list.data$GMAC, mode.type=mod.type.vec[i], seed=seed, n=n, verbose=verbose)
+    print("running Simulation 2...")
+    out2=simu2(tissue = tissue, data=list.data$GMAC, mod.type=mod.type.vec[i], seed=seed, n=n, verbose=verbose)
+    print("...done")
     
     print("############################################################################")
     
@@ -1442,8 +1500,8 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, alpha=0.0
   
   out.mat$MRPC.Addis.class=mod.type.vec
   
-  return(list(data.sim=sim.sets, data.orig=orig.sets, out.mat=out.mat))
-  
+  #return(list(data.sim=sim.sets, data.orig=orig.sets, out.mat=out.mat))
+  return(out.mat=out.mat)
 }
 
 

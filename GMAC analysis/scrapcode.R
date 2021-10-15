@@ -83,6 +83,6 @@ ot1=run.simu12(tissue = "WholeBlood" ,trios=trios,
 
 
 
-
-
-
+list.data=cross.regress(tissue="WholeBlood", trio.ind=121, mod.type="trans", addis.pcs=NULL)
+simu2(tissue = "WholeBlood", data=list.data$GMAC, seed=NULL, mod.type="Trans.Med", n=10, verbose=TRUE)
+simu1(data=list.data$GMAC,alpha=0.001, mod.type=NULL, verbose=TRUE)

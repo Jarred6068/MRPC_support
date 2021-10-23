@@ -1,6 +1,6 @@
-,MO,M1,M2,M3,M4,Other,Total GMAC Inferred
-AdiposeSubcutaneous,100,41,4,122,135,2,404
-ArteryTibial,83,22,5,135,110,0,355
-MuscleSkeletal,116,30,6,173,123,2,450
-SkinSunExposed,111,33,10,162,127,0,443
-WholeBlood,109,46,16,162,172,3,508
+"","MO","M1","M2","M3","M4","Other","Total GMAC Inferred"
+"AdiposeSubcutaneous",107,47,12,102,134,2,404
+"ArteryTibial",88,37,10,108,112,0,355
+"MuscleSkeletal",126,37,8,145,132,2,450
+"SkinSunExposed",118,42,12,132,139,0,443
+"WholeBlood",107,55,29,142,171,4,508

@@ -273,13 +273,13 @@ cross.analyze=function(tissues=tissues.vec[,1], save=FALSE, path="/mnt/ceph/jarr
     unq.trans=which(is.na(row.match(postproc.trans$sig.trios, postproc.cis$sig.trios)))
     
     if(isTRUE(d1>d2)){
-      unq.common=na.omit(row.match(postproc.cis$sig.trios, postproc.trans$sig.trios))
-      common=postproc.cis$sig.trios[unq.common,]
-      perm.reg.p.common=postproc.trans$pq.values$Out.p[unq.common]
-    }else{
       unq.common=na.omit(row.match(postproc.trans$sig.trios, postproc.cis$sig.trios))
-      common=postproc.trans$sig.trios[unq.common]
+      common=postproc.cis$sig.trios[unq.common,]
       perm.reg.p.common=postproc.cis$pq.values$Out.p[unq.common]
+    }else{
+      unq.common=na.omit(row.match(postproc.cis$sig.trios, postproc.trans$sig.trios))
+      common=postproc.trans$sig.trios[unq.common,]
+      perm.reg.p.common=postproc.trans$pq.values$Out.p[unq.common]
     }
     
     pr.p.unq.cis=postproc.cis$pq.values$Out.p[unq.cis]
@@ -328,7 +328,11 @@ cross.analyze=function(tissues=tissues.vec[,1], save=FALSE, path="/mnt/ceph/jarr
   
   bk.tbl$`Total GMAC Inferred`=rowSums(bk.tbl)
   
-  return(list(final.tables=tables.list, breakdown.tab=bk.tbl, unique.tab=unq.table))
+  return(list(final.tables=tables.list, 
+              breakdown.tab=bk.tbl, 
+              unique.tab=unq.table, 
+              postproc.cis=postproc.cis$sig.trios, 
+              postproc.trans=postproc.trans$sig.trios))
   
 }
 
@@ -1176,6 +1180,7 @@ simu1=function(data=NULL,alpha=0.001, mod.type=NULL, verbose=TRUE){
   names(b)=row.names(as.data.frame(summary(mod)$coefficients))
   idx=which(as.data.frame(summary(mod)$coefficients)$`Pr(>|t|)`[-c(1:3)]<alpha)+3
   keep.pcs=row.names(as.data.frame(summary(mod)$coefficients))[idx]
+  sigma=summary(mod)$sigma
   
   #S=id.suppress(data, verbose=FALSE)
   #p=length(na.omit(match(keep.pcs, names(S[which(S>1)]))))/length(keep.pcs)
@@ -1191,7 +1196,7 @@ simu1=function(data=NULL,alpha=0.001, mod.type=NULL, verbose=TRUE){
   #print(length(b.gen))
   X.gen=X[,c(1:3, match(keep.pcs, colnames(X)[-1])+1)]
   #print(dim(X.gen))
-  errors=rnorm(dim(X.gen)[1])
+  errors=rnorm(dim(X.gen)[1], mean = 0, sd = sigma)
   
   Tj=X.gen%*%b.gen+errors
   
@@ -1221,8 +1226,10 @@ simu1=function(data=NULL,alpha=0.001, mod.type=NULL, verbose=TRUE){
     print(b.gen)
     print("=====================model-matrix-for-Tj==============================")
     print(head(X.gen))
+    print(dim(X.gen))
     print("========================Results-for-simulated-Tj======================")
     print(summary(mod2))
+    print(dim(model.matrix(mod2)))
   }
   
   
@@ -1241,7 +1248,10 @@ simu1=function(data=NULL,alpha=0.001, mod.type=NULL, verbose=TRUE){
   }
   
   #print(cor(data.new[, (length(colnames(data.new))-2):length(colnames(data.new))])[,1:3])
-  return(list(sim.data=data.new, GMAC.sim.p=sim.p, GMAC.sim.b=sim.b))
+  return(list(sim.data=data.new, 
+              GMAC.sim.p=sim.p, 
+              GMAC.sim.b=sim.b, 
+              dim.diff=(dim(model.matrix(mod2))[2]-1)-(dim(X.gen)[2]-1) ))
   
 }
 
@@ -1259,7 +1269,7 @@ simu1=function(data=NULL,alpha=0.001, mod.type=NULL, verbose=TRUE){
 
 
 
-
+#=========================================================================
 #A function which simulates the trans gene of a given trio by 
 #                 Tj=a + b1 Ci + b2 Li + V + errors
 
@@ -1274,6 +1284,7 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
   
   out.vec=rep(0, 6)
   names(out.vec)=c("Num.PCs.GMAC", "Per.Var", "Med.pvalue.MRPC", "Med.coef.MRPC", "Med.pvalue.GMAC", "Med.coef.GMAC")
+  
   
   
   data$pcr=as.factor(data$pcr)
@@ -1315,6 +1326,7 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
   X=model.matrix(true.model)
   b=as.data.frame(summary(true.model)$coefficients)$Estimate
   names(b)=row.names(as.data.frame(summary(true.model)$coefficients))
+  sigma=summary(true.model)$sigma
   
   if(verbose==TRUE){
     print("==============coefficients-used-to-generate-Tj========================")
@@ -1322,7 +1334,8 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
     print("=====================model-matrix-for-Tj==============================")
     print(head(X))
   }
-  errors=rnorm(dim(X)[1])
+  errors=rnorm(dim(X)[1],mean = 0, sd = sigma)
+  #errors=rnorm(dim(X)[1])
   
   Tj=X%*%b+errors
   
@@ -1364,7 +1377,10 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
   }
 
   
-  return(list(data.sim=data.new, GMAC.sim.p=sim.p, GMAC.sim.b=sim.b))
+  return(list(data.sim=data.new, 
+              GMAC.sim.p=sim.p, 
+              GMAC.sim.b=sim.b, 
+              dim.diff=n))
 }
 
 
@@ -1467,7 +1483,14 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
     #sim.sets[[i]]=out
     
     print("running Simulation 2...")
-    out2=simu2(tissue = tissue, data=list.data$GMAC, mod.type=mod.type.vec[i], seed=seed, n=n, verbose=verbose)
+    if(n=="random"){
+      nn=floor(runif(1, 1, 20))
+      print(nn)
+      out2=simu2(tissue = tissue, data=list.data$GMAC, mod.type=mod.type.vec[i], seed=seed, n=nn, verbose=verbose)
+    }else{
+      out2=simu2(tissue = tissue, data=list.data$GMAC, mod.type=mod.type.vec[i], seed=seed, n=n, verbose=verbose)
+    }
+    
     print("...done")
     
     print("############################################################################")
@@ -1491,17 +1514,22 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
     #Small truth simulation
     out.mat$STM.med.p[i]=out$GMAC.sim.p
     out.mat$STM.med.coef[i]=out$GMAC.sim.b
+    out.mat$STM.dim.diff[i]=out$dim.diff
     #Large truth simulation
     out.mat$LTM.med.p[i]=out2$GMAC.sim.p
     out.mat$LTM.med.coef[i]=out2$GMAC.sim.b
-    
+    out.mat$LTM.dim.diff[i]=out2$dim.diff
     
   }
   
   
   out.mat$Med.type=mod.type.vec
   out.mat$ADDIS.inf.Class=l1.table$final.tables[[1]]$Addis.Class[match(out.mat$Trio.Num,  l1.table$final.tables[[1]]$Trio.Num)]
-  out.mat$perm.reg.p=l1.table$final.tables[[1]]$Perm.rep.p[match(out.mat$Trio.Num,  l1.table$final.tables[[1]]$Trio.Num)]
+  out.mat$Perm.p=l1.table$Perm.rep.p[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
+  out.mat$cis.gene=l1.table$cis[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
+  out.mat$trans.gene=l1.table$trans[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
+  out.mat$snp=l1.table$snp[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
+  #print(out.mat$Perm.p)
   
   #return(list(data.sim=sim.sets, data.orig=orig.sets, out.mat=out.mat))
   return(out.mat=out.mat)

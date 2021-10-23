@@ -4,7 +4,6 @@ source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 #post process the significant mediation test pvalues by qvalue method
 
 
-
 #cross analysis for GMAC inferred cis and trans trios (l1, l2, respectively) that did not match/overlap the 
 #ADDIS inferred M1T1 and M1T2 trios
 #run for WholeBlood
@@ -486,4 +485,51 @@ r87a=check.ns.gmac(input.list.data=list.data87,
                    which.mod="ADDIS",
                    plot.it=TRUE, 
                    save.name="23M1")
+
+
+
+
+
+
+
+
+#==========================================================================
+#------------------------run-cross-analyze-and-save-tables-----------------
+#==========================================================================
+
+
+source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+l1=cross.analyze(tissues=tissues.vec[,1], save=FALSE)
+
+write.csv(l1$breakdown.tab, file="/mnt/ceph/jarredk/GMACanalysis/master_tables/summary.all.tissues.final.csv")
+write.csv(l1$unique.tab, file="/mnt/ceph/jarredk/GMACanalysis/master_tables/GMAC.unique.trios.breakdown.csv")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

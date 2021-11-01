@@ -519,7 +519,7 @@ cross.regress=function(tissue="WholeBlood", trio.ind=NULL, mod.type="cis", addis
 
 #a function to recreate the permutation regression from GMAC
 
-run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL, Alg="GMAC"){
+run.permuted.reg=function(trio, nperms=1000, plot=FALSE, filename=NULL, Alg="GMAC", med.type=NULL){
   
   wald.stat=NULL
   
@@ -533,7 +533,23 @@ run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL, Alg="GMAC
   }
 
   
-  test.wald=summary(lm(trans.gene~., data=trio2))$coefficients[2,3]
+  if(med.type=="Both"){
+    
+    coef.mat=as.data.frame(summary(lm(trans.gene~., data=trio2))$coefficients)
+    test.wald=coef.mat$Estimate[which(row.names(coef.mat)=="cis.gene")]
+    
+  }else if(med.type=="Cis.Med"){
+    
+    coef.mat=as.data.frame(summary(lm(trans.gene~., data=trio2))$coefficients)
+    test.wald=coef.mat$Estimate[which(row.names(coef.mat)=="cis.gene")]
+    
+  }else{
+    
+    coef.mat=as.data.frame(summary(lm(cis.gene~., data=trio2))$coefficients)
+    test.wald=coef.mat$Estimate[which(row.names(coef.mat)=="trans.gene")]
+    
+  }
+
   
   for(i in 1:nperms){
     
@@ -541,11 +557,53 @@ run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL, Alg="GMAC
     trio0=trio[which(trio$SNP==0),]
     trio1=trio[which(trio$SNP==1),]
     trio2=trio[which(trio$SNP==2),]
-    
+    #print(trio1$cis.gene)
+    #print(trio2$cis.gene)
+    #print(trio0$cis.gene[shuffle(trio0$cis.gene)])
     #permute
-    trio0$cis.gene=trio0$cis.gene[shuffle(trio0$cis.gene)]
-    trio1$cis.gene=trio1$cis.gene[shuffle(trio1$cis.gene)]
-    trio2$cis.gene=trio2$cis.gene[shuffle(trio2$cis.gene)]
+    
+    
+    
+    if(med.type=="Both"){
+      
+      if(isTRUE(length(trio0$cis.gene)>1)){
+        trio0$cis.gene=trio0$cis.gene[shuffle(trio0$cis.gene)]
+      }
+      if(isTRUE(length(trio1$cis.gene)>1)){
+        trio1$cis.gene=trio1$cis.gene[shuffle(trio1$cis.gene)]
+      }
+      if(isTRUE(length(trio2$cis.gene)>1)){
+        trio2$cis.gene=trio2$cis.gene[shuffle(trio2$cis.gene)]
+      }
+      
+    }else if(med.type=="Cis.Med"){
+      
+      if(isTRUE(length(trio0$cis.gene)>1)){
+        trio0$cis.gene=trio0$cis.gene[shuffle(trio0$cis.gene)]
+      }
+      if(isTRUE(length(trio1$cis.gene)>1)){
+        trio1$cis.gene=trio1$cis.gene[shuffle(trio1$cis.gene)]
+      }
+      if(isTRUE(length(trio2$cis.gene)>1)){
+        trio2$cis.gene=trio2$cis.gene[shuffle(trio2$cis.gene)]
+      }
+      
+    }else{
+      
+      if(isTRUE(length(trio0$trans.gene)>1)){
+        trio0$trans.gene=trio0$trans.gene[shuffle(trio0$trans.gene)]
+      }
+      if(isTRUE(length(trio1$trans.gene)>1)){
+        trio1$trans.gene=trio1$trans.gene[shuffle(trio1$trans.gene)]
+      }
+      if(isTRUE(length(trio2$trans.gene)>1)){
+        trio2$trans.gene=trio2$trans.gene[shuffle(trio2$trans.gene)]
+      }
+      
+    }
+    
+    #print(trio1$cis.gene)
+    #print(trio2$cis.gene)
     
     #print(trio0$cis.gene[shuffle(trio0$cis.gene)][1:5])
     
@@ -559,7 +617,28 @@ run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL, Alg="GMAC
       trio.permuted$sex=as.factor(trio.permuted$sex)
       trio.permuted$platform=as.factor(trio.permuted$platform)
     }
-    wald.stat[i]=summary(lm(trans.gene~., data=trio.permuted))$coefficients[2,3]
+    
+    
+    
+    
+    
+    
+    if(med.type=="Both"){
+      
+      coef.mat=as.data.frame(summary(lm(trans.gene~., data=trio.permuted))$coefficients)
+      wald.stat[i]=coef.mat$Estimate[which(row.names(coef.mat)=="cis.gene")]
+      
+    }else if(med.type=="Cis.Med"){
+      
+      coef.mat=as.data.frame(summary(lm(trans.gene~., data=trio.permuted))$coefficients)
+      wald.stat[i]=coef.mat$Estimate[which(row.names(coef.mat)=="cis.gene")]
+      
+    }else{
+      
+      coef.mat=as.data.frame(summary(lm(cis.gene~., data=trio.permuted))$coefficients)
+      wald.stat[i]=coef.mat$Estimate[which(row.names(coef.mat)=="trans.gene")]
+      
+    }
     
     
   }
@@ -600,8 +679,9 @@ run.permuted.reg=function(trio, nperms=1000, plot=TRUE, filename=NULL, Alg="GMAC
     
   }
   
-  p.value=sum(abs(wald.stat)>abs(test.wald))/length(wald.stat)
-  
+    p.value=2*min(sum(wald.stat<test.wald)/length(wald.stat),sum(wald.stat>test.wald)/length(wald.stat) )
+
+
   return(list(p.value=p.value, null.wald.stats=wald.stat, obs.wald.stat=test.wald))
   
 }
@@ -1357,6 +1437,7 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
   }
   
   
+  
   if(verbose==TRUE){
     print("========================Results-for-simulated-Tj======================")
     print(summary(model2))
@@ -1375,7 +1456,9 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
     sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="trans.gene")]
     sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="trans.gene")]
   }
-
+  
+  
+  
   
   return(list(data.sim=data.new, 
               GMAC.sim.p=sim.p, 
@@ -1387,7 +1470,75 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
 
 
 
+#A function to simulate the trans gene under the GMAC parametric model and then 
+#applying the MRPC-ADDIS parametric model under the simulated trans gene to determine
+#The power when only MRPC selected confounders are included - to be wrapped by simu12
 
+
+simu3=function(MRPC.data=NULL, GMAC.data=NULL, mod.type=NULL, verbose=NULL){
+  
+  GMAC.data$pcr=as.factor(GMAC.data$pcr)
+  GMAC.data$platform=as.factor(GMAC.data$platform)
+  GMAC.data$sex=as.factor(GMAC.data$sex)
+  
+  
+  if(mod.type=="Both"){
+    true.model=lm(trans.gene~., data=GMAC.data)
+  }else if(mod.type=="Cis.Med"){
+    true.model=lm(trans.gene~., data=GMAC.data)
+  }else{
+    true.model=lm(cis.gene~., data=GMAC.data)
+  }
+  
+  if(verbose==TRUE){
+    print("========================Results-for-True-Tj======================")
+    print(summary(true.model))
+  }
+  
+  b=as.data.frame(summary(true.model)$coefficients)$Estimate
+  X=model.matrix(true.model)
+  sigma=summary(true.model)$sigma
+  
+  Tj=X%*%b+rnorm(dim(X)[1], mean = 0, sd=sigma)
+  
+  new.data=MRPC.data
+  new.data$trans.gene=Tj
+  
+  
+  
+  if(mod.type=="Both"){
+    analysis.model=lm(trans.gene~., data = new.data)
+  }else if(mod.type=="Cis.Med"){
+    analysis.model=lm(trans.gene~., data = new.data)
+  }else{
+    analysis.model=lm(cis.gene~., data = new.data)
+  }
+  
+  
+  if(verbose==TRUE){
+    print("========================Results-for-simulated-Tj======================")
+    print(summary(analysis.model))
+  }
+  
+  
+  sim.coef.mat=as.data.frame(summary(analysis.model)$coefficients)
+  
+  if(mod.type=="Both"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else if(mod.type=="Cis.Med"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else{
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="trans.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="trans.gene")]
+  }
+  
+  
+  return(list(sim.data=new.data, pvalue=sim.p, b.coef=sim.b))
+
+  
+}
 
 
 
@@ -1405,7 +1556,8 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
   # 
   #preallocate table
   n1=c("Trio.Num", "Num.pcs.MRPC", "Per.var.MRPC", "Num.pcs.GMAC", "Per.var.GMAC", "Med.pvalue.MRPC", 
-       "Med.coef.MRPC", "Med.pvalue.GMAC", "Med.coef.GMAC", "STM.med.p", "STM.med.coef", "LTM.med.p", "LTM.med.coef")
+       "Med.coef.MRPC", "Med.pvalue.GMAC", "Med.coef.GMAC", "STM.med.p", "STM.med.coef", "STM.perm.p", 
+       "LTM.med.p", "LTM.med.coef", "LTM.perm.p", "Perm.p.MRPC")
   out.mat=as.data.frame(matrix(0, nrow = length(trios), ncol=length(n1)))
   colnames(out.mat)=n1
   
@@ -1498,7 +1650,9 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
     
     match.pcs=na.omit(match(colnames(list.data$GMAC), colnames(PCs$x)))
     
-    
+    out.mat$Perm.p.MRPC[i]=run.permuted.reg(list.data$addis, nperms=1000, Alg="ADDIS", med.type = mod.type.vec[i])$p.value
+    out.mat$LTM.perm.p[i]=run.permuted.reg(out2$data.sim, nperms=1000, Alg="GMAC", med.type = mod.type.vec[i])$p.value
+    out.mat$STM.perm.p[i]=run.permuted.reg(out$sim.data, nperms=1000, Alg="GMAC", med.type = mod.type.vec[i])$p.value
 
     #store
     out.mat$Trio.Num[i]=trios[i]
@@ -1525,7 +1679,7 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
   
   out.mat$Med.type=mod.type.vec
   out.mat$ADDIS.inf.Class=l1.table$final.tables[[1]]$Addis.Class[match(out.mat$Trio.Num,  l1.table$final.tables[[1]]$Trio.Num)]
-  out.mat$Perm.p=l1.table$Perm.rep.p[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
+  out.mat$Perm.p.GMAC=l1.table$Perm.rep.p[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$cis.gene=l1.table$cis[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$trans.gene=l1.table$trans[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$snp=l1.table$snp[match(out.mat$Trio.Num,  l1.table$Trio.Num)]

@@ -74,7 +74,7 @@ run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'
     
     #saving output
     print('output...done...saving')
-    save(out.list, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/all_trios_output_', mediation.type, '.Rdata'))
+    save(out.list, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/all_trios_output_', mediation.type, 'TEST1.Rdata'))
     print('...done')
     
 

@@ -39,7 +39,7 @@ To further understand the conflict in edge determination between MRPC-ADDIS and 
 
 \begin{eqnarray} T^{\ast}_{j} = \hat{\beta_0}+\hat{\beta_1}C_i + \hat{\beta_2}L_i + \hat{{\bf\Gamma}}_W {\bf W}_{ij} +\epsilon  \end{eqnarray}
 
-where $T^{\ast}_{j}$ is the simulated trans gene, the coefficients are replaced by their estimates from the regression in \textbf{eq (1)}, the errors are standard normal, and ${\bf W}_{ij}$ is a subset of confounders in ${\bf X}_{ij}$ representing the "highly" significant confounders from \textbf{eq (1)} ($p<0.001$). Note that if the GMAC inferred mediation type was trans gene mediation only then the cis gene was simulated and the mediation test was preformed on the $\beta_1$ coefficient from regression of the cis gene: $C_i = \beta_0 + \beta_1T_j + \beta_2L_i + {\bf \Gamma X}_{ij}+\epsilon$. 
+where $T^{\ast}_{j}$ is the simulated trans gene, the coefficients are replaced by their estimates from the regression in \textbf{eq (1)}, the errors are $\epsilon \sim N(0, \hat{\sigma})$, and ${\bf W}_{ij}$ is a subset of confounders in ${\bf X}_{ij}$ representing the "highly" significant confounders from \textbf{eq (1)} ($p<0.001$). Note that if the GMAC inferred mediation type was trans gene mediation only then the cis gene was simulated and the mediation test was preformed on the $\beta_1$ coefficient from regression of the cis gene: $C_i = \beta_0 + \beta_1T_j + \beta_2L_i + {\bf \Gamma X}_{ij}+\epsilon$. 
 
 We refer to the trans-gene generating function in \textbf{(2)} as the Small True Model (STM) as the simulated trans gene comes from a model that is a subset of the explanatory variables in the analysis model described in \textbf{(1)}. The simulated mediation test then replaces $T_j$ in \textbf{(1)} with the simulated trans gene $T^{\ast}_j$. Therefore, the simulated mediation test under the STM can be decomposed as the test on the $\beta_1$ coefficient obtained from the regression:
 
@@ -77,9 +77,9 @@ To uncover the computational differences between MRPC and GMAC, we focused on tr
 
 \subsection*{3.2 Simulation Results}
 
-To observe the predictive differences between the MRPC-ADDIS and GMAC methods, we simulated the GMAC mediation test under two models for the trans gene: (i) when the true model generating the trans gene is smaller than the analysis model (STM), and (ii) when the model generating the trans gene is larger than the analysis model (LTM) see section ${\bf 2.3}$ for details. The STM simulated mediation test from (i) represents the case when the analysis model includes additional confounders not involved in the true trans gene generating process (i.e when we include more confounders than needed). Alternatively, the LTM simulated mediation test from (ii) represents a scenario similar to the test preformed by MRPC-ADDIS where the number of confounders included in the mediation test is a subset of the confounders in the model generating the trans gene with the greatest contribution to the response (i.e when we don't include enough confounders).   
+To observe the predictive differences between the MRPC-ADDIS and GMAC methods, we simulated the GMAC mediation test under two models for the trans gene: (i) when the true model generating the trans gene is smaller than the analysis model (STM), and (ii) when the model generating the trans gene is larger than the analysis model (LTM) see section ${\bf 2.3}$ for details. The STM simulated mediation test from (i) represents the case when the analysis model includes additional confounders not involved in the true trans gene generating process (i.e when we include more confounders than needed). Alternatively, the LTM simulated mediation test from (ii) represents a scenario similar to the test preformed by MRPC-ADDIS where the number of confounders included in the mediation test is a subset of the confounders in the model generating the trans gene with the greatest contribution to the response (i.e when we don't include enough confounders). 
 
-\textbf{Figure 4} and \textbf{Figure 5} 
+In general, over-specifying or under-specifying the model did little to change the inference of the mediation test (\textbf{Figure 4}). The blue dots in \textbf{Figure 4} distinguish specific trios which contain an eQTL with a rare allele present in the sample (typically with an allele frequency $\approx 1\%$). As can be clearly seen in \textbf{Figures 4 and 5}, in the presence of a rare allele, the permutation test infers a mediation edge regardless relative distance of analysis model to the true trans gene generating process. 
 
 
 
@@ -164,7 +164,7 @@ ggplot(data=dat1, aes(x=abs(pcors), fill=labels))+geom_density(alpha=0.5)+
 
 
 ```{r, fig.cap="(A) scatter plots for the number of PC's included by GMAC and MRPC (B) and the percentage of total variation in expression summarized by the included PC's for each model", echo=FALSE, message=FALSE, warning=FALSE}
-sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
+sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
 library(ggpubr)
 library(prodlim)
 sim.odd=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes.csv", header = T)
@@ -214,8 +214,8 @@ A=ggplot(data = sim)+
   geom_point(aes(x=log10(adj.p1), y=log10(adj.p2), color=colvar))+
   theme(legend.position = "none")+
  # ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Simulated Mediation P-value')),
-       x = expression(log10('Observed Mediation P-value')),
+  labs(y = expression(log10('Simulated Parametric P-value')),
+       x = expression(log10('Observed Parametric P-value')),
        subtitle = "Small True Model")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-15,0))+
@@ -232,8 +232,8 @@ B=ggplot(data = sim)+
   geom_point(aes(x=log10(adj.p1), y=log10(adj.p3), color=colvar))+
   theme(legend.position = "none")+
   #ggtitle("Scatter of Mediation Pvalues", subtitle = "Large True Model")+
-  labs(y = expression(log10('Simulated Mediation P-value')),
-       x = expression(log10('Observed Mediation P-value')),
+  labs(y = expression(log10('Simulated Parametric P-value')),
+       x = expression(log10('Observed Parametric P-value')),
        subtitle = "Large True Model")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-15,0))+
@@ -241,15 +241,21 @@ B=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-sim$adj.p4=sim$Perm.p
+sim$adj.p4=sim$Perm.p.GMAC
 sim$adj.p4[sim$adj.p4<=2e-16]=2e-16+rnorm(length(which(sim$adj.p4<=2e-16)), 0, sd=sqrt(2e-16))
+
+sim$adj.p5=sim$STM.perm.p
+sim$adj.p5[sim$adj.p5<=2e-16]=2e-16+rnorm(length(which(sim$adj.p5<=2e-16)), 0, sd=sqrt(2e-16))
+
+sim$adj.p6=sim$LTM.perm.p
+sim$adj.p6[sim$adj.p6<=2e-16]=2e-16+rnorm(length(which(sim$adj.p6<=2e-16)), 0, sd=sqrt(2e-16))
 
 A1=ggplot(data = sim)+
   #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p4), y=log10(adj.p2), color=colvar))+
+  geom_point(aes(x=log10(adj.p4), y=log10(adj.p5), color=colvar))+
   theme(legend.position = "none")+
-  labs(y = expression(log10('Simulated Mediation P-value')),
-       x = expression(log10('Observed Permuted P-value')),
+  labs(y = expression(log10('Simulated Permutation P-value')),
+       x = expression(log10('Observed Permutation P-value')),
        subtitle = "Small True Model")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-15,0))+
@@ -260,10 +266,10 @@ A1=ggplot(data = sim)+
 
 B1=ggplot(data = sim)+
   #geom_point(aes(x=Perm.p, y=LTM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p4), y=log10(adj.p3), color=colvar))+
+  geom_point(aes(x=log10(adj.p4), y=log10(adj.p6), color=colvar))+
   theme(legend.position = "none")+
-  labs(y = expression(log10('Simulated Mediation P-value')),
-       x = expression(log10('Observed Permuted P-value')),
+  labs(y = expression(log10('Simulated Permutation P-value')),
+       x = expression(log10('Observed Permutation P-value')),
        subtitle = "Large True Model")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-15,0))+
@@ -275,9 +281,41 @@ B1=ggplot(data = sim)+
 ggarrange(A, B, A1, B1, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 ```
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
+#sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
+
+set.seed(222)
+
+sim$adj.p7=sim$TGM.p
+sim$adj.p7[sim$adj.p2<=2e-16]=2e-16+rnorm(length(which(sim$adj.p7<=2e-16)), 0, sd=sqrt(2e-16))
+sim$adj.p8=sim$Med.pvalue.MRPC
+sim$adj.p8[sim$adj.p8<=2e-16]=2e-16+rnorm(length(which(sim$adj.p8<=2e-16)), 0, sd=sqrt(2e-16))
+# cv2=sim$colvar
+# sim$colvar2=as.factor(replace(cv2, sim$Med.pvalue.GMAC<2e-16, 2))
+
+h=0.05
+ggplot(data = sim)+
+  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
+  geom_point(aes(x=log10(adj.p1), y=log10(adj.p7), color=colvar))+
+  theme(legend.position = "none")+
+ # ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
+  labs(y = expression(log10('Simulated Parametric P-value')),
+       x = expression(log10('Observed Parametric P-value')),
+       subtitle = "GMAC True Model and MRPC Analysis Model")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+  #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
 
 
-```{r, fig.cap="$\\bf (A)$ and $\\bf (B):$ The relationship between the simulated mediation $p$-value and the number of additional (STM scenario) or missing (LTM scenario) confounders in the analysis model relative to the true model generating the trans gene. In both plots blue points represent trios with a rare allele observed at the SNP loci e.g having a frequency among subjects below $5\\%$.", echo=FALSE, message=FALSE, warning=FALSE}
+```
+
+
+
+
+```{r, fig.cap="$\\bf (A)$ and $\\bf (B):$ The relationship between the simulated mediation $p$-value and the number of additional (STM scenario) or missing (LTM scenario) confounders in the analysis model relative to the true model generating the trans gene. In both plots blue boxes represent trios with a rare allele observed at the SNP loci e.g having a frequency among subjects below $5\\%$.", echo=FALSE, message=FALSE, warning=FALSE}
 #sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
 
 #set.seed(222)
@@ -287,36 +325,45 @@ ggarrange(A, B, A1, B1, labels = c("A","B","C","D") , nrow=2, ncol=2)
 # sim$adj.p2=sim$STM.med.p
 # sim$adj.p2[sim$adj.p2<=2e-16]=2e-16+rnorm(length(which(sim$adj.p2<=2e-16)), 0, sd=sqrt(2e-16))
 
+TT=summary(as.factor(sim$STM.dim.diff))
+rmv=as.numeric(names(TT[TT==1]))
+
+sim.sub=sim[-c(match(rmv, sim$STM.dim.diff)),]
 
 h=0.05
-A=ggplot(data = sim)+
+A=ggplot(data = sim.sub)+
   #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=STM.dim.diff, y=log10(adj.p2), color=colvar))+
+  geom_boxplot(aes(x=as.factor(STM.dim.diff), y=log10(adj.p2), fill=colvar))+
   theme(legend.position = "none")+
   #ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
   labs(y = expression(log10('Simulated Mediation P-value')),
        x = "Number of Additional Confounders In Analysis",
        subtitle = "Small True Model")+
-  scale_x_continuous(limits = c(0, 20))+
-  scale_y_continuous(limits = c(-15,0))+
+  #scale_x_continuous(limits = c(0, 20))+
+  #scale_y_continuous(limits = c(-15,0))+
   #geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   #geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
   #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
 
-sim$adj.p3=sim$LTM.med.p
-sim$adj.p3[sim$adj.p3<=2e-16]=2e-16+rnorm(length(which(sim$adj.p3<=2e-16)), 0, sd=sqrt(2e-16))
+# sim$adj.p3=sim$LTM.med.p
+# sim$adj.p3[sim$adj.p3<=2e-16]=2e-16+rnorm(length(which(sim$adj.p3<=2e-16)), 0, sd=sqrt(2e-16))
+
+# TT=summary(as.factor(sim$LTM.dim.diff))
+# rmv=as.numeric(names(TT[TT==1]))
+# 
+# sim.sub=sim[-c(match(rmv, sim$LTM.dim.diff)),]
 
 B=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=LTM.med.p, color="red"))+
-  geom_point(aes(x=LTM.dim.diff, y=log10(adj.p3), color=colvar))+
+  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
+  geom_boxplot(aes(x=as.factor(LTM.dim.diff), y=log10(adj.p3), fill=colvar))+
   theme(legend.position = "none")+
-  #ggtitle("Scatter of Mediation Pvalues", subtitle = "Large True Model")+
+  #ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
   labs(y = expression(log10('Simulated Mediation P-value')),
        x = "Number of Missing Confounders In Analysis",
        subtitle = "Large True Model")+
-  scale_x_continuous(limits = c(0, 20))+
-  scale_y_continuous(limits = c(-15,0))+
+  #scale_x_continuous(limits = c(0, 20))+
+  #scale_y_continuous(limits = c(-15,0))+
   #geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   #geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
@@ -331,7 +378,7 @@ ggarrange(A, B, labels = c("A","B") , nrow=2)
 
 
 
-```{r, fig.cap="\\textbf{A} The relationship between the observed $p$-value for the mediation test under GMAC and the observed mediation $p$-value under MRPC-ADDIS. \\textbf{B} The relationship between the observed $p$-value for the permuted mediation test under GMAC and the observed mediation $p$-value under MRPC-ADDIS. \\textbf{C} Comparison of the permutation and mediation $p$-values under GMAC. Blue points indicate trios with a corresponding rare allele at the SNP loci. \\textbf{D} Comparison of the permutation and mediation $p$-values under GMAC and excluding trios with a corresponding rare allele for visibility. In \\textbf{A,B,D} points along the black diagonal lines indicate near $1:1$ correspondence in the $p$-values between methods.", echo=FALSE, message=FALSE, warning=FALSE}
+```{r, fig.cap="\\textbf{A} The distribution of the difference between the GMAC and MRPC models in terms of in percentage of variation captured by the PCs/confounders included by each model, and under the special case of trios for which the mediation test was significant under GMAC but insignificant under MRPC \\textbf{B} The distribution described for \\textbf{A} but under the alternative scenario when both GMAC and MRPC mediation tests were insignificant (not to be confused with the permutation test which is significant for GMAC). \\textbf{C} Comparison of the permutation and mediation $p$-values under GMAC. Blue points indicate trios with a corresponding rare allele at the SNP loci. \\textbf{D} Comparison of the permutation and mediation $p$-values under GMAC and excluding trios with a corresponding rare allele for visibility. In \\textbf{A,B,D} points along the black diagonal lines indicate near $1:1$ correspondence in the $p$-values between methods.", echo=FALSE, message=FALSE, warning=FALSE}
 
 
 
@@ -357,7 +404,7 @@ A=ggplot(aes(x=Per.var.GMAC-Per.var.MRPC),data = sim.sub)+geom_histogram(aes(y =
   #     y = expression(log10('Obs. MRPC Mediation Pvalue')),
   #    col = expression('% Difference \nIn Variation \nIn Included \nPC\'s'),
   #    subtitle = "GMAC vs MRPC")+
-  labs(x = "Difference In % Variation",
+  labs(x = "Difference In % Variation Between GMAC and MRPC",
        col = expression('% Difference \nIn Variation \nIn Included \nPC\'s'),
        subtitle =  "GMAC p < 0.05 vs MRPC p > 0.05")
   #geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
@@ -374,7 +421,7 @@ sim.sub=subset(sim, Med.pvalue.GMAC>0.05 & Med.pvalue.MRPC>0.05)
 
 B=ggplot(aes(x=Per.var.GMAC-Per.var.MRPC),data = sim.sub)+geom_histogram(aes(y = ..density..),color = "black", fill = "white")+
   geom_density(alpha = 0.2, fill = "#FF6666") + theme_minimal()+
-  labs(x = "Difference In % Variation",
+  labs(x = "Difference In % Variation Between GMAC and MRPC",
        col = expression('% Difference \nIn Variation \nIn Included \nPC\'s'),
        subtitle = "GMAC p > 0.05 vs MRPC p > 0.05")
 #B=ggplot(data = sim)+
@@ -392,13 +439,13 @@ B=ggplot(aes(x=Per.var.GMAC-Per.var.MRPC),data = sim.sub)+geom_histogram(aes(y =
   #geom_abline(intercept = 0, slope = 1, linetype="dashed")
 
 C=ggplot(data = sim)+
-  geom_point(aes(x=Perm.p, y=Med.pvalue.GMAC, color=colvar, label=Trio.Num))+
+  geom_point(aes(x=Perm.p.GMAC, y=Perm.p.MRPC, color=colvar, label=Trio.Num))+
   #geom_point(aes(x=Med.pvalue.GMAC, y=STM.med.p))+
   theme(legend.position = "none")+
   #ggtitle("Scatter of Mediation Pvalues", )+
-    labs(y = "Observed GMAC Mediation Pvalue",
-       x = 'Observed Permuted P-value',
-       subtitle = "Comparing Mediation and Permutation Test")+
+    labs(y = "Observed Permutation P-value (MRPC)",
+       x = 'Observed Permutation P-value (GMAC)',
+       subtitle = "Comparing Permutation Tests Under GMAC and MRPC")+
   geom_hline(yintercept = h, linetype="dashed", color="red")+
   geom_vline(xintercept = h, linetype="dashed", color="red")+
   scale_x_continuous(limits=c(0, 0.006))
@@ -408,20 +455,21 @@ C=ggplot(data = sim)+
 
   
 D=ggplot(data = sim)+
-  geom_point(aes(x=Perm.p, y=Med.pvalue.GMAC, color=colvar, label=Trio.Num))+
+  geom_point(aes(x=Perm.p.GMAC, y=Perm.p.MRPC, color=colvar, label=Trio.Num))+
   #geom_point(aes(x=Med.pvalue.GMAC, y=STM.med.p))+
   theme(legend.position = "none")+
   #ggtitle("Scatter of Mediation Pvalues", )+
-    labs(y = "Observed GMAC Mediation Pvalue",
-       x = 'Observed Permuted P-value',
-       subtitle = "Comparing Mediation and Permutation Test")+
+    labs(y = "Observed Permutation P-value (MRPC)",
+       x = 'Observed Permutation P-value (GMAC)',
+       subtitle = "Comparing Permutation Tests Under GMAC and MRPC")+
   geom_hline(yintercept = h, linetype="dashed")+
   geom_text(aes( -0.0004, h, label = h, vjust = -1), size = 5)+
   scale_y_continuous(limits = c(0, 0.006))+
   geom_abline(slope = 1, intercept = 0, linetype="dashed")
 
 
-ggarrange(A,B,C,D, labels = c("A","B","C","D"), nrow=2, ncol=2)
+
+ggarrange(A,B,C,D, labels = c("A","B","C","D"), nrow=3, ncol=2)
 
 
 ```
@@ -449,8 +497,8 @@ B=ggplot(data = trio1922ArT)+
        col = expression('Genotype Of \nSubject'),
        subtitle = "SNP ID: chr16_89561052_T_G_b38")
 
-alternative=(sim.odd[,23]+2*sim.odd[,24])/(2*rowSums(sim.odd[,22:24]))
-genotypes=sim.odd[,22:24]/rowSums(sim.odd[,22:24])
+alternative=(sim.odd[,26]+2*sim.odd[,27])/(2*rowSums(sim.odd[,25:27]))
+genotypes=sim.odd[,25:27]/rowSums(sim.odd[,25:27])
 
 freqmat=cbind.data.frame(allele=c(alternative, alternative, alternative), geno=c(genotypes[,1], genotypes[,2], genotypes[,3]), Genotype=as.factor(c(rep("Homozygous.Ref",dim(genotypes)[1]), rep("Heterozygous",dim(genotypes)[1]), rep("Homozygous.Alt",dim(genotypes)[1]))))
 
@@ -466,7 +514,51 @@ C=ggplot(data = freqmat)+
   
 
 ggarrange(C, ggarrange(A, B, labels=c("B","C"), ncol = 2), labels = c("A"), nrow=2)
+```
 
+
+
+
+```{r, fig.cap="\\textbf{A} and \\textbf{C}: Example scatter plots of trios from subcutaneous adipose tissue and whole blood (respectively) with a rare allele present in the sample: Note that 0 indicates individuals homozygous for the reference allele, 1 indicates hetezygous individuals and 2 indicates individuals who are homozygous for the alternative (rare) allele. The apparent outlier represents a single individual in the sample who was homozygous for the rare allele, and \\textbf{B} and \\textbf{C} are the scatter plots with the point(s) for the homozygous-alternative individuals removed and a confidence ellipse calculated over the remaining homozygous-reference and heterzygous individals.", echo=FALSE, message=FALSE, warning=FALSE}
+
+trio5683AS=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/Trio5683AS.txt", sep="\t", header = T)
+trio8112WB=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/Trio8112WB.txt", sep="\t", header = T)
+
+
+A=ggplot(data = trio5683AS)+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  labs(x = expression("Cis Gene: ENSG00000145715"),
+       y = expression("Trans Gene: ENSG00000264330"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr5_86411404_G_A_b38")
+
+B=ggplot(data = subset(trio5683AS, SNP!=2))+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  stat_ellipse(geom="polygon",aes(x=cis.gene, y=trans.gene, fill=as.factor(SNP)),alpha=0.35, show.legend=F)+
+  labs(x = expression("Cis Gene: ENSG00000145715"),
+       y = expression("Trans Gene: ENSG00000264330"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr5_86411404_G_A_b38")
+
+
+C=ggplot(data = trio8112WB)+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  labs(x = expression("Cis Gene: ENSG00000272356"),
+       y = expression("Trans Gene: ENSG00000238423"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr6_111433344_G_A_b38")
+
+
+D=ggplot(data = subset(trio8112WB, SNP!=2))+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  stat_ellipse(geom="polygon",aes(x=cis.gene, y=trans.gene, fill=as.factor(SNP)),alpha=0.35, show.legend=F)+
+  labs(x = expression("Cis Gene: ENSG00000272356"),
+       y = expression("Trans Gene: ENSG00000238423"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr6_111433344_G_A_b38")
+
+
+ggarrange(A,B,C,D, labels = c("A","B","C","D"), nrow=2, ncol=2)
 
 ```
 

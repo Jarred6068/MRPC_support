@@ -9,15 +9,13 @@ loadRData <- function(fileName=NULL){
   get(ls()[ls() != "fileName"])
 }
 
-#read in expression data (Human Genome build 37)
-bsgs=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/new_data_GE_R2_bsgs_delete.RData")
+#read in expression data
+bsgs=read.csv(file = "/mnt/ceph/jarredk/Methyl/ExpressData/new_data_GE_R2_bsgs_delete.csv")
 bsgs=as.data.frame(bsgs[,-1])
-#bsgs.Rdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/new_data_GE_R2_bsgs_delete.RData")
+bsgs.Rdata=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/new_data_GE_R2_bsgs_delete.RData")
 geo.bsgs=read.csv(file = "/mnt/ceph/jarredk/Methyl/ExpressData/BSGS_GEO_Accession_data2.csv")
 
 #methyl=read.csv(file = "/mnt/ceph/jarredk/Methyl/new_data_M_average_delete.csv")
-#obtain gene names
-ILMN_Gene=bsgs[,2]
 
 #remove p-values
 pcols=seq(4, dim(bsgs)[2], 2)
@@ -62,9 +60,10 @@ covariates.final=covariates[idx2,]
 covariates.final[1:10,]
 
 tbsgs=tbsgs[idx2, cols.to.keep]
-aligned.genes=Genes[idx2]
+
+#tbsgs=cbind.data.frame(Gene.name=Genes[idx2], tbsgs)
 tbsgs[1:10,1:10]
-aligned.genes[1:10]
+
 #center and scale
 library('preprocessCore',lib="/mnt/ceph/jarredk/Rpackages")
 
@@ -73,6 +72,7 @@ tbsgs.scaled.normal=normalize.quantiles(scale(tbsgs))
 save(covariates.final, file = "/mnt/ceph/jarredk/Methyl/ExpressData/bsgs.cov.final.Rdata")
 save(tbsgs, file = "/mnt/ceph/jarredk/Methyl/ExpressData/transposed.bsgsdata.Rdata")
 save(tbsgs.scaled.normal, file = "/mnt/ceph/jarredk/Methyl/ExpressData/transposed.bsgs.scaled.normal.Rdata")
+save(Gene.name=Genes[cols.to.keep], file = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs_GeneIDs.Rdata")
 
 #histograms to check normality
 
@@ -161,13 +161,12 @@ residuals.bsgs[1:5,1:5]
 #save
 Peerdata.bsgs=residuals.bsgs
 Peerdata.bsgs[1:5,1:5]
-Peerdata.bsgs=rbind.data.frame(Genes, Peerdata.bsgs)
 save(Peerdata.bsgs, file="/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.RData")
 write.csv(Peerdata.bsgs, file="/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.csv")
 
 
 #pairwise plots of columns of peer residuals with scaled expression data 
-peer1=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.RData")
+peer1=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs.Rdata")
 
 for( i in 1:100){
   #pre-transformation:

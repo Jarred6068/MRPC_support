@@ -15,7 +15,7 @@ express.resids=loadRData(fileName = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerda
 ex.genotypes=as.data.frame(ex.genotypes[-1,])
 
 rn1=row.names(express.resids)[-1]
-rn2=row.names(methyl.resids)[-1]
+rn2=row.names(methyl.resids)
 
 express.genenames=as.character(express.resids[1,])
 express.resids2=as.data.frame(apply(express.resids[-1,],2,as.numeric))
@@ -25,8 +25,8 @@ row.names(express.resids2)=rn1
 rn2.new=NULL
 for(i in 1:length(rn2)){rn2.new[i]=strsplit(rn2[i], "/")[[1]][1]}
 
-methyl.genenames=as.character(methyl.resids[1,])
-methyl.resids2=as.data.frame(apply(methyl.resids[-1,],2,as.numeric))
+methyl.genenames=loadRData(fileName ="/mnt/ceph/jarredk/Methyl/MethylData/MethylData.RegressResids.UCSC_RefGene_Name.Rdata")
+#methyl.resids2=as.data.frame(apply(methyl.resids[-1,],2,as.numeric))
 row.names(methyl.resids2)=rn2.new
 
 #alignment of subjects in both matrices
@@ -70,7 +70,10 @@ match.gn.parsed=function(egn, mgnp){
   
 }
 
+#a list of the methylation probes matched to each gene in express.genenames
 triobuildlist=match.gn.parsed(express.genenames, methyl.gn.parsed)
+
+
 
 #save(triobuildlist, file = "/mnt/ceph/jarredk/Methyl/triobuildlist.Rdata")
 #====================================================================================

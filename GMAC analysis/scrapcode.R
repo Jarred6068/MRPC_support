@@ -144,7 +144,7 @@ print(sum(V))
 #checking trios with conflicting mediation and permutation p values
 #must be run post run_simulations.slurm on cluster
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-sim=read.table(file="/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
+sim=read.table(file="/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_adipose_subcutaneous.txt", sep="\t", header = T)
 
 #wt=sim[which(sim$Med.pvalue.GMAC>0.05),]
 
@@ -154,19 +154,35 @@ colnames(snp.dist)=c("hr","het","ha")
 for(i in 1:dim(sim)[1]){
   
   if(sim$Med.type[i]=="Trans.Med"){
-    list.data=cross.regress(tissue=wt$Tissue[i], trio.ind=wt$Trio.Num[i], mod.type="trans", addis.pcs=NULL, verbose=F)
+    list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type="trans", addis.pcs=NULL, verbose=F)
   }else{
-    list.data=cross.regress(tissue=wt$Tissue[i], trio.ind=wt$Trio.Num[i], mod.type="cis", addis.pcs=NULL, verbose=F)
+    list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type="cis", addis.pcs=NULL, verbose=F)
   }
   
-  snp.dist[i,]=summary(factor(list.data$GMAC$SNP))
+  
+  #account for SNPs with less than 3 genotypes
+  if(length(summary(factor(list.data$GMAC$SNP)))<3){
+    
+    if( length(which(names(summary(factor(list.data$GMAC$SNP)))=="0"))==0 ){
+      snp.dist[i,]=c(NA ,summary(factor(list.data$GMAC$SNP)))
+    }else if ( length(which(names(summary(factor(list.data$GMAC$SNP)))=="1"))==0 ){
+      snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP))[1], NA , summary(factor(list.data$GMAC$SNP))[2])
+    }else{
+      snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP)), NA)
+    }
+    
+  }else{
+    
+    snp.dist[i,]=summary(factor(list.data$GMAC$SNP))
+    
+  }
   
 }
 
 
 output1=cbind.data.frame(sim, snp.dist)
 
-write.csv(output1, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv", row.names = F)
+write.csv(output1, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_AS.csv", row.names = F)
 
 
 
@@ -176,7 +192,7 @@ write.csv(output1, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_im
 
 #Add in simulation for MRPC on GMAC model to the simulations.txt dataset
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-sim=read.table(file="/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
+sim=read.table(file="/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_adipose_subcutaneous.txt", sep="\t", header = T)
 
 p=NULL
 
@@ -200,7 +216,7 @@ for(i in 1:dim(sim)[1]){
 
 sim$TGM.p=p
 
-write.table(sim, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_wholeblood.txt", col.names = T, row.names = F, sep = "\t",
+write.table(sim, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_adipose_subcutaneous.txt", col.names = T, row.names = F, sep = "\t",
             quote=F)
 
 

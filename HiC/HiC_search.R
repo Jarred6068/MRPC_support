@@ -21,8 +21,14 @@ find_trans=function(TransGeneName=NULL){
 
     meta2=read.delim(paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",tissue.names[1,2],
                     "_AllPC/",tissue.names[1,2],".genepos.V8.txt",sep="")) 
+    
+    genenames.BM=read.table(file = "/mnt/ceph/jarredk/HiC_Analyses/mart_export_genenames_and_ids38.txt", header=T, sep=",")
       
       TGattr=subset(meta2, gene_id==TransGeneName)
+      
+      TGattr$gene.name=genenames.BM[which(genenames.BM$Gene.stable.ID==TransGeneName),2]
+      
+      #print(genenames.BM[which(genenames.BM$Gene.stable.ID==TransGeneName),2])
   
   return(TGattr)
   
@@ -63,10 +69,12 @@ get_trio_attr=function(trio.index=NULL, tissue.name="CellsEBVtransformedlymphocy
   
   meta2=read.delim(paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",tissue.names[1,2],
                          "_AllPC/",tissue.names[1,2],".genepos.V8.txt",sep="")) 
+  
+  #genenames.BM=read.table(file = "/mnt/ceph/jarredk/HiC_Analyses/mart_export_genenames_and_ids.txt", header=T, sep=",")
     
   #space allocation
   attri.mat.cis=as.data.frame(matrix(0, nrow=length(trio.index), ncol=dim(meta)[2]))
-  attri.mat.trans=as.data.frame(matrix(0, nrow=length(trio.index), ncol=4))
+  attri.mat.trans=as.data.frame(matrix(0, nrow=length(trio.index), ncol=5))
   snps=NULL
   #retrieve attributes for all genes in all given trios: 
   for(i in 1:length(trio.index)){
@@ -80,7 +88,8 @@ get_trio_attr=function(trio.index=NULL, tissue.name="CellsEBVtransformedlymphocy
     if(verbose==TRUE){
       print(paste(i,") finding attributes for ", trio.index[i],"...", sep = ""))
     }
-      
+    
+    #print(gene.name[2])
     #get cis-trans gene attributes
     TGattr=find_trans(TransGeneName=gene.name[2])
     attri.mat.cis[i,] = subset(meta, gene_id == gene.name[1])
@@ -88,7 +97,7 @@ get_trio_attr=function(trio.index=NULL, tissue.name="CellsEBVtransformedlymphocy
       
   }
   
-  colnames(attri.mat.trans)=colnames(meta2)
+  colnames(attri.mat.trans)=c(colnames(meta2), "gene.name")
   colnames(attri.mat.cis)=colnames(meta)
   attri.mat.cis$chr = gsub("chr","", attri.mat.cis$chr)
   attri.mat.trans$trio.idx=trio.index
@@ -341,39 +350,47 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
   qvals2=rep(0, length(p.values2))
   BY2=rep(0, length(p.values2))
   
-  print(dim(hic.extent))
+  #print(dim(hic.extent))
   print("made it this far1")
   
+  #print(colnames(trio.attr$Attributes$trans))
+  #print(head(trio.attr$Attributes$trans))
+  #print(colnames(trio.attr$Attributes$trans))
+  #print(head(trio.attr$Attributes$trans))
   #summarize
-  info.list = cbind.data.frame(trio.attr$SNPS,
-                               trio.attr$Attributes$cis$gene_name,
-                               trio.attr$Attributes$cis$gene_id,
-                               reads, averages, total.nas, p.values, BY,
-                               bh.thresh, qvals, trio.attr$Attributes$cis$chr,
+  info.list = cbind.data.frame(trio.attr$SNPS, 
+                               trio.attr$Attributes$trans$gene.name,
                                trio.attr$Attributes$trans$gene_id,
                                trio.attr$Attributes$trans$chr,
+                               reads, averages, total.nas, p.values, BY,
+                               bh.thresh, qvals, 
                                trio.attr$Attributes$cis$variant_pos,
                                trio.attr$Attributes$trans$left,
                                trio.attr$Attributes$trans$right,
-                               hic.extent)
+                               hic.extent, 
+                               trio.attr$Attributes$cis$gene_name,
+                               trio.attr$Attributes$cis$gene_id,
+                               trio.attr$Attributes$cis$chr)
   
-  print(info.list)
+  #print(info.list)
   
   info.list2 = cbind.data.frame(trio.attr$SNPS, 
-                                trio.attr$Attributes$cis$gene_name,
-                                trio.attr$Attributes$cis$gene_id,
-                                reads, averages, total.nas, p.values2, BY2,
-                                bh.thresh2, qvals2, trio.attr$Attributes$cis$chr,
+                                trio.attr$Attributes$trans$gene.name,
                                 trio.attr$Attributes$trans$gene_id,
                                 trio.attr$Attributes$trans$chr,
+                                reads, averages, total.nas, p.values2, BY2,
+                                bh.thresh2, qvals2, 
                                 trio.attr$Attributes$cis$variant_pos,
                                 trio.attr$Attributes$trans$left,
                                 trio.attr$Attributes$trans$right,
-                                hic.extent)
+                                hic.extent, 
+                                trio.attr$Attributes$cis$gene_name,
+                                trio.attr$Attributes$cis$gene_id,
+                                trio.attr$Attributes$cis$chr)
   #name cols
-  cnames=c("SNP", "gene_name", "cis.gene.ID","obs.reads", "expected", "total_NA's", "P(>obs)", "BY","HB.Adjusted", "qvals",
-                        "cis.chr", "trans.gene.ID", "trans.chr","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
-                        "variant.upper.bound", "trans.lower.bound", "trans.upper.bound")
+  cnames=c("SNP", "trans.gene.name", "trans.gene.ID", "trans.chr", "obs.reads", "expected.reads", "total_NA's", "P(>obs)", 
+           "BY","HB.Adjusted", "qvals","variant.pos", "trans.left","trans.right", "variant.lower.bound", 
+                        "variant.upper.bound", "trans.lower.bound", "trans.upper.bound","cis.gene.name", "cis.gene.ID", "cis.chr")
   
   colnames(info.list)=cnames
   colnames(info.list2)=cnames

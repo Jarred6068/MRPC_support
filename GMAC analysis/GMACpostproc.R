@@ -1678,7 +1678,7 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
   
   
   out.mat$Med.type=mod.type.vec
-  out.mat$ADDIS.inf.Class=l1.table$final.tables[[1]]$Addis.Class[match(out.mat$Trio.Num,  l1.table$final.tables[[1]]$Trio.Num)]
+  out.mat$ADDIS.inf.Class=l1.table$Addis.Class[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$Perm.p.GMAC=l1.table$Perm.rep.p[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$cis.gene=l1.table$cis[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$trans.gene=l1.table$trans[match(out.mat$Trio.Num,  l1.table$Trio.Num)]

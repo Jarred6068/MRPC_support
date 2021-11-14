@@ -184,12 +184,12 @@ ggplot(data=dat1, aes(x=abs(pcors), fill=labels))+geom_density(alpha=0.5)+
 #sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
 library(ggpubr)
 library(prodlim)
-sim1=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv", header = T)
-sim2=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_AS.csv", 
+sim1=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB_alltrios.csv", header = T)
+sim2=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_AS_alltrios.csv", 
                header = T)
 sim3=rbind.data.frame(sim1,sim2)
 
-sim=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv", header = T)
+sim=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB_alltrios.csv", header = T)
 
 sim$alternative=(sim$het+2*sim$ha)/(2*rowSums(sim[,26:28]))
 sim$reference=1-sim$alternative

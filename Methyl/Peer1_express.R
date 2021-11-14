@@ -68,11 +68,12 @@ tbsgs[1:10,1:10]
 library('preprocessCore',lib="/mnt/ceph/jarredk/Rpackages")
 
 tbsgs.scaled.normal=normalize.quantiles(scale(tbsgs))
+GeneIDs=Genes[cols.to.keep]
 
 save(covariates.final, file = "/mnt/ceph/jarredk/Methyl/ExpressData/bsgs.cov.final.Rdata")
 save(tbsgs, file = "/mnt/ceph/jarredk/Methyl/ExpressData/transposed.bsgsdata.Rdata")
 save(tbsgs.scaled.normal, file = "/mnt/ceph/jarredk/Methyl/ExpressData/transposed.bsgs.scaled.normal.Rdata")
-save(Gene.name=Genes[cols.to.keep], file = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs_GeneIDs.Rdata")
+save(GeneIDs, file = "/mnt/ceph/jarredk/Methyl/ExpressData/Peerdata.bsgs_GeneIDs.Rdata")
 
 #histograms to check normality
 

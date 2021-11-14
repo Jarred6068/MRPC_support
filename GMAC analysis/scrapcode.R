@@ -224,6 +224,63 @@ write.table(sim, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/simulation
 
 
 
+#Add in permutation pvalue for simulation for MRPC on GMAC model to the simulations.txt dataset
+source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+t1=read.csv(file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv")
+
+p=NULL
+
+
+for(i in 1:dim(t1)[1]){
+  #print(i)
+  
+  L2A=Lond2Addis.lookup(trio.index=t1$Trio.Num[i], tissue.name=t1$Tissue[i], with.pc=TRUE)
+  print(dim(L2A$correlation))
+  if(length(colnames(L2A$correlation))>3){
+    addis.pcs=colnames(L2A$correlation)[-c(1:3)]
+  }else{
+    addis.pcs=NULL
+  }
+  
+  list.data=cross.regress(tissue=t1$Tissue[i], trio.ind=t1$Trio.Num[i], mod.type=t1$Med.type[i], addis.pcs=addis.pcs, verbose=F)
+  
+  out=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=t1$Med.type[i], verbose=F)
+  print(dim(out$sim.data))
+  p[i]=run.permuted.reg(out$sim.data, nperms=1000, Alg="ADDIS", med.type = t1$Med.type[i])$p.value
+  print(p[i])
+  
+}
+
+
+t1$TGM.perm=p
+
+
+write.csv(t1, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv", row.names = F)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #testing GMAC inference on trios with rare alleles in cis-eQTL:

@@ -139,7 +139,7 @@ SkinSunExposed      106 33 12 185 138     0                 474
 WholeBlood          122 55 22 152 162     0                 513
 
 
-
+***The write up for this folder is GMACwriteup.pdf and can be found in the Manuscript Directory
 
 
 

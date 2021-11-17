@@ -136,7 +136,7 @@ extract_hic=function(fileName=NULL, chrs=c("1","1"), resol=10000, package.path="
 #=============================================Resampling_Function====================================================
 
 Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search.size=100000, resamples=10000, 
-                               verbose=FALSE, plot.hist=FALSE, trio=NULL, tiss=NULL, FDR=NULL){
+                               verbose=FALSE, plot.hist=FALSE, trio=NULL, tiss=NULL, FDR=NULL, plot.title=NULL){
   
   #SYNTAX:
   #filepath - feeds to extrac_hic to obtain min/max bounds for both chromosomes
@@ -154,13 +154,14 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   
   
   #for histogram plotting
+  library(ggpubr,lib="/mnt/ceph/jarredk/Rpackages")
   tissues=c("CellsCulturedfibroblasts","SkinNotSunExposed","Lung","CellsEBVtransformedlymphocytes")
   tisspath=c("fibroblast_cells","Skin","Lung","lymphoblastoid_cells")
   
   reads=rep(0, resamples)
   sampler=NULL
   CI=NULL
-  i=1
+  #i=1
   data.hic2=extract_hic(fileName = filePath, 
                         chrs = chrs,
                         resol=res)
@@ -196,12 +197,22 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   #histogram 
   if(plot.hist==TRUE){
     
+    
+    
     idx=which(tiss==tissues)
     G=tisspath[idx]
     
-    png(paste("/mnt/ceph/jarredk/HiC_Analyses/",FDR,"/Histograms/",G ,"/rplot_", trio ,".png", sep = ""))
+    if(is.null(plot.title)){plot.title=paste(paste0(chrs,collapse =":"), G, sep = ":")}
     
-    H1=hist(reads, breaks = 10)
+    png(paste("/mnt/ceph/jarredk/HiC_Analyses/",FDR,"/Histograms/",G ,"/rplot_", trio ,".png", sep = ""))
+    r1=as.numeric(na.omit(reads))
+    H1=ggplot(mapping=aes(x=r1)) + 
+       geom_histogram(aes(y=..density..), color="black", fill="white")+
+       geom_density(alpha=.2, fill="#FF6666")+
+       labs(x="Number of Interactions",
+            y="Density",
+            title = paste0(plot.title))+
+       theme_classic2()
     plot(H1)
     
     dev.off()

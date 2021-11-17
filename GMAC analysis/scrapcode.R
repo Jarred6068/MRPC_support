@@ -2,7 +2,7 @@
   #read in postprocessing functions
 
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-l1=cross.analyze(tissues=tissues.vec[5,1], save=FALSE)
+l1=cross.analyze(tissues="CellsEBVtransformedlymphocytes", save=FALSE)
 #check first 15 M3's for wholeblood
 data1=l1$final.tables[[1]][which(l1$final.tables[[1]]$Addis.Class=="M3"),]
 M3.trios.sample=l1$final.tables[[1]][which(l1$final.tables[[1]]$Addis.Class=="M3"),]$Trio.Num
@@ -33,9 +33,9 @@ MRPC.fit.FDR.addis <- MRPC(test.data,
 as(MRPC.fit.FDR.addis@graph, "matrix")[1:3,1:3]
 
 
-Lond2Addis.lookup(trio.index=133, tissue.name="WholeBlood", with.pc=TRUE)
+Lond2Addis.lookup(trio.index=2977, tissue.name="CellsEBVtransformedlymphocytes", with.pc=TRUE)
 
-list.data=cross.regress(tissue="WholeBlood", trio.ind=8112, mod.type="cis", addis.pcs=NULL)
+list.data=cross.regress(tissue="CellsEBVtransformedlymphocytes", trio.ind=8112, mod.type="cis", addis.pcs=NULL)
 
 
 fname1=paste0("/mnt/ceph/jarredk/GMACanalysis/GMAC.permutedREG.trio",

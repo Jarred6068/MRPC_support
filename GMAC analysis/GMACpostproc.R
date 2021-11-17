@@ -969,8 +969,7 @@ reclass=function(tissue="WholeBlood", trio.ind.vec=NULL, mod.type="cis", verbose
 #a utility function combining many of the above for ease of use
 
 
-runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Class=="M3"),][1:15,], 
-               trio.number=NULL, mtype=""){
+runit=function(indata=NULL, med.type=NULL,trio.number=NULL, mtype=""){
   
   #space allocation
   cors=as.data.frame(matrix(0, nrow=length(trio.number), ncol = 3))
@@ -1008,14 +1007,14 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
     print("--------------ADDIS-PCs--------------")
     print(addis.pcs)
   
-    list.data=cross.regress(tissue="WholeBlood", trio.ind=trio.number[i], mod.type="cis", addis.pcs=addis.pcs,
+    list.data=cross.regress(tissue="WholeBlood", trio.ind=trio.number[i], mod.type=med.type[i], addis.pcs=addis.pcs,
                             mtype = mtype, plot.it = TRUE)
     
     num.pcs[i,2]=length(colnames(list.data$GMAC)[-c(1:2,(length(colnames(list.data$GMAC))-3):length(colnames(list.data$GMAC)))])
     
     fname1=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/GMAC.nomatch.permutedREG.trio",
                   trio.number[i],".png")
-    out.permreg=run.permuted.reg(trio=list.data$GMAC, nperms=10000, plot=TRUE, filename=fname1)
+    out.permreg=run.permuted.reg(trio=list.data$GMAC, nperms=10000, plot=TRUE, med.type = med.type[i], filename=fname1)
     perm.p.gmac[i,1]=out.permreg$p.value
     perm.p.gmac[i,2]=out.permreg$obs.wald.stat
     
@@ -1025,7 +1024,7 @@ runit=function(indata=l1$final.tables[[5]][which(l1$final.tables[[5]]$Addis.Clas
   
     fname2=paste0("/mnt/ceph/jarredk/GMACanalysis/additional_plots/GMAC.nomatch.permutedREG.trio",
                 trio.number[i],".addis.png")
-    out.permreg=run.permuted.reg(trio=list.data$addis, nperms=10000, plot=TRUE, Alg="ADDIS", filename=fname2)
+    out.permreg=run.permuted.reg(trio=list.data$addis, nperms=10000, plot=TRUE, med.type = med.type[i], Alg="ADDIS", filename=fname2)
     perm.p.addis[i,1]=out.permreg$p.value
     perm.p.addis[i,2]=out.permreg$obs.wald.stat
   

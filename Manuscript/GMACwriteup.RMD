@@ -184,17 +184,33 @@ ggplot(data=dat1, aes(x=abs(pcors), fill=labels))+geom_density(alpha=0.5)+
 #sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
 library(ggpubr)
 library(prodlim)
-sim1=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB_alltrios.csv", header = T)
-sim2=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_AS_alltrios.csv", 
+sim=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv", header = T)
+sim2=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_AS.csv", 
                header = T)
-sim3=rbind.data.frame(sim1,sim2)
+sim3=rbind.data.frame(sim,sim2)
 
-sim=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB_alltrios.csv", header = T)
 
 sim$alternative=(sim$het+2*sim$ha)/(2*rowSums(sim[,26:28]))
 sim$reference=1-sim$alternative
 genotypes=sim[,26:28]/rowSums(sim[,26:28])
 
+#floor variables
+
+sim$Perm.p.GMAC.floored=sim$Perm.p.GMAC
+sim$Perm.p.GMAC.floored=replace(sim$Perm.p.GMAC.floored, which(sim$Perm.p.GMAC.floored<=2e-16), 2e-16)
+
+sim$Perm.p.MRPC.floored=sim$Perm.p.MRPC
+sim$Perm.p.MRPC.floored=replace(sim$Perm.p.MRPC.floored, which(sim$Perm.p.MRPC.floored<=2e-16), 2e-16)
+
+#LTM-STM permutation pvalues 
+sim$STM.perm.p.floored=sim$STM.perm.p
+sim$STM.perm.p.floored=replace(sim$STM.perm.p.floored, which(sim$STM.perm.p.floored<=2e-16), 2e-16)
+
+sim$LTM.perm.p.floored=sim$LTM.perm.p
+sim$LTM.perm.p.floored=replace(sim$LTM.perm.p.floored, which(sim$LTM.perm.p.floored<=2e-16), 2e-16)
+
+sim$TGM.perm.floored=sim$TGM.perm
+sim$TGM.perm.floored=replace(sim$TGM.perm.floored, which(sim$TGM.perm.floored<=2e-16), 2e-16)
 
 #create color for allele frequencies of alternative or reference < 5% 
 cv1=rep(0, dim(sim)[1])
@@ -207,13 +223,14 @@ A=ggplot(data = sim3, aes(x=Num.pcs.GMAC, y=Per.var.GMAC, color=Tissue))+
   ggtitle("%Var Accounted For by GMAC included PC's", subtitle = "GMAC")+
   xlab("Number of PC's")+
   ylab("%Total Variance In Expression")
-  #geom_abline(intercept = 0, slope = 0.5, linetype="dashed")
+
+
 B=ggplot(data = sim3, aes(x=Num.pcs.MRPC, y=Per.var.MRPC, color=Tissue))+
   geom_point()+
   ggtitle("%Var Accounted For by MRPC included PC's", subtitle = "MRPC")+
   xlab("Number of PC's")+
   ylab("%Total Variance In Expression")
-  #geom_abline(intercept = 0, slope = 0.5, linetype="dashed")
+
 
 ggarrange(A, B, nrow = 2, labels = c("A", "B"))
 
@@ -229,87 +246,59 @@ ggarrange(A, B, nrow = 2, labels = c("A", "B"))
 
 
 ```{r, fig.cap="\\textbf{(A)} and \\textbf{(B)} the relationship between the observed $p$-value of the mediation test and the $p$-value from the simulated mediation test under the STM and LTM scenarios. \\textbf{(C)} and \\textbf{(D)} the relationship between the observed $p$-value of the permuted mediation test and the $p$-value from the simulated mediation tests under the STM and LTM scenarios. In all plots blue points represent trios with a rare allele observed at the SNP loci e.g having a frequency among subjects below $5\\%$. The dotted lines define the zone of insignificance at $\\log_{10}(\\alpha) = -1.301$ scale. Note that $p$-values < 2e-16 have been floored to $2e-16$", echo=FALSE, message=FALSE, warning=FALSE, results='hide',fig.keep='all'}
-#sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
 
-set.seed(222)
+#set.seed(222)
 
-sim$adj.p1=sim$Med.pvalue.GMAC
-sim$adj.p1[sim$adj.p1<=2e-16]=2e-16
-sim$adj.p2=sim$STM.med.p
-sim$adj.p2[sim$adj.p2<=2e-16]=2e-16
-
-# cv2=sim$colvar
-# sim$colvar2=as.factor(replace(cv2, sim$Med.pvalue.GMAC<2e-16, 2))
 
 h=0.05
 A=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p1), y=log10(adj.p2), color=colvar))+
+  geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(STM.med.p), color=colvar))+
   theme(legend.position = "none")+
- # ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Simulated Parametric P-value')),
-       x = expression(log10('Observed Parametric P-value')),
-       subtitle = "Small True Model")+
+  labs(y = expression(log10('Sim. Parametric P-value')),
+       x = expression(log10('GMAC Obs. Parametric P-value')),
+       subtitle = "Small True Model Simulation")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-15,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
-  #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
-
-sim$adj.p3=sim$LTM.med.p
-sim$adj.p3[sim$adj.p3<=2e-16]=2e-16
 
 B=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=LTM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p1), y=log10(adj.p3), color=colvar))+
+  geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(LTM.med.p), color=colvar))+
   theme(legend.position = "none")+
-  #ggtitle("Scatter of Mediation Pvalues", subtitle = "Large True Model")+
-  labs(y = expression(log10('Simulated Parametric P-value')),
-       x = expression(log10('Observed Parametric P-value')),
-       subtitle = "Large True Model")+
+  labs(y = expression(log10('Sim. Parametric P-value')),
+       x = expression(log10('GMAC Obs Parametric P-value')),
+       subtitle = "Large True Model Simulation")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-15,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
-
-sim$adj.p4=sim$Perm.p.GMAC
-sim$adj.p4[sim$adj.p4<=2e-16]=2e-16
-
-sim$adj.p5=sim$STM.perm.p
-sim$adj.p5[sim$adj.p5<=2e-16]=2e-16
 
 A1=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p4), y=log10(adj.p5), color=colvar))+
-  theme(legend.position = "none")+
-  labs(y = expression(log10('Simulated Permutation P-value')),
-       x = expression(log10('Observed Permutation P-value')),
-       subtitle = "Small True Model")+
-  scale_x_continuous(limits = c(-15,0))+
-  scale_y_continuous(limits = c(-15,0))+
-  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
-  #scale_x_continuous(limits = c(-100,0))+
-  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
-  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+   geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(STM.perm.p.floored), color=colvar))+
+   theme(legend.position = "none")+
+   labs(y = expression(log10('Sim. Permutation P-value')),
+        x = expression(log10('GMAC Obs. Permutation P-value')),
+        subtitle = "Small True Model Simulation")+
+   scale_x_continuous(limits = c(-15,0))+
+   scale_y_continuous(limits = c(-5,0))+
+   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-
-sim$adj.p6=sim$LTM.perm.p
-sim$adj.p6[sim$adj.p6<=2e-16]=2e-16
 
 B1=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=LTM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p4), y=log10(adj.p6), color=colvar))+
-  theme(legend.position = "none")+
-  labs(y = expression(log10('Simulated Permutation P-value')),
-       x = expression(log10('Observed Permutation P-value')),
-       subtitle = "Large True Model")+
-  scale_x_continuous(limits = c(-15,0))+
-  scale_y_continuous(limits = c(-15,0))+
-  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
-  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
-  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+   geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(LTM.perm.p.floored), color=colvar))+
+   theme(legend.position = "none")+
+   labs(y = expression(log10('Sim. Permutation P-value')),
+        x = expression(log10('GMAC Obs. Permutation P-value')),
+        subtitle = "Large True Model Simulation")+
+   scale_x_continuous(limits = c(-15,0))+
+   scale_y_continuous(limits = c(-5,0))+
+   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
 ggarrange(A, B, A1, B1, labels = c("A","B","C","D") , nrow=2, ncol=2)
@@ -332,85 +321,61 @@ ggarrange(A, B, A1, B1, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 ```{r, fig.cap="\\textbf{A and B} Comparison of the observed parametric and permuation $p$-values to those simulated under the True GMAC model scenario. \\textbf{C} comparison of the parametric to permuation $p$-values withing the TGM simulation. \\textbf{D} comparison of the parametric and permuation $p$-values within MRPC", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
-#sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
 
-set.seed(222)
+#set.seed(222)
 
-sim$adj.p7=sim$TGM.p
-sim$adj.p7[sim$adj.p7<=2e-16]=2e-16
-sim$adj.p8=sim$Med.pvalue.MRPC
-sim$adj.p8[sim$adj.p8<=2e-16]=2e-16
-sim$adj.p9=sim$Perm.p.MRPC
-sim$adj.p9[sim$adj.p9<=2e-16]=2e-16
-sim$adj.p10=sim$TGM.perm
-sim$adj.p10[sim$adj.p10<=2e-16]=2e-16
-
-# cv2=sim$colvar
-# sim$colvar2=as.factor(replace(cv2, sim$Med.pvalue.GMAC<2e-16, 2))
 
 h=0.05
 A=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p1), y=log10(adj.p7), color=colvar))+
+  geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(TGM.p), color=colvar))+
   theme(legend.position = "none")+
- # ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Simulated TGM Parametric P-value')),
-       x = expression(log10('Observed GMAC Parametric P-value')),
-       subtitle = "True GMAC Model (TGM) for Trans Gene Analyzed with smaller MRPC model")+
-  scale_x_continuous(limits = c(-15,0))+
+  labs(y = expression(log10('Sim. TGM Parametric P-value')),
+       x = expression(log10('Obs. GMAC Parametric P-value')),
+       subtitle = "True GMAC Model Simulation")+
+  scale_x_continuous(limits = c(-10,0))+
   scale_y_continuous(limits = c(-15,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
-  #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
 
 
 
 B=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p4), y=log10(adj.p10), color=colvar))+
+  geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(TGM.perm.floored), color=colvar))+
   theme(legend.position = "none")+
- # ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Simulated TGM Permutation P-value')),
-       x = expression(log10('Observed GMAC Permutation P-value')),
-       subtitle = "True GMAC Model (TGM) for Trans Gene Analyzed with smaller MRPC model")+
-  scale_x_continuous(limits = c(-15,0))+
-  scale_y_continuous(limits = c(-15,0))+
+  labs(y = expression(log10('Sim. TGM Permutation P-value')),
+       x = expression(log10('Obs. GMAC Permutation P-value')),
+       subtitle = "True GMAC Model Simulation")+
+  scale_x_continuous(limits = c(-10,0))+
+  scale_y_continuous(limits = c(-5,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
-  #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
 
 
 C=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p7), y=log10(adj.p10), color=colvar))+
+  geom_point(aes(x=log10(TGM.p), y=log10(TGM.perm.floored), color=colvar))+
   theme(legend.position = "none")+
- # ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Observed Permutation P-value')),
-       x = expression(log10('Observed Parametric P-value')),
-       subtitle = "True GMAC Model (TGM) for Trans Gene Analyzed with smaller MRPC model")+
+  labs(y = expression(log10('Sim. TGM Perm. P-value')),
+       x = expression(log10('Sim. TGM Para. P-value')),
+       subtitle = "True GMAC Model Simulation Perm. Vs. Para")+
   scale_x_continuous(limits = c(-15,0))+
-  scale_y_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-5,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
-  #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
 
 D=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_point(aes(x=log10(adj.p8), y=log10(adj.p9), color=colvar))+
+  geom_point(aes(x=log10(Med.pvalue.MRPC), y=log10(Perm.p.MRPC.floored), color=colvar))+
   theme(legend.position = "none")+
- # ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Observed Permutation P-value')),
-       x = expression(log10('Observed Parametric P-value')),
-       subtitle = "MRPC")+
-  scale_x_continuous(limits = c(-15,0))+
-  scale_y_continuous(limits = c(-15,0))+
+  labs(y = expression(log10('MRPC Permutation P-value')),
+       x = expression(log10('MRPC Parametric P-value')),
+       subtitle = "MRPC Permutation Vs. Parametric")+
+  scale_x_continuous(limits = c(-7,0))+
+  scale_y_continuous(limits = c(-5,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
-  #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
 
 ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
@@ -424,14 +389,15 @@ ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 ```{r, fig.cap="\\textbf{(A)} and \\textbf{(B)} The relationship between the simulated mediation $p$-value and the number of additional (STM scenario) or missing (LTM scenario) confounders in the analysis model relative to the true model generating the trans gene. In both plots blue boxes represent trios with a rare allele observed at the SNP loci e.g having a frequency among subjects below $5\\%$.", echo=FALSE, message=FALSE, warning=FALSE, results='hide',fig.keep='all'}
-#sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations.txt", sep="\t", header = T)
 
-#set.seed(222)
+sim$STM.med.p.floored=sim$STM.med.p
+sim$STM.med.p.floored=replace(sim$STM.med.p.floored, which(sim$STM.med.p.floored<=2e-16), 2e-16)
 
-# sim$adj.p1=sim$Med.pvalue.GMAC
-# sim$adj.p1[sim$adj.p1<=2e-16]=2e-16+rnorm(length(which(sim$adj.p1<=2e-16)), 0, sd=sqrt(2e-16))
-# sim$adj.p2=sim$STM.med.p
-# sim$adj.p2[sim$adj.p2<=2e-16]=2e-16+rnorm(length(which(sim$adj.p2<=2e-16)), 0, sd=sqrt(2e-16))
+sim$LTM.med.p.floored=sim$LTM.med.p
+sim$LTM.med.p.floored=replace(sim$LTM.med.p.floored, which(sim$LTM.med.p.floored<=2e-16), 2e-16)
+
+sim$TGM.med.floored=sim$TGM.p
+sim$TGM.med.floored=replace(sim$TGM.med.floored, which(sim$TGM.med.floored<=2e-16), 2e-16)
 
 TT=summary(as.factor(sim$STM.dim.diff))
 rmv=as.numeric(names(TT[TT==1]))
@@ -440,46 +406,35 @@ sim.sub=sim[-c(match(rmv, sim$STM.dim.diff)),]
 
 h=0.05
 A=ggplot(data = sim.sub)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_boxplot(aes(x=as.factor(STM.dim.diff), y=log10(adj.p2), fill=colvar))+
+  geom_boxplot(aes(x=as.factor(STM.dim.diff), y=log10(STM.med.p.floored), fill=colvar))+
   theme(legend.position = "none")+
-  #ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Simulated Mediation P-value')),
-       x = "Number of Additional Confounders In Analysis",
+  labs(y = expression(log10('STM Sim. Parametric P-value')),
+       x = "Number of Extra Components In Analysis Model",
        subtitle = "Small True Model")+
-  #scale_x_continuous(limits = c(0, 20))+
-  #scale_y_continuous(limits = c(-15,0))+
-  #geom_abline(intercept = 0, slope = 1, linetype="dotted")+
-  #geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
-  #geom_text(aes( 0, h, label = 'log10(0.05)', hjust = 1.5, vjust=22), size = 3.5, color="red")
 
-# sim$adj.p3=sim$LTM.med.p
-# sim$adj.p3[sim$adj.p3<=2e-16]=2e-16+rnorm(length(which(sim$adj.p3<=2e-16)), 0, sd=sqrt(2e-16))
-
-# TT=summary(as.factor(sim$LTM.dim.diff))
-# rmv=as.numeric(names(TT[TT==1]))
-# 
-# sim.sub=sim[-c(match(rmv, sim$LTM.dim.diff)),]
 
 B=ggplot(data = sim)+
-  #geom_point(aes(x=Perm.p, y=STM.med.p, color="red"))+
-  geom_boxplot(aes(x=as.factor(LTM.dim.diff), y=log10(adj.p3), fill=colvar))+
+  geom_boxplot(aes(x=as.factor(LTM.dim.diff), y=log10(LTM.med.p.floored), fill=colvar))+
   theme(legend.position = "none")+
-  #ggtitle("Scatter of Mediation Pvalues", subtitle = "Small True Model")+
-  labs(y = expression(log10('Simulated Mediation P-value')),
-       x = "Number of Missing Confounders In Analysis",
+  labs(y = expression(log10('LTM Sim. Parametric P-value')),
+       x = "Number of Missing Components In Analysis Model",
        subtitle = "Large True Model")+
-  #scale_x_continuous(limits = c(0, 20))+
-  #scale_y_continuous(limits = c(-15,0))+
-  #geom_abline(intercept = 0, slope = 1, linetype="dotted")+
-  #geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+C=ggplot(data = sim)+
+  geom_boxplot(aes(x=as.factor(Num.pcs.GMAC-Num.pcs.MRPC), y=log10(TGM.med.floored), fill=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('TGM Sim. Parametric P-value')),
+       x = "Number of Missing Components In Analysis Model",
+       subtitle = "True GMAC Model Simulation")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
 
 
-ggarrange(A, B, labels = c("A","B") , nrow=2)
+ggarrange(A, B, C, labels = c("A","B","C") , nrow=3)
 
 ```
 
@@ -512,10 +467,7 @@ sim.sub$`Model Significance`=as.factor(sim.sub$`Model Significance`)
 A=ggplot(data = sim.sub)+
   geom_boxplot(aes(x=`Model Significance`, y=Per.var.GMAC-Per.var.MRPC, fill=`Model Significance`))+
   theme(axis.text.x=element_blank())+
-  #geom_histogram(aes(y = ..density..),color = "black", fill = "white")+
-  #geom_density(alpha = 0.2, fill = "#FF6666") + theme_minimal()+
-  labs(x = "Difference In % Variation Between GMAC and MRPC",
-       col = expression('% Difference \nIn Variation \nIn Included \nPC\'s'))
+  labs(y="Diff. In Cumulative Variation In Included PC's")
 
 mean1=mean(sim.sub1$Per.var.GMAC-sim.sub1$Per.var.MRPC)
 mean2=mean(sim.sub2$Per.var.GMAC-sim.sub2$Per.var.MRPC)
@@ -523,35 +475,26 @@ mean2=mean(sim.sub2$Per.var.GMAC-sim.sub2$Per.var.MRPC)
 B=ggplot(data = sim.sub)+geom_density(aes(x=Per.var.GMAC-Per.var.MRPC, fill=`Model Significance`), alpha=0.3, show.legend = FALSE)+
   geom_vline(xintercept = mean1, linetype="dotted")+
   geom_vline(xintercept = mean2, linetype="dotted")+
-  #geom_histogram(aes(y = ..density..),color = "black", fill = "white")+
-  #geom_density(alpha = 0.2) + 
   theme_minimal()+
-  labs(x = "Difference In % Variation Between GMAC and MRPC",
-       col = expression('% Difference \nIn Variation \nIn Included \nPC\'s'))
+  labs(x="Diff. In Cumulative Variation In Included PC's")
 
 
 C=ggplot(data = sim)+
   geom_point(aes(x=Perm.p.GMAC, y=Perm.p.MRPC, color=colvar, label=Trio.Num))+
-  #geom_point(aes(x=Med.pvalue.GMAC, y=STM.med.p))+
   theme(legend.position = "none")+
-  #ggtitle("Scatter of Mediation Pvalues", )+
-    labs(y = "Observed Permutation P-value (MRPC)",
+  labs(y = "Observed Permutation P-value (MRPC)",
        x = 'Observed Permutation P-value (GMAC)',
        subtitle = "Comparing Permutation Tests Under GMAC and MRPC")+
   geom_hline(yintercept = h, linetype="dashed", color="red")+
   geom_vline(xintercept = h, linetype="dashed", color="red")+
   scale_x_continuous(limits=c(0, 0.01))
-  #geom_text(aes( -0.0004, h, label = h, vjust = -1), size = 5)+
-  #scale_y_continuous(limits = c(0, 0.006))+
   geom_abline(slope = 1, intercept = 0, linetype="dashed")
 
   
 D=ggplot(data = sim)+
   geom_point(aes(x=Perm.p.GMAC, y=Perm.p.MRPC, color=colvar, label=Trio.Num))+
-  #geom_point(aes(x=Med.pvalue.GMAC, y=STM.med.p))+
   theme(legend.position = "none")+
-  #ggtitle("Scatter of Mediation Pvalues", )+
-    labs(y = "Observed Permutation P-value (MRPC)",
+  labs(y = "Observed Permutation P-value (MRPC)",
        x = 'Observed Permutation P-value (GMAC)',
        subtitle = "Comparing Permutation Tests Under GMAC and MRPC")+
   geom_hline(yintercept = h, linetype="dashed", color="red")+
@@ -573,18 +516,17 @@ ggarrange(A,B,C,D, labels = c("A","B","C","D"), nrow=2, ncol=2)
 
 
 
-
 ```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
 
 trio9AS=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/trio9AS.txt", sep="\t", header = T)
 
 
 ggplot(data = trio9AS)+
-  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)), size=3)+
   labs(x = expression("Cis Gene: ENSG00000163682"),
        y = expression("Trans Gene: ENSG00000237550"),
        col = expression('Genotype Of \nSubject'),
-       subtitle = "SNP ID: chr4_39448204_G_A_b38")
+       subtitle = "SNP ID: chr4_39448204_G_A_b38")+theme_pubr()
 
 ```
 
@@ -601,29 +543,7 @@ ggplot(data = trio1922ArT)+
        col = expression('Genotype Of \nSubject'),
        subtitle = "SNP ID: chr16_89561052_T_G_b38")+theme_pubr()
 
-#trio1922ArT$SNP=as.factor(trio1922ArT$SNP)
 
-
-
-
-
-# alternative=(sim.odd[,26]+2*sim.odd[,27])/(2*rowSums(sim.odd[,25:27]))
-# genotypes=sim.odd[,25:27]/rowSums(sim.odd[,25:27])
-
-# freqmat=cbind.data.frame(allele=c(alternative, alternative, alternative), geno=c(genotypes[,1], genotypes[,2], genotypes[,3]), Genotype=as.factor(c(rep("Homozygous.Ref",dim(genotypes)[1]), rep("Heterozygous",dim(genotypes)[1]), rep("Homozygous.Alt",dim(genotypes)[1]))))
-# 
-# 
-# C=ggplot(data = freqmat)+
-#   geom_line(aes(x=allele, y=geno, color=Genotype))+
-#   labs(x = expression("Frequency of Alternative allele"),
-#        y = expression("Frequency of Genotype"),
-#        #color = c("Heterozygous", "Homozygous Alt","Homozygous.Ref"),
-#        subtitle = "")+
-#   theme(legend.position = "right")
-#   
-#   
-# 
-# ggarrange(C, ggarrange(A, B, labels=c("B","C"), ncol = 2), labels = c("A"), nrow=2)
 ```
 
 

@@ -54,7 +54,7 @@ sim$TGM.perm.floored=replace(sim$TGM.perm.floored, which(sim$TGM.perm.floored<=2
 
 #create color for allele frequencies of alternative or reference < 5% 
 cv1=rep(0, dim(sim)[1])
-cv2=replace(cv1, which(sim$alternative<=0.05 | sim$reference<=0.05), 1)
+cv2=replace(cv1, which(sim$alternative<=0.01 | sim$reference<=0.01), 1)
 h=0.05
 sim$colvar=as.factor(cv2)
 
@@ -116,7 +116,7 @@ A1=ggplot(data = sim)+
   geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(STM.perm.p.floored), color=colvar))+
   theme(legend.position = "none")+
    labs(y = expression(log10('Sim. Permutation P-value')),
-        x = expression(log10('GMAC Obs. Permutation P-value')),
+        x = expression(log10('GMAC Obs. Nominal P-value')),
         subtitle = "Small True Model Simulation")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-5,0))+
@@ -128,7 +128,7 @@ B1=ggplot(data = sim)+
   geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(LTM.perm.p.floored), color=colvar))+
   theme(legend.position = "none")+
    labs(y = expression(log10('Sim. Permutation P-value')),
-        x = expression(log10('GMAC Obs. Permutation P-value')),
+        x = expression(log10('GMAC Obs. Nominal P-value')),
         subtitle = "Large True Model Simulation")+
   scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-5,0))+
@@ -183,7 +183,7 @@ B=ggplot(data = sim)+
   geom_point(aes(y=log10(TGM.perm.floored), x=log10(Perm.p.GMAC.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. TGM Permutation P-value')),
-       x = expression(log10('Obs. GMAC Permutation P-value')),
+       x = expression(log10('Obs. GMAC Nominal P-value')),
        subtitle = "True GMAC Model Simulation")+
   scale_x_continuous(limits = c(-10,0))+
   scale_y_continuous(limits = c(-5,0))+
@@ -361,7 +361,7 @@ D=ggplot(data = sim)+
   theme(legend.position = "none")+
   #ggtitle("Scatter of Mediation Pvalues", )+
     labs(y = "Observed Permutation P-value (MRPC)",
-       x = 'Observed Permutation P-value (GMAC)',
+       x = 'Observed Nominal P-value (GMAC)',
        subtitle = "Comparing Permutation Tests Under GMAC and MRPC")+
   geom_hline(yintercept = h, linetype="dashed", color="red")+
   geom_text(aes( -0.0004, h, label = h, vjust = -1), size = 5)+

@@ -157,7 +157,7 @@ ADDIS, that were also significant under GMAC, were considered consistent
 
 \subsection*{2.3 Simulations}
 
-\indent \(\bullet\) The Small True Model Simulation
+\indent \(\bullet\) The Small True Model Simulation (STM)
 
 To further understand the conflict in edge determination between
 MRPC-ADDIS and GMAC, we simulated the mediation test - the test for the
@@ -192,8 +192,9 @@ as the test on the \(\beta_1\) coefficient obtained from the regression:
 
 where \({\bf M}_{ij}\) represents the additional confounders in
 \({\bf X}_{ij}\) that are not included in \({\bf W}_{ij}\) see
-\textbf{Figure 1}.\\
-\indent \(\bullet\) The Large True Model Simulation
+\textbf{Figure 1}.
+
+\indent \(\bullet\) The Large True Model Simulation (LTM)
 
 Conversely, a second simulation model was implemented to observe the
 power of the mediation test when the generating model for the trans gene
@@ -218,7 +219,7 @@ mediation \(p\)-value) were visually inspected to determine the effect
 of model mis-specification on the power of the mediation and permutation
 test(s).
 
-\indent \(\bullet\) True GMAC Model Simulation
+\indent \(\bullet\) True GMAC Model Simulation (TGM)
 
 We preformed a third and final simulation of the trans gene using the
 analysis model in GMAC given by \textbf{(1)} as the trans gene
@@ -230,6 +231,21 @@ where \({\bf Z}_{ij}\) is a subset of both \({bf X}_{ij}\) and
 \({W}_{ij}\) representing only the confounders selected under the MRPC
 methodology. The goal was to analyze the power of MRPC when infer the
 larger GMAC model under the assumption that the GMAC model is the true.
+
+\indent \(\bullet\) GMAC Self Simulation (GSS)
+
+We created a fourth simulation scenario to test the importance of
+permutation on the analysis result. Each of the above simualtions uses
+variations understanding the inferential power of MRPC/GMAC when we know
+we have the incorrect model. In this scenario we take a different
+approach and use the model suggested by GMAC for each trio given by
+\textbf{eqn. (1)} to generate the trans gene such that:
+
+\[ T_j^{\ast} = \hat{\beta}_0 + \hat{\beta}_1 C_i + \hat{\beta}_2 L_i + \hat{{\bf \Gamma}} {\bf X}_{ij} + \epsilon  \]
+
+where \(\epsilon \sim N(0, \hat{\sigma})\). We the apply \({\bf 1}\) to
+each simulated trio under this scenario to obtain the parametric and
+permutation inferences when we know the analysis model is correct.
 
 \section*{3. Results}
 \subsection*{3.1 Comparing GMAC and MRPC}

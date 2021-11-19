@@ -272,7 +272,7 @@ calc.cors=function(mmat=NULL, emat=NULL, gmat=NULL, GMInfo=NULL, GEInfo=NULL, ge
 
 
 
-      colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Chr", "Coordinate", "Cor", "CountedAllele", "OtherAllele")
+      colnames(init.table2)=c("Express_Gene_ID", "SNP_ID", "Cor", "Chr", "Coordinate", "CountedAllele", "OtherAllele")
 
 
       #fileName

@@ -23,6 +23,11 @@ data.new.lond$Model=as.factor(data.new.lond$Model)
 data.new.lond$logtrios=log(data.new.lond$`Number of Trios`, base = 10)
 
 #plot for lond
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F3_Breakdown of Inferred Trio Types (LOND).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F3_Breakdown of Inferred Trio Types (LOND).tiff", units = "in",
+#    width=12, height=8, res=800)
+
 ggbarplot(data.new.lond, x = "Tissue_Name", y = "Number of Trios",
           fill = "Model", color = "Model", 
           palette = c("cadetblue1","red4", "yellow","navyblue","salmon1", "chartreuse3"),
@@ -33,6 +38,11 @@ ggbarplot(data.new.lond, x = "Tissue_Name", y = "Number of Trios",
   coord_flip()+
   ggtitle("Breakdown of Inferred Trio Types (LOND)")
 
+dev.off()
+
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F3_Breakdown of Inferred Trio Types (LOND).pdf", units = "in",
+    width=12, height=8)
+
 #adjust data format for addis:
 longform=expand.grid(tiss[,2], c("M0","M1","M2","M3","M4","Others"))
 longdata=as.vector(cbind(addis.table$Num.M0, addis.table$Num.M1, addis.table$Num.M2, addis.table$Num.M3, addis.table$Num.M4, addis.table$Num.Others))
@@ -42,6 +52,11 @@ colnames(data.new.addis)=c("Tissue_Name", "Model","Number of Trios")
 data.new.addis$Model=as.factor(data.new.addis$Model)
 
 #plot for addis
+
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F3_Breakdown of Inferred Trio Types (ADDIS).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F3_Breakdown of Inferred Trio Types (ADDIS).tiff", units = "in",
+#    width=12, height=8, res=800)
 ggbarplot(data.new.addis, x = "Tissue_Name", y = "Number of Trios",
           fill = "Model", color = "Model", 
           palette = c("cadetblue1", "red4", "yellow","navyblue","salmon1", "chartreuse3"),
@@ -52,7 +67,10 @@ ggbarplot(data.new.addis, x = "Tissue_Name", y = "Number of Trios",
   coord_flip()+
   ggtitle("Breakdown of Inferred Trio Types (ADDIS)")
 
+dev.off()
 
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F3_Breakdown of Inferred Trio Types (ADDIS).pdf", units = "in",
+       width=12, height=8)
 #===========================================================================================
 #--------------------Cis--Trans--inferred--M1--Mediator--breakdown--------------------------
 #===========================================================================================
@@ -103,6 +121,11 @@ lond.table.final$`Number of Trios`=as.numeric(lond.table.final$`Number of Trios`
 #plot addis M1 inferred
 
 #plot for addis M1 inferred
+
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F4_Breakdown of Inferred M1 Mediation Types (ADDIS).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F4_Breakdown of Inferred M1 Mediation Types (ADDIS).tiff", units = "in",
+#    width=12, height=8, res=800)
 ggbarplot(addis.table.final, x = "Tissue_Name", y = "Number of Trios",
           fill = "Type of Mediation", color = "Type of Mediation", 
           palette = c("navyblue","salmon1"),
@@ -114,6 +137,16 @@ ggbarplot(addis.table.final, x = "Tissue_Name", y = "Number of Trios",
   ggtitle("Breakdown of Inferred M1 Mediation Types (ADDIS)")
 
 
+dev.off()
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F4_Breakdown of Inferred M1 Mediation Types (ADDIS).pdf", units = "in",
+    width=12, height=8)
+
+
+
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F4_Breakdown of Inferred M1 Mediation Types (LOND).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F4_Breakdown of Inferred M1 Mediation Types (LOND).tiff", units = "in",
+#    width=12, height=8, res=800)
 
 #plot lond M1 inferred
 ggbarplot(lond.table.final, x = "Tissue_Name", y = "Number of Trios",
@@ -127,8 +160,9 @@ ggbarplot(lond.table.final, x = "Tissue_Name", y = "Number of Trios",
   ggtitle("Breakdown of Inferred M1 Mediation Types (LOND)")
 
 
-
-
+dev.off()
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F4_Breakdown of Inferred M1 Mediation Types (LOND).pdf", units = "in",
+    width=12, height=8)
 
 
 
@@ -177,6 +211,11 @@ LTCM.final$`Number of Genes`=log(LTCM.final$`Number of Genes`+1, base = 10)
 
 library(latex2exp)
 
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F5_Histograms of Tissue Sharing (ADDIS).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F5_Histograms of Tissue Sharing (ADDIS).tiff", units = "in",
+#    width=12, height=8, res=800)
+
 # plot for addis
 ggbarplot(ATCM.final, x = "Number of Tissues Shared", y = "Number of Genes",
           fill = "Type of Mediation", color = "Type of Mediation", 
@@ -191,10 +230,19 @@ ggbarplot(ATCM.final, x = "Number of Tissues Shared", y = "Number of Genes",
   #coord_flip()+
   ggtitle("Number of Shared Tissues Among Trans and Cis Mediation Genes (ADDIS)")
 
+dev.off()
+
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F5_Histograms of Tissue Sharing (ADDIS).pdf", units = "in",
+    width=12, height=8)
 
 
 
 
+
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F5_Histograms of Tissue Sharing (LOND).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F5_Histograms of Tissue Sharing (LOND).tiff", units = "in",
+#    width=12, height=8, res=800)
 #plot for Lond
 ggbarplot(LTCM.final, x = "Number of Tissues Shared", y = "Number of Genes",
           fill = "Type of Mediation", color = "Type of Mediation", 
@@ -209,9 +257,10 @@ ggbarplot(LTCM.final, x = "Number of Tissues Shared", y = "Number of Genes",
   #coord_flip()+
   ggtitle("Number of Shared Tissues Among Trans and Cis Mediation Genes (LOND)")
 
+dev.off()
 
-
-
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F5_Histograms of Tissue Sharing (LOND).pdf", units = "in",
+    width=12, height=8)
 
 
 
@@ -336,7 +385,10 @@ lond.final=rbind(lond.data.t1.new, lond.data.t2.new)
 colnames(lond.final)=c("Number of Genes", "Tissue", "Gene Type", "Type_Mediation")
 
 
-
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F6_Distribution of Mediator Gene Types For each Tissue (LOND).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F6_Distribution of Mediator Gene Types For each Tissue (LOND).tiff", units = "in",
+#    width=12, height=8, res=800)
 #plot for lond
 ggbarplot(lond.final, x = "Tissue", y = "Number of Genes",
           fill = "Gene Type", color = "Gene Type", 
@@ -351,7 +403,17 @@ ggbarplot(lond.final, x = "Tissue", y = "Number of Genes",
   
   coord_flip()+
   ggtitle("Distribution of Mediator Gene Types For each Tissue (LOND)")
+dev.off()
 
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F6_Distribution of Mediator Gene Types For each Tissue (LOND).pdf", units = "in",
+    width=12, height=8)
+
+
+
+png("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F6_Distribution of Mediator Gene Types For each Tissue (ADDIS).png", units = "in",
+    width=12, height=8, res=1000)
+#tiff("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F6_Distribution of Mediator Gene Types For each Tissue (ADDIS).tiff", units = "in",
+#    width=12, height=8, res=800)
 
 #plot for addis
 ggbarplot(addis.final, x = "Tissue", y = "Number of Genes",
@@ -367,3 +429,8 @@ ggbarplot(addis.final, x = "Tissue", y = "Number of Genes",
   
   coord_flip()+
   ggtitle("Distribution of Mediator Gene Types For each Tissue (ADDIS)")
+
+dev.off()
+
+ggsave("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/F6_Distribution of Mediator Gene Types For each Tissue (ADDIS).pdf", units = "in",
+    width=12, height=8)

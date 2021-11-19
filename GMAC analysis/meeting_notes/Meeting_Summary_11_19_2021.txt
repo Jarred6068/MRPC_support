@@ -1,0 +1,21 @@
+
+* discovered that we had set the GMAC function to report the nominal p value calculated as
+
+
+		nominal.p.value = 2 * (1 - pnorm(abs((test.wald - mean(wald.stat))/sd(wald.stat))))
+
+Therefore all plots up this point that use "Obs GMAC permutation pvalue" need to be changed to 
+
+		"Obs. GMAC nominal pvalue
+
+*The nominal pvalue measures the distance between the center of permutation distribution of t-stats and the observed
+ t-value for beta_1 in the regression
+
+
+*Need to add in nominal pvalue calculation for simulation tests
+
+*So far it appears there may be a difference between the raw permutation pvalue and the nominal pvalue
+*need to check this difference between GMAC obs perm and GMAC obs nominal
+
+ 
+

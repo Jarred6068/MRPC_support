@@ -37,121 +37,55 @@ source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 
     
     
-    #--------------------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------------------------
+#checking trios with conflicting mediation and permutation p values
+#must be run post run_simulations.slurm on cluster
+#source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
     
-    #Add in simulation for MRPC on GMAC model to the simulations.txt dataset
-    #source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-    sim=read.table(file=paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_","WholeBlood",".txt"), sep="\t", header = T)
+sim=read.table(file=paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_","WholeBlood",".txt"), sep="\t", header = T)
     
-    p=NULL
+#wt=sim[which(sim$Med.pvalue.GMAC>0.05),]
     
-    for(i in 1:dim(sim)[1]){
-      print(i)
+snp.dist=as.data.frame(matrix(0, nrow = dim(sim)[1], ncol = 3))
+colnames(snp.dist)=c("hr","het","ha")
+    
+for(i in 1:dim(sim)[1]){
       
-      L2A=Lond2Addis.lookup(trio.index=sim$Trio.Num[i], tissue.name=sim$Tissue[i], with.pc=TRUE)
-      
-      if(length(colnames(L2A$correlation))>3){
-        addis.pcs=colnames(L2A$correlation)[-c(1:3)]
-      }else{
-        addis.pcs=NULL
-      }
-      
-      list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type=sim$Med.type[i], addis.pcs=addis.pcs, verbose=F)
-      
-      p[i]=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=sim$Med.type[i], verbose=F)$pvalue
+  if(sim$Med.type[i]=="Trans.Med"){
+    list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type="trans", addis.pcs=NULL, verbose=F)
+  }else{
+      list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type="cis", addis.pcs=NULL, verbose=F)
+  }
       
       
-    }
-    
-    sim$TGM.p=p
-    
-    write.table(sim, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_","WholeBlood",".txt"), 
-                col.names = T, row.names = F, sep = "\t", quote=F)
-    
-    
-    #--------------------------------------------------------------------------------------------------
-    
-    #checking trios with conflicting mediation and permutation p values
-    #must be run post run_simulations.slurm on cluster
-    #source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-    sim=read.table(file=paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_","WholeBlood",".txt"), sep="\t", header = T)
-    
-    #wt=sim[which(sim$Med.pvalue.GMAC>0.05),]
-    
-    snp.dist=as.data.frame(matrix(0, nrow = dim(sim)[1], ncol = 3))
-    colnames(snp.dist)=c("hr","het","ha")
-    
-    for(i in 1:dim(sim)[1]){
-      
-      if(sim$Med.type[i]=="Trans.Med"){
-        list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type="trans", addis.pcs=NULL, verbose=F)
-      }else{
-        list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type="cis", addis.pcs=NULL, verbose=F)
-      }
-      
-      
-      #account for SNPs with less than 3 genotypes
-      if(length(summary(factor(list.data$GMAC$SNP)))<3){
+  #account for SNPs with less than 3 genotypes
+  if(length(summary(factor(list.data$GMAC$SNP)))<3){
         
-        if( length(which(names(summary(factor(list.data$GMAC$SNP)))=="0"))==0 ){
-          snp.dist[i,]=c(NA ,summary(factor(list.data$GMAC$SNP)))
-        }else if ( length(which(names(summary(factor(list.data$GMAC$SNP)))=="1"))==0 ){
-          snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP))[1], NA , summary(factor(list.data$GMAC$SNP))[2])
-        }else{
-          snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP)), NA)
-        }
+  if( length(which(names(summary(factor(list.data$GMAC$SNP)))=="0"))==0 ){
+      snp.dist[i,]=c(NA ,summary(factor(list.data$GMAC$SNP)))
+  }else if ( length(which(names(summary(factor(list.data$GMAC$SNP)))=="1"))==0 ){
+    snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP))[1], NA , summary(factor(list.data$GMAC$SNP))[2])
+  }else{
+    snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP)), NA)
+  }
         
-      }else{
+  }else{
         
-        snp.dist[i,]=summary(factor(list.data$GMAC$SNP))
+    snp.dist[i,]=summary(factor(list.data$GMAC$SNP))
         
-      }
+  }
       
-    }
+}
     
     
-    output1=cbind.data.frame(sim, snp.dist)
+output1=cbind.data.frame(sim, snp.dist)
     
-    write.csv(output1, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_","WB",".csv"), 
-              row.names = F)
-    
-    
-    #-------------------------------------------------------------------------------------------------
-    
-    #source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-    #Add in permutation pvalue for simulation for MRPC on GMAC model to the simulations.txt dataset
-    t1=read.csv(file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_","WB",".csv"))
-    
-    p=NULL
+write.csv(output1, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_","WB",".csv"),
+          row.names = F)
     
     
-    for(i in 1:dim(t1)[1]){
-      #print(i)
-      
-      L2A=Lond2Addis.lookup(trio.index=t1$Trio.Num[i], tissue.name=t1$Tissue[i], with.pc=TRUE)
-      print(dim(L2A$correlation))
-      if(length(colnames(L2A$correlation))>3){
-        addis.pcs=colnames(L2A$correlation)[-c(1:3)]
-      }else{
-        addis.pcs=NULL
-      }
-      
-      list.data=cross.regress(tissue=t1$Tissue[i], trio.ind=t1$Trio.Num[i], mod.type=t1$Med.type[i], addis.pcs=addis.pcs, verbose=F)
-      
-      out=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=t1$Med.type[i], verbose=F)
-      print(dim(out$sim.data))
-      p[i]=run.permuted.reg(out$sim.data, nperms=1000, Alg="ADDIS", med.type = t1$Med.type[i])$p.value
-      print(p[i])
-      
-    }
-    
-    
-    t1$TGM.perm=p
-    
-    
-    write.csv(t1, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_","WB",".csv"), 
-              row.names = F)
-    
+
 
 
 print("...Finished")

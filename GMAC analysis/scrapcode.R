@@ -33,9 +33,11 @@ MRPC.fit.FDR.addis <- MRPC(test.data,
 as(MRPC.fit.FDR.addis@graph, "matrix")[1:3,1:3]
 
 
-Lond2Addis.lookup(trio.index=2977, tissue.name="CellsEBVtransformedlymphocytes", with.pc=TRUE)
+Lond2Addis.lookup(trio.index=9711, tissue.name="AdiposeSubcutaneous", with.pc=TRUE)
 
-list.data=cross.regress(tissue="CellsEBVtransformedlymphocytes", trio.ind=8112, mod.type="cis", addis.pcs=NULL)
+list.data=cross.regress(tissue="AdiposeSubcutaneous", trio.ind=9711, mod.type="trans", addis.pcs=NULL)
+
+run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=FALSE, filename=NULL, Alg="GMAC", med.type="Trans.Med")
 
 
 fname1=paste0("/mnt/ceph/jarredk/GMACanalysis/GMAC.permutedREG.trio",
@@ -128,7 +130,34 @@ print(sum(V))
 
 
 
+#--------------------------------------------------------------------------------------------------
 
+#Add in simulation for MRPC on GMAC model to the simulations.txt dataset
+#source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+sim=read.table(file=paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_","AdiposeSubcutaneous",".txt"), sep="\t", header = T)
+
+p=NULL
+
+for(i in 1:dim(sim)[1]){
+  print(i)
+  
+  L2A=Lond2Addis.lookup(trio.index=sim$Trio.Num[i], tissue.name=sim$Tissue[i], with.pc=TRUE)
+  
+  if(length(colnames(L2A$correlation))>3){
+    addis.pcs=colnames(L2A$correlation)[-c(1:3)]
+  }else{
+    addis.pcs=NULL
+  }
+  
+  list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type=sim$Med.type[i], addis.pcs=addis.pcs, verbose=F)
+  
+  out3=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=sim$Med.type[i], verbose=F)
+  
+  p[i]=out3$pvalue
+  
+}
+
+sim$TGM.p=p
 
 
 
@@ -336,5 +365,57 @@ output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.
 
 
 
+#---------------------simulation-tables:-------------------------
+
+source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+
+
+#nn=50
+
+#small truth model large inferred model
+
+
+
+
+l1=cross.analyze(tissues="WholeBlood", save=FALSE)
+
+trios=l1$final.tables[[1]]$Trio.Num
+med.types=l1$final.tables[[1]]$Mediation.type
+print("running Simulations...")
+
+ot1=run.simu12(tissue = "WholeBlood" ,trios=trios, 
+               l1.table=l1$final.tables[[1]],
+               mod.type.vec=med.types,
+               alpha=0.001, n="random")
+print("...done")
+ot1$Tissue=rep("WholeBlood")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+
+list.data=cross.regress(tissue="AdiposeSubcutaneous", trio.ind=9711, mod.type="trans", addis.pcs=NULL)
+
+run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=FALSE, filename=NULL, Alg="GMAC", med.type="Trans.Med")$null.wald.stat
 
 

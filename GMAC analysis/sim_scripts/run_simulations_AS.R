@@ -37,36 +37,6 @@ write.table(ot1, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/sim
 
 
 
-#--------------------------------------------------------------------------------------------------
-
-#Add in simulation for MRPC on GMAC model to the simulations.txt dataset
-#source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-sim=read.table(file=paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_","AdiposeSubcutaneous",".txt"), sep="\t", header = T)
-
-p=NULL
-
-for(i in 1:dim(sim)[1]){
-  print(i)
-  
-  L2A=Lond2Addis.lookup(trio.index=sim$Trio.Num[i], tissue.name=sim$Tissue[i], with.pc=TRUE)
-  
-  if(length(colnames(L2A$correlation))>3){
-    addis.pcs=colnames(L2A$correlation)[-c(1:3)]
-  }else{
-    addis.pcs=NULL
-  }
-  
-  list.data=cross.regress(tissue=sim$Tissue[i], trio.ind=sim$Trio.Num[i], mod.type=sim$Med.type[i], addis.pcs=addis.pcs, verbose=F)
-  
-  p[i]=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=sim$Med.type[i], verbose=F)$pvalue
-  
-  
-}
-
-sim$TGM.p=p
-
-write.table(sim, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/simulations_","AdiposeSubcutaneous",".txt"), 
-            col.names = T, row.names = F, sep = "\t", quote=F)
 
 
 #--------------------------------------------------------------------------------------------------
@@ -116,41 +86,6 @@ write.csv(output1, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/T
           row.names = F)
 
 
-#-------------------------------------------------------------------------------------------------
-
-#source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-#Add in permutation pvalue for simulation for MRPC on GMAC model to the simulations.txt dataset
-t1=read.csv(file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_","AS",".csv"))
-
-p=NULL
-
-
-for(i in 1:dim(t1)[1]){
-  #print(i)
-  
-  L2A=Lond2Addis.lookup(trio.index=t1$Trio.Num[i], tissue.name=t1$Tissue[i], with.pc=TRUE)
-  print(dim(L2A$correlation))
-  if(length(colnames(L2A$correlation))>3){
-    addis.pcs=colnames(L2A$correlation)[-c(1:3)]
-  }else{
-    addis.pcs=NULL
-  }
-  
-  list.data=cross.regress(tissue=t1$Tissue[i], trio.ind=t1$Trio.Num[i], mod.type=t1$Med.type[i], addis.pcs=addis.pcs, verbose=F)
-  
-  out=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=t1$Med.type[i], verbose=F)
-  print(dim(out$sim.data))
-  p[i]=run.permuted.reg(out$sim.data, nperms=1000, Alg="ADDIS", med.type = t1$Med.type[i])$p.value
-  print(p[i])
-  
-}
-
-
-t1$TGM.perm=p
-
-
-write.csv(t1, file = paste0("/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_","AS",".csv"), 
-          row.names = F)
 
 
 

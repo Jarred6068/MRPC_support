@@ -153,8 +153,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   #FDR - the method of FDR in MRPC by which the trio was classified:"LOND" or "ADDIS"
   
   
-  #for histogram plotting
-  library(ggpubr,lib="/mnt/ceph/jarredk/Rpackages")
+  
   tissues=c("CellsCulturedfibroblasts","SkinNotSunExposed","Lung","CellsEBVtransformedlymphocytes")
   tisspath=c("fibroblast_cells","Skin","Lung","lymphoblastoid_cells")
   
@@ -197,6 +196,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   #histogram 
   if(plot.hist==TRUE){
     
+    library(ggpubr,lib="/mnt/ceph/jarredk/Rpackages")
     
     
     idx=which(tiss==tissues)
@@ -228,6 +228,10 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
   upper.limit=X.bar+abs(qnorm(0.025))*X.sd
   CI=c(lower.limit, X.bar, upper.limit)
   names(CI)=c("lower.limit", "mean", "upper.limit")
+  
+  if(verbose == TRUE){
+    print(CI)
+  }
   
   #return resampled data (and hist object if plot.hist==TRUE)
   if(plot.hist==TRUE){

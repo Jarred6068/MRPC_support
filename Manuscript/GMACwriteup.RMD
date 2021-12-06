@@ -183,10 +183,10 @@ ggplot(data=dat1, aes(x=abs(pcors), fill=labels))+geom_density(alpha=0.5)+
 
 
 
-$\bullet$ variance across tissues plots
+## variance across tissues plots
 
 
-```{r, fig.cap="(A) scatter plots for the number of PC's included by GMAC and MRPC (B) and the percentage of total variation in expression summarized by the included PC's for each model", echo=FALSE, message=FALSE, warning=FALSE}
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
 #sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
 library(ggpubr)
 library(prodlim)
@@ -196,31 +196,34 @@ sim2=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/m
 sim3=rbind.data.frame(sim,sim2)
 
 
-sim$alternative=(sim$het+2*sim$ha)/(2*rowSums(sim[,32:34]))
+sim$alternative=(sim$het+2*sim$ha)/(2*rowSums(sim[,36:38]))
 sim$reference=1-sim$alternative
-genotypes=sim[,32:34]/rowSums(sim[,32:34])
+genotypes=sim[,36:38]/rowSums(sim[,36:38])
 
 #floor variables
 
 sim$Perm.p.GMAC.floored=sim$Perm.p.GMAC
-sim$Perm.p.GMAC.floored=replace(sim$Perm.p.GMAC.floored, which(sim$Perm.p.GMAC.floored==0), 2e-16)
+sim$Perm.p.GMAC.floored=replace(sim$Perm.p.GMAC.floored, which(sim$Perm.p.GMAC.floored==0), 1e-05)
 
 sim$Perm.p.MRPC.floored=sim$Perm.p.MRPC
-sim$Perm.p.MRPC.floored=replace(sim$Perm.p.MRPC.floored, which(sim$Perm.p.MRPC.floored==0), 2e-16)
+sim$Perm.p.MRPC.floored=replace(sim$Perm.p.MRPC.floored, which(sim$Perm.p.MRPC.floored==0), 1e-05)
 
 #LTM-STM permutation pvalues 
 sim$STM.perm.p.floored=sim$STM.perm.p
-sim$STM.perm.p.floored=replace(sim$STM.perm.p.floored, which(sim$STM.perm.p.floored==0), 2e-16)
+sim$STM.perm.p.floored=replace(sim$STM.perm.p.floored, which(sim$STM.perm.p.floored==0), 1e-05)
 
 sim$LTM.perm.p.floored=sim$LTM.perm.p
-sim$LTM.perm.p.floored=replace(sim$LTM.perm.p.floored, which(sim$LTM.perm.p.floored==0), 2e-16)
+sim$LTM.perm.p.floored=replace(sim$LTM.perm.p.floored, which(sim$LTM.perm.p.floored==0), 1e-05)
 
-sim$TGM.perm.floored=sim$TGM.perm
-sim$TGM.perm.floored=replace(sim$TGM.perm.floored, which(sim$TGM.perm.floored==0), 2e-16)
+sim$TGM.perm.floored=sim$TGM.perm.p
+sim$TGM.perm.floored=replace(sim$TGM.perm.floored, which(sim$TGM.perm.floored==0), 1e-05)
+
+sim$GSS.perm.floored=sim$GSS.perm.p
+sim$GSS.perm.floored=replace(sim$GSS.perm.floored, which(sim$GSS.perm.floored==0), 1e-05)
 
 #create color for allele frequencies of alternative or reference < 5% 
 cv1=rep(0, dim(sim)[1])
-cv2=replace(cv1, which(sim$alternative<=0.01 | sim$reference<=0.01), 1)
+cv2=replace(cv1, which(sim$alternative<=0.05 | sim$reference<=0.05), 1)
 h=0.05
 sim$colvar=as.factor(cv2)
 
@@ -248,10 +251,10 @@ ggarrange(A, B, nrow = 2, labels = c("A", "B"))
 
 
 
-$\bullet$ LTM and STM plots
+## LTM and STM plots
 
 
-```{r, fig.cap="\\textbf{(A)} and \\textbf{(B)} the relationship between the observed $p$-value of the mediation test and the $p$-value from the simulated mediation test under the STM and LTM scenarios. \\textbf{(C)} and \\textbf{(D)} the relationship between the observed $p$-value of the permuted mediation test and the $p$-value from the simulated mediation tests under the STM and LTM scenarios. In all plots blue points represent trios with a rare allele observed at the SNP loci e.g having a frequency among subjects below $5\\%$. The dotted lines define the zone of insignificance at $\\log_{10}(\\alpha) = -1.301$ scale. Note that $p$-values < 2e-16 have been floored to $2e-16$", echo=FALSE, message=FALSE, warning=FALSE, results='hide',fig.keep='all'}
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE, results='hide',fig.keep='all'}
 
 #set.seed(222)
 
@@ -285,9 +288,9 @@ A1=ggplot(data = sim)+
    geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(STM.perm.p.floored), color=colvar))+
    theme(legend.position = "none")+
    labs(y = expression(log10('Sim. Permutation P-value')),
-        x = expression(log10('GMAC Obs. Nominal P-value')),
+        x = expression(log10('GMAC Obs. Perm. P-value')),
         subtitle = "Small True Model Simulation")+
-   scale_x_continuous(limits = c(-15,0))+
+   scale_x_continuous(limits = c(-5,0))+
    scale_y_continuous(limits = c(-5,0))+
    geom_abline(intercept = 0, slope = 1, linetype="dotted")+
    geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
@@ -298,9 +301,9 @@ B1=ggplot(data = sim)+
    geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(LTM.perm.p.floored), color=colvar))+
    theme(legend.position = "none")+
    labs(y = expression(log10('Sim. Permutation P-value')),
-        x = expression(log10('GMAC Obs. Nominal P-value')),
+        x = expression(log10('GMAC Obs. Perm. P-value')),
         subtitle = "Large True Model Simulation")+
-   scale_x_continuous(limits = c(-15,0))+
+   scale_x_continuous(limits = c(-5,0))+
    scale_y_continuous(limits = c(-5,0))+
    geom_abline(intercept = 0, slope = 1, linetype="dotted")+
    geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
@@ -324,21 +327,21 @@ ggarrange(A, B, A1, B1, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 
-$\bullet$ TGM and MRPC plots
+## TGM and MRPC plots
 
-```{r, fig.cap="\\textbf{A and B} Comparison of the observed parametric and permuation $p$-values to those simulated under the True GMAC model scenario. \\textbf{C} comparison of the parametric to permuation $p$-values withing the TGM simulation. \\textbf{D} comparison of the parametric and permuation $p$-values within MRPC", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
 
 #set.seed(222)
 
 
 h=0.05
 A=ggplot(data = sim)+
-  geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(TGM.p), color=colvar))+
+  geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(TGM.med.p), color=colvar))+
   theme(legend.position = "none")+
-  labs(y = expression(log10('Sim. TGM Parametric P-value')),
+  labs(y = expression(log10('Sim. Parametric P-value')),
        x = expression(log10('Obs. GMAC Parametric P-value')),
        subtitle = "True GMAC Model Simulation")+
-  scale_x_continuous(limits = c(-10,0))+
+  scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-15,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
@@ -349,10 +352,10 @@ A=ggplot(data = sim)+
 B=ggplot(data = sim)+
   geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(TGM.perm.floored), color=colvar))+
   theme(legend.position = "none")+
-  labs(y = expression(log10('Sim. TGM Permutation P-value')),
-       x = expression(log10('GMAC Obs. Nominal P-value')),
+  labs(y = expression(log10('Sim. Permutation P-value')),
+       x = expression(log10('GMAC Obs. Perm. P-value')),
        subtitle = "True GMAC Model Simulation")+
-  scale_x_continuous(limits = c(-10,0))+
+  scale_x_continuous(limits = c(-5,0))+
   scale_y_continuous(limits = c(-5,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
@@ -360,13 +363,13 @@ B=ggplot(data = sim)+
 
 
 C=ggplot(data = sim)+
-  geom_point(aes(x=log10(TGM.p), y=log10(TGM.perm.floored), color=colvar))+
+  geom_point(aes(x=log10(TGM.med.p), y=log10(TGM.perm.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. TGM Perm. P-value')),
        x = expression(log10('Sim. TGM Para. P-value')),
        subtitle = "True GMAC Model Simulation Perm. Vs. Para")+
   scale_x_continuous(limits = c(-15,0))+
-  scale_y_continuous(limits = c(-5,0))+
+  scale_y_continuous(limits = c(-6,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
@@ -377,7 +380,7 @@ D=ggplot(data = sim)+
   labs(y = expression(log10('MRPC Permutation P-value')),
        x = expression(log10('MRPC Parametric P-value')),
        subtitle = "MRPC Permutation Vs. Parametric")+
-  scale_x_continuous(limits = c(-7,0))+
+  scale_x_continuous(limits = c(-15,0))+
   scale_y_continuous(limits = c(-5,0))+
   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
@@ -392,27 +395,199 @@ ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 
-$\bullet$ GSS and GMAC plots 
+## GSS and GMAC plots 
+
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+
+#set.seed(222)
+
+
+h=0.05
+A=ggplot(data = sim)+
+  geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(GSS.med.p), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Parametric P-value')),
+       x = expression(log10('Obs. GMAC Parametric P-value')),
+       subtitle = "GMAC Self Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+
+B=ggplot(data = sim)+
+  geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(GSS.perm.floored), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Permutation P-value')),
+       x = expression(log10('GMAC Obs. Perm. P-value')),
+       subtitle = "GMAC self Simulation")+
+  scale_x_continuous(limits = c(-5,0))+
+  scale_y_continuous(limits = c(-5,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+C=ggplot(data = sim)+
+  geom_point(aes(x=log10(GSS.med.p), y=log10(GSS.perm.floored), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Perm. P-value')),
+       x = expression(log10('Sim. Para. P-value')),
+       subtitle = "GMAC Self Simulation Perm. Vs. Para")+
+  scale_x_continuous(limits = c(-5,0))+
+  scale_y_continuous(limits = c(-5,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+D=ggplot(data = sim)+
+  geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(Perm.p.GMAC.floored), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('GMAC Permutation P-value')),
+       x = expression(log10('GMAC Parametric P-value')),
+       subtitle = "GMAC Permutation Vs. Parametric")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-5,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
+
+```
+
+
+## Nominal P-value plots
+
+
+
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+
+#set.seed(222)
+
+
+h=0.05
+A=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.STM), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('Obs. GMAC Nominal P-value')),
+       subtitle = "Small True Model Simulation")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-16,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+
+B=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.LTM), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('Obs. GMAC Nominal P-value')),
+       subtitle = "Large True Model Simulation")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-16,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+C=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.TGM), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('Obs. GMAC Nominal P-value')),
+       subtitle = "True GMAC Model Simulation")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-16,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+D=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.GSS), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('Obs. GMAC Nominal P-value')),
+       subtitle = "GMAC Self Simulation")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-16,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+E=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.MRPC), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Obs. MRPC Nominal P-value')),
+       x = expression(log10('Obs. GMAC Nominal P-value')),
+       subtitle = "MRPC vs. GMAC")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-16,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+G=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Perm.p.GMAC.floored), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Obs. Perm. P-value')),
+       x = expression(log10('Obs. Nominal P-value')),
+       subtitle = "GMAC Nominal vs Permutation")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-5,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
+
+```
 
 
 
 
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+
+E=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.MRPC), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Obs. MRPC Nominal P-value')),
+       x = expression(log10('Obs. GMAC Nominal P-value')),
+       subtitle = "MRPC vs. GMAC")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-16,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+h=0.05
+G=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(sim$Med.pvalue.GMAC), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Obs. Para. P-value')),
+       x = expression(log10('Obs. Nominal P-value')),
+       subtitle = "GMAC Nominal vs Pare")+
+  scale_x_continuous(limits = c(-16,0))+
+  scale_y_continuous(limits = c(-5,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+ggarrange(E, G, labels = c("E","G") , nrow=2, ncol=2)
+
+```
 
 
 
 
+## boxplots for PC inclusion differences
 
 
-
-
-
-
-
-
-
-$\bullet$ boxplots for PC inclusion differences
-
-```{r, fig.cap="\\textbf{(A)} and \\textbf{(B)} The relationship between the simulated mediation $p$-value and the number of additional (STM scenario) or missing (LTM scenario) confounders in the analysis model relative to the true model generating the trans gene. In both plots blue boxes represent trios with a rare allele observed at the SNP loci e.g having a frequency among subjects below $5\\%$.", echo=FALSE, message=FALSE, warning=FALSE, results='hide',fig.keep='all'}
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE, results='hide',fig.keep='all'}
 
 sim$STM.med.p.floored=sim$STM.med.p
 sim$STM.med.p.floored=replace(sim$STM.med.p.floored, which(sim$STM.med.p.floored<=2e-16), 2e-16)
@@ -420,7 +595,7 @@ sim$STM.med.p.floored=replace(sim$STM.med.p.floored, which(sim$STM.med.p.floored
 sim$LTM.med.p.floored=sim$LTM.med.p
 sim$LTM.med.p.floored=replace(sim$LTM.med.p.floored, which(sim$LTM.med.p.floored<=2e-16), 2e-16)
 
-sim$TGM.med.floored=sim$TGM.p
+sim$TGM.med.floored=sim$TGM.med.p
 sim$TGM.med.floored=replace(sim$TGM.med.floored, which(sim$TGM.med.floored<=2e-16), 2e-16)
 
 TT=summary(as.factor(sim$STM.dim.diff))
@@ -472,11 +647,11 @@ ggarrange(A, B, C, labels = c("A","B","C") , nrow=3)
 
 
 
-$\bullet$ variation differences between sig and non-sig trios GMAC/MRPC
+## variation differences between sig and non-sig trios GMAC/MRPC
 
 
 
-```{r, fig.cap="\\textbf{A} The distribution of the difference between the GMAC and MRPC models in terms of in percentage of variation captured by the PCs/confounders included by each model, and under the special case of trios for which the mediation test was significant under GMAC but insignificant under MRPC \\textbf{B} The distribution described for \\textbf{A} but under the alternative scenario when both GMAC and MRPC mediation tests were insignificant (not to be confused with the permutation test which is significant for GMAC). \\textbf{C} Comparison of the permutation and mediation $p$-values under GMAC. Blue points indicate trios with a corresponding rare allele at the SNP loci. \\textbf{D} Comparison of the permutation and mediation $p$-values under GMAC and excluding trios with a corresponding rare allele for visibility. In \\textbf{A,B,D} points along the black diagonal lines indicate near $1:1$ correspondence in the $p$-values between methods.", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
 
 
 
@@ -510,23 +685,23 @@ B=ggplot(data = sim.sub)+geom_density(aes(x=Per.var.GMAC-Per.var.MRPC, fill=`Mod
 
 
 C=ggplot(data = sim)+
-  geom_point(aes(x=Perm.p.GMAC, y=Perm.p.MRPC, color=colvar, label=Trio.Num))+
+  geom_point(aes(x=GMAC.Nominal.p, y=Nominal.p.MRPC, color=colvar, label=Trio.Num))+
   theme(legend.position = "none")+
-  labs(y = "Observed Permutation P-value (MRPC)",
+  labs(y = "Observed Nominal P-value (MRPC)",
        x = 'Observed Nominal P-value (GMAC)',
-       subtitle = "Comparing Permutation Tests Under GMAC and MRPC")+
+       subtitle = "MRPC vs. GMAC:  Color = Rare Variants")+
   geom_hline(yintercept = h, linetype="dashed", color="red")+
-  geom_vline(xintercept = h, linetype="dashed", color="red")+
-  scale_x_continuous(limits=c(0, 0.01))
+  #geom_vline(xintercept = h, linetype="dashed", color="red")+
+  scale_y_continuous(limits = c(0, h))+
   geom_abline(slope = 1, intercept = 0, linetype="dashed")
 
-  
+MRPC.class=as.factor(sim$ADDIS.inf.Class)
 D=ggplot(data = sim)+
-  geom_point(aes(x=Perm.p.GMAC, y=Perm.p.MRPC, color=colvar, label=Trio.Num))+
-  theme(legend.position = "none")+
-  labs(y = "Observed Permutation P-value (MRPC)",
-       x = 'Observed Nominal P-value (GMAC)',
-       subtitle = "Comparing Permutation Tests Under GMAC and MRPC")+
+  geom_point(aes(x=GMAC.Nominal.p, y=Nominal.p.MRPC, color=MRPC.class))+
+  #theme(legend.position = "none")+
+  labs(y = "Obs. Nominal P-value (MRPC)",
+       x = 'Obs. Nominal P-value (GMAC)',
+       subtitle = "MRPC vs. GMAC:  Color = Inf. Model Type")+
   geom_hline(yintercept = h, linetype="dashed", color="red")+
   geom_text(aes( -0.0004, h, label = h, vjust = -1), size = 5)+
   scale_y_continuous(limits = c(0, h))+

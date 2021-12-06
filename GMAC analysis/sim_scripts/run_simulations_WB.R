@@ -63,11 +63,11 @@ for(i in 1:dim(sim)[1]){
   if(length(summary(factor(list.data$GMAC$SNP)))<3){
         
   if( length(which(names(summary(factor(list.data$GMAC$SNP)))=="0"))==0 ){
-      snp.dist[i,]=c(NA ,summary(factor(list.data$GMAC$SNP)))
+      snp.dist[i,]=c(0 ,summary(factor(list.data$GMAC$SNP)))
   }else if ( length(which(names(summary(factor(list.data$GMAC$SNP)))=="1"))==0 ){
-    snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP))[1], NA , summary(factor(list.data$GMAC$SNP))[2])
+    snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP))[1], 0 , summary(factor(list.data$GMAC$SNP))[2])
   }else{
-    snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP)), NA)
+    snp.dist[i,]=c(summary(factor(list.data$GMAC$SNP)), 0)
   }
         
   }else{

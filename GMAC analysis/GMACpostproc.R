@@ -295,7 +295,7 @@ cross.analyze=function(tissues=tissues.vec[,1], save=FALSE, path="/mnt/ceph/jarr
     table.pp=rbind.data.frame(common, postproc.cis$sig.trios[unq.cis,], postproc.trans$sig.trios[unq.trans,])
     table2.pp=cbind.data.frame(table.pp, 
                                Mediation.type=found,
-                               Perm.rep.p=c(perm.reg.p.common, pr.p.unq.cis, pr.p.unq.trans))
+                               Perm.reg.p=c(perm.reg.p.common, pr.p.unq.cis, pr.p.unq.trans))
     
     #get the trio indicies and Addis M class
     trio.idx=locate.trio(input=table2.pp[,1:3], trio.mat = trios)
@@ -1338,8 +1338,8 @@ simu1=function(data=NULL,alpha=0.001, mod.type=NULL, verbose=TRUE){
   
   #print(cor(data.new[, (length(colnames(data.new))-2):length(colnames(data.new))])[,1:3])
   return(list(sim.data=data.new, 
-              GMAC.sim.p=sim.p, 
-              GMAC.sim.b=sim.b, 
+              pvalue=sim.p, 
+              b.coef=sim.b, 
               dim.diff=(dim(model.matrix(mod2))[2]-1)-(dim(X.gen)[2]-1) ))
   
 }
@@ -1470,15 +1470,15 @@ simu2=function(tissue = "WholeBlood", data=NULL, seed=NULL, mod.type=NULL, n=10,
   
   
   return(list(data.sim=data.new, 
-              GMAC.sim.p=sim.p, 
-              GMAC.sim.b=sim.b, 
+              pvalue=sim.p, 
+              b.coef=sim.b, 
               dim.diff=n))
 }
 
 
 
 
-
+#Simulation 3 TGM
 #A function to simulate the trans gene under the GMAC parametric model and then 
 #applying the MRPC-ADDIS parametric model under the simulated trans gene to determine
 #The power when only MRPC selected confounders are included - to be wrapped by simu12
@@ -1511,15 +1511,17 @@ simu3=function(MRPC.data=NULL, GMAC.data=NULL, mod.type=NULL, verbose=NULL){
   Tj=X%*%b+rnorm(dim(X)[1], mean = 0, sd=sigma)
   
   new.data=MRPC.data
-  new.data$trans.gene=Tj
-  
+  #new.data$trans.gene=Tj
   
   
   if(mod.type=="Both"){
+    new.data$trans.gene=Tj
     analysis.model=lm(trans.gene~., data = new.data)
   }else if(mod.type=="Cis.Med"){
+    new.data$trans.gene=Tj
     analysis.model=lm(trans.gene~., data = new.data)
   }else{
+    new.data$cis.gene=Tj
     analysis.model=lm(cis.gene~., data = new.data)
   }
   
@@ -1554,9 +1556,97 @@ simu3=function(MRPC.data=NULL, GMAC.data=NULL, mod.type=NULL, verbose=NULL){
 
 
 
+#------------------------------------------
+
+#simulation 4 GSS
+
+
+simu4=function(GMAC.data=NULL, mod.type=NULL, verbose=NULL){
+  
+  GMAC.data$pcr=as.factor(GMAC.data$pcr)
+  GMAC.data$platform=as.factor(GMAC.data$platform)
+  GMAC.data$sex=as.factor(GMAC.data$sex)
+  
+  
+  if(mod.type=="Both"){
+    true.model=lm(trans.gene~., data=GMAC.data)
+  }else if(mod.type=="Cis.Med"){
+    true.model=lm(trans.gene~., data=GMAC.data)
+  }else{
+    true.model=lm(cis.gene~., data=GMAC.data)
+  }
+  
+  if(verbose==TRUE){
+    print("========================Results-for-True-Tj======================")
+    print(summary(true.model))
+  }
+  
+  #simulate trans gene
+  b=as.data.frame(summary(true.model)$coefficients)$Estimate
+  #print(head(b))
+  X=model.matrix(true.model)
+  #print(head(X))
+  sigma=summary(true.model)$sigma
+  #print(sigma)
+  
+  Tj=X%*%b+rnorm(dim(X)[1], mean = 0, sd=sigma)
+  
+  #print("simulated gene")
+  #print(head(Tj))
+  new.data=GMAC.data
+  #new.data$trans.gene=Tj
+  
+  
+  
+  if(mod.type=="Both"){
+    new.data$trans.gene=Tj
+    analysis.model=lm(trans.gene~., data = new.data)
+  }else if(mod.type=="Cis.Med"){
+    new.data$trans.gene=Tj
+    analysis.model=lm(trans.gene~., data = new.data)
+  }else{
+    new.data$cis.gene=Tj
+    analysis.model=lm(cis.gene~., data = new.data)
+  }
+  
+  
+  if(verbose==TRUE){
+    print("========================Results-for-simulated-Tj======================")
+    print(summary(analysis.model))
+  }
+  
+  
+  sim.coef.mat=as.data.frame(summary(analysis.model)$coefficients)
+  
+  if(mod.type=="Both"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else if(mod.type=="Cis.Med"){
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="cis.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="cis.gene")]
+  }else{
+    sim.p=sim.coef.mat$`Pr(>|t|)`[which(row.names(sim.coef.mat)=="trans.gene")]
+    sim.b=sim.coef.mat$Estimate[which(row.names(sim.coef.mat)=="trans.gene")]
+  }
+  
+  
+  return(list(sim.data=new.data, pvalue=sim.p, b.coef=sim.b))
+  
+  
+}
+
+
+
+
+
+
+
+#--------------------------------------------------Simulation Wrapper-------------------------------------------------------
+
 #A function which wraps simu1, simu2 and cross.regress together
 
-run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=NULL, alpha=0.001, n=10, seed=222, verbose=FALSE){
+run.simu12=function(tissue="WholeBlood", trios=NULL, mod.type.vec=NULL, l1.table=NULL, alpha=0.001, n=10, seed=222, num.perms=1000,
+                    verbose=FALSE){
   # 
   # sim.sets=vector("list", length = length(trios))
   # orig.sets=vector("list", length = length(trios))
@@ -1635,12 +1725,14 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
 
     
     #orig.sets[[i]]=list.data$GMAC
+    #STM simulation
     print("running Simulation 1...")
     out=simu1(list.data$GMAC, alpha = alpha, mod.type=mod.type.vec[i], verbose=verbose)
     print("...done")
     
     #sim.sets[[i]]=out
     
+    #LTM simulation
     print("running Simulation 2...")
     if(n=="random"){
       nn=floor(runif(1, 1, 20))
@@ -1651,7 +1743,11 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
     }
     
     #run TGM simulation
+    print("running Simulation 3...")
     out3=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=mod.type.vec[i], verbose=F)
+    #run GSS simulation
+    print("running Simulation 4...")
+    out4=simu4(GMAC.data=list.data$GMAC, mod.type=mod.type.vec[i], verbose=T)
     
     print("...done")
     
@@ -1661,29 +1757,47 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
     match.pcs=na.omit(match(colnames(list.data$GMAC), colnames(PCs$x)))
     
     #run the permuted regressions
-    perm1=run.permuted.reg(list.data$addis, nperms=1000, Alg="ADDIS", med.type = mod.type.vec[i])
-    perm2=run.permuted.reg(out$sim.data, nperms=1000, Alg="GMAC", med.type = mod.type.vec[i])
-    perm3=run.permuted.reg(out2$data.sim, nperms=1000, Alg="GMAC", med.type = mod.type.vec[i])
-    perm4=run.permuted.reg(out3$sim.data, nperms=1000, Alg="ADDIS", med.type = mod.type.vec[i])
-    perm5=run.permuted.reg(list.data$GMAC, nperms=1000, Alg="GMAC", med.type = mod.type.vec[i])
+    
+    print("Running Permutation Regressions...")
+    #get MRPC nominal and perm p
+    perm1=run.permuted.reg(list.data$addis, nperms=num.perms, Alg="ADDIS", med.type = mod.type.vec[i])
+    #STM, LTM, and TGM simulations
+    perm2=run.permuted.reg(out$sim.data, nperms=num.perms, Alg="GMAC", med.type = mod.type.vec[i])
+    perm3=run.permuted.reg(out2$data.sim, nperms=num.perms, Alg="GMAC", med.type = mod.type.vec[i])
+    perm4=run.permuted.reg(out3$sim.data, nperms=num.perms, Alg="ADDIS", med.type = mod.type.vec[i])
+    #Get GMAC nominal and perm p
+    perm5=run.permuted.reg(list.data$GMAC, nperms=num.perms, Alg="GMAC", med.type = mod.type.vec[i])
+    #GSS simulation
+    perm6=run.permuted.reg(out4$sim.data, nperms=num.perms, Alg="GMAC", med.type = mod.type.vec[i])
+    print("-----------checking values to ensure accuracy--------")
+    print(perm6$nominal.p)
+    print(perm6$p.value)
+    print(out4$pvalue)
+    print(out4$b.coef)
+    print(list.data$GMAC[1:5,1:5])
+    print(out4$sim.data[1:5,1:5])
+    
+    print("...done")
     
     #get the permutation and nominal pvalues
     out.mat$Perm.p.MRPC[i]=perm1$p.value
     out.mat$Nominal.p.MRPC[i]=perm1$nominal.p
-    
+    #STM
     out.mat$STM.perm.p[i]=perm2$p.value
     out.mat$Nominal.p.STM[i]=perm2$nominal.p
-    
+    #LTM
     out.mat$LTM.perm.p[i]=perm3$p.value
     out.mat$Nominal.p.LTM[i]=perm3$nominal.p
-    
+    #TGM
     out.mat$TGM.perm.p[i]=perm4$p.value
     out.mat$Nominal.p.TGM[i]=perm4$nominal.p
-    
-    out.mat$Perm.p.GMAC[i]=perm5$pvalue
+    #GMAC
+    out.mat$Perm.p.GMAC[i]=perm5$p.value
+    #GSS
+    out.mat$GSS.perm.p[i]=perm6$p.value
+    out.mat$Nominal.p.GSS[i]=perm6$nominal.p
 
     #store
-    out.mat$Trio.Num[i]=trios[i]
     out.mat$Num.pcs.MRPC[i]=length(addis.pcs)
     out.mat$Per.var.MRPC[i]=round(sum(addis.var.act)/total.var, 6)*100
     out.mat$Num.pcs.GMAC[i]=length(match.pcs)
@@ -1694,22 +1808,28 @@ run.simu12=function(tissue="WholeBlood", trios=NULL,mod.type.vec=NULL, l1.table=
     out.mat$Med.coef.GMAC[i]=list.data$Regress$b.addis.cis.gene
     out.mat$Med.coef.MRPC[i]=list.data$Regress$b.gmac.cis.gene
     #Small truth simulation
-    out.mat$STM.med.p[i]=out$GMAC.sim.p
-    out.mat$STM.med.coef[i]=out$GMAC.sim.b
+    out.mat$STM.med.p[i]=out$pvalue
+    out.mat$STM.med.coef[i]=out$b.coef
     out.mat$STM.dim.diff[i]=out$dim.diff
     #Large truth simulation
-    out.mat$LTM.med.p[i]=out2$GMAC.sim.p
-    out.mat$LTM.med.coef[i]=out2$GMAC.sim.b
+    out.mat$LTM.med.p[i]=out2$pvalue
+    out.mat$LTM.med.coef[i]=out2$b.coef
     out.mat$LTM.dim.diff[i]=out2$dim.diff
-    
+    #True GMAC simulation
     out.mat$TGM.med.p[i]=out3$pvalue
+    out.mat$TGM.med.coef[i]=out3$b.coef
+    #out.mat$TGM.dim.diff[i]=out3$dim.diff
+    #GMAC Self Simulation
+    out.mat$GSS.med.p[i]=out4$pvalue
+    out.mat$GSS.med.coef[i]=out4$b.coef
     
   }
   
-  
+  #meta info
+  out.mat$Trio.Num=trios
   out.mat$Med.type=mod.type.vec
   out.mat$ADDIS.inf.Class=l1.table$Addis.Class[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
-  out.mat$GMAC.Nominal.p=l1.table$Perm.rep.p[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
+  out.mat$GMAC.Nominal.p=l1.table$Perm.reg.p[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$cis.gene=l1.table$cis[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$trans.gene=l1.table$trans[match(out.mat$Trio.Num,  l1.table$Trio.Num)]
   out.mat$snp=l1.table$snp[match(out.mat$Trio.Num,  l1.table$Trio.Num)]

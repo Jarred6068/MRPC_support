@@ -35,7 +35,7 @@ as(MRPC.fit.FDR.addis@graph, "matrix")[1:3,1:3]
 
 Lond2Addis.lookup(trio.index=9711, tissue.name="AdiposeSubcutaneous", with.pc=TRUE)
 
-list.data=cross.regress(tissue="AdiposeSubcutaneous", trio.ind=9711, mod.type="trans", addis.pcs=NULL)
+list.data=cross.regress(tissue="WholeBlood", trio.ind=30, mod.type="both", addis.pcs=NULL)
 
 run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=FALSE, filename=NULL, Alg="GMAC", med.type="Trans.Med")
 
@@ -46,6 +46,9 @@ start.t=Sys.time()
 out.permreg=run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=F, filename=fname1)
 end.t=Sys.time()
 end.t-start.t
+
+
+perm6=run.permuted.reg(sim$sim.data, nperms=1000, Alg="GMAC", med.type = "Both")
 
 #========================================================================================
 ##suppression analysis
@@ -383,11 +386,14 @@ trios=l1$final.tables[[1]]$Trio.Num
 med.types=l1$final.tables[[1]]$Mediation.type
 print("running Simulations...")
 
-ot1=run.simu12(tissue = "WholeBlood" ,trios=trios, 
-               l1.table=l1$final.tables[[1]],
-               mod.type.vec=med.types,
+start.time=Sys.time()
+ot1=run.simu12(tissue = "WholeBlood" ,trios=trios[1:10], 
+               l1.table=l1$final.tables[[1]][1:10,],
+               mod.type.vec=med.types[1:10],
                alpha=0.001, n="random")
+end.time=Sys.time()
 print("...done")
+print(paste0("time = ", end.time-start.time))
 ot1$Tissue=rep("WholeBlood")
 
 
@@ -410,12 +416,143 @@ ot1$Tissue=rep("WholeBlood")
 
 
 
-
+l1=cross.analyze(tissues="AdiposeSubcutaneous", save=FALSE)
 
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 
 list.data=cross.regress(tissue="AdiposeSubcutaneous", trio.ind=9711, mod.type="trans", addis.pcs=NULL)
 
 run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=FALSE, filename=NULL, Alg="GMAC", med.type="Trans.Med")$null.wald.stat
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#load in needed stuff
+sim=read.csv(file="/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv", header = T)
+source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
+
+tissue="WholeBlood"
+l1=cross.analyze(tissues=tissue, save=FALSE)
+#pull out trios which were no longer significant after the GSS simulation 
+trios=sim$Trio.Num[sim$Nominal.p.GSS>0.05][1:5]
+mod.type.vec=sim$Med.type[sim$Nominal.p.GSS>0.05][1:5]
+# trios=sim$Trio.Num[sim$Nominal.p.GSS<0.05]
+# mod.type.vec=sim$Med.type[sim$Nominal.p.GSS<0.05]
+
+
+
+for(i in 1:length(trios)){
+  
+  #testing GSS code
+  
+  
+  if(mod.type.vec[i]=="Both"){
+    
+    list.data=cross.regress(tissue=tissue, 
+                            trio.ind=trios[i], 
+                            mod.type="cis", 
+                            #addis.pcs=addis.pcs, 
+                            verbose = FALSE)
+    
+  }else if(mod.type.vec[i]=="Cis.Med"){
+    
+    list.data=cross.regress(tissue=tissue, 
+                            trio.ind=trios[i], 
+                            mod.type="cis", 
+                            #addis.pcs=addis.pcs, 
+                            verbose = FALSE)
+  }else{
+    
+    list.data=cross.regress(tissue=tissue, 
+                            trio.ind=trios[i], 
+                            mod.type="trans", 
+                            #addis.pcs=addis.pcs, 
+                            verbose = FALSE)
+    
+  }
+  
+  #print(list.data$GMAC[1:5,1:5])
+  p1=NULL
+  p2=NULL
+  p3=NULL
+  
+  for(j in 1:100){
+  
+    out4=simu4(GMAC.data=list.data$GMAC, mod.type=mod.type.vec[i], verbose=F)
+    #print(out4$sim.data[1:5,1:5])
+    #print(out4$sim.data[1:5,1:5])
+    #print(list.data$GMAC[1:5,1:5])
+    #print(out4$pvalue)
+    #print(out4$b.coef)
+    p1[j]=out4$pvalue
+
+    perm6=run.permuted.reg(out4$sim.data, nperms=1000, Alg="GMAC", med.type = mod.type.vec[i])
+    #print(perm6$nominal.p)
+    #print(perm6$p.value)
+    p2[j]=perm6$p.value
+    p3[j]=perm6$nominal.p
+  }
+  
+  png(paste0("/mnt/ceph/jarredk/GMACanalysis/Unstable_trios_plots/plot_", tissue, "_", trios[i], "_",mod.type.vec[i], ".png"))
+  plot(p1, p3, pch=21, bg="black",
+       xlab="Simulated Para. P-value",
+       ylab="Simulated Nominal P-value",
+       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+  abline(a=0, b=1, lty="dotted", col="red")
+  dev.off()
+  
+  png(paste0("/mnt/ceph/jarredk/GMACanalysis/Unstable_trios_plots/histogram_", tissue, "_", trios[i], "_",mod.type.vec[i], ".png"))
+  par(mfrow=c(2,2))
+  hist(p1, xlab="Simulated Para. P-value",
+       ylab="Simulated Nominal P-value",
+       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+  hist(p2,
+       xlab="Simulated Para. P-value",
+       ylab="Simulated Nominal P-value",
+       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+  hist(p3,
+       xlab="Simulated Para. P-value",
+       ylab="Simulated Nominal P-value",
+       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+  dev.off()
+  
+}
+
+
+i=1
+
+list.data=cross.regress(tissue=tissue, 
+                        trio.ind=trios[2], 
+                        mod.type="cis", 
+                        #addis.pcs=addis.pcs, 
+                        verbose = T)
+
+p=NULL
+b=NULL
+for(i in 1:100){out4=simu4(GMAC.data=list.data$GMAC, mod.type=mod.type.vec[1], verbose=T);p[i]=out4$pvalue;b[i]=round(out4$b.coef,6)}
+
+
+
+
+
+
+
+
+
+
 
 

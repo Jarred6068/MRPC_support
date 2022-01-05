@@ -246,8 +246,8 @@ cross.analyze=function(tissues=tissues.vec[,1], save=FALSE, path="/mnt/ceph/jarr
   for(i in 1:length(tissues)){
     
     #read in GMAC results
-    output.cis=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_cis.Rdata', sep = ""))
-    output.trans=loadRData(fileName=paste('/mnt/ceph/jarredk/GMACanalysis/', tissues[i], '/all_trios_output_trans.Rdata', sep=""))
+    output.cis=loadRData(fileName=paste(path, tissues[i], '/all_trios_output_cis.Rdata', sep = ""))
+    output.trans=loadRData(fileName=paste(path, tissues[i], '/all_trios_output_trans.Rdata', sep=""))
     
     #process 
     postproc.cis=run.postproc(output.pvals = output.cis$output.table[,5], 
@@ -1578,7 +1578,7 @@ simu4=function(GMAC.data=NULL, mod.type=NULL, verbose=NULL){
   
   if(verbose==TRUE){
     print("========================Results-for-True-Tj======================")
-    print(summary(true.model))
+    print(summary(true.model)$sigma)
   }
   
   #simulate trans gene
@@ -1587,6 +1587,7 @@ simu4=function(GMAC.data=NULL, mod.type=NULL, verbose=NULL){
   X=model.matrix(true.model)
   #print(head(X))
   sigma=summary(true.model)$sigma
+  #sigma=0.0117
   #print(sigma)
   
   Tj=X%*%b+rnorm(dim(X)[1], mean = 0, sd=sigma)

@@ -13,7 +13,7 @@ path='/mnt/ceph/jarredk/Reg_Net/'
 tissues.vec=tissue.names[top5, 2:3]
 
 
-run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'){
+run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis', which.trios="all"){
   
   #types=c('LM1T1','LM1T2','AM1T1', 'LM1T2')
   
@@ -43,25 +43,49 @@ run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'
 
     print('data.assembled...running.GMAC')
     #run gmac analysis
-    if(mediation.type=='trans'){
+    if(which.trios=="all"){
       
-      output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
-                     exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
-                     trios.idx = tables.gmac.list$trios.idx[,c(1,3,2)], nperm = 10000, nominal.p = TRUE)
-      
+      if(mediation.type=='trans'){
+        
+        output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
+                       exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
+                       trios.idx = tables.gmac.list$trios.idx[,c(1,3,2)], nperm = 10000, nominal.p = TRUE)
+        
+        
+      }else{
+        
+        output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
+                       exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
+                       trios.idx = tables.gmac.list$trios.idx, nperm = 10000, nominal.p = TRUE)
+        
+        
+      }
       
     }else{
       
-      output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
-                     exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
-                     trios.idx = tables.gmac.list$trios.idx, nperm = 10000, nominal.p = TRUE)
       
+      if(mediation.type=='trans'){
+        
+        output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
+                       exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
+                       trios.idx = tables.gmac.list$trios.idx[which.trios,c(1,3,2)], nperm = 10000, nominal.p = TRUE)
+        
+        
+      }else{
+        
+        output <- gmac(known.conf = tables.gmac.list$known.conf, cov.pool = tables.gmac.list$cov.pool, 
+                       exp.dat = tables.gmac.list$exp.dat, snp.dat.cis = tables.gmac.list$snp.dat.cis, 
+                       trios.idx = tables.gmac.list$trios.idx[which.trios,], nperm = 10000, nominal.p = TRUE)
+        
+        
+      }
       
     }
     
     
+    
     #reorganize output for saving
-    out.table=cbind.data.frame(tables.gmac.list$trio.ref, output[[1]], output[[2]])
+    out.table=cbind.data.frame(tables.gmac.list$trio.ref[which.trios,], output[[1]], output[[2]])
     colnames(out.table)=c(colnames(tables.gmac.list$trio.ref), 
                           paste0('pval_', colnames(output[[1]])), 
                           paste0('effect_change_', colnames(output[[2]])))
@@ -74,7 +98,7 @@ run.GMAC=function(tissues.vec=tissue.vec, path.tables=path, mediation.type='cis'
     
     #saving output
     print('output...done...saving')
-    save(out.list, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/all_trios_output_', mediation.type, 'nomp_false.Rdata'))
+    save(out.list, file = paste0('/mnt/ceph/jarredk/GMACanalysis/', tissues.vec[t,1], '/all_trios_output_', mediation.type, 'stability_check.Rdata'))
     print('...done')
     
 

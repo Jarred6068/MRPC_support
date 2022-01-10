@@ -1,0 +1,3 @@
+SNP	cis.gene	cis.gene.name	trans.gene	trans.gene.name	Tissue
+chr1_169858957_A_G_b38	ENSG00000171806	METTL18	ENSG00000198570	RD3	ColonSigmoid
+chr1_169791754_C_T_b38	ENSG00000171806	METTL18	ENSG00000168621	GDNF	HeartAtrialAppendage

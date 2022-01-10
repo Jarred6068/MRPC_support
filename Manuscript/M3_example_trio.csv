@@ -1,0 +1,39 @@
+"SNP","cis.gene","cis.gene.name","trans.gene","trans.gene.name","cis.chr","trans.chr","cis.gene.start","cis.gene.end","trans.gene.start","trans.gene.end","cis.gene.type","trans.gene.type","model","Tissue","Trio.Index"
+"chrX_154591448_G_A_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","AdiposeSubcutaneous",287
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000270388","MTCO3P22","X","5","154506159","154516242","100051133","100051916","protein_coding","processed_pseudogene","M3","AdiposeVisceral",92
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","AdrenalGland",204
+"chrX_154531643_C_T_b38","ENSG00000071889","FAM3A","ENSG00000259479","SORD2P","X","15","154506159","154516242"," 44825747"," 44884694","protein_coding","transcribed_unprocessed_pseudogene","M3","ArteryAorta",130
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000270388","MTCO3P22","X","5","154506159","154516242","100051133","100051916","protein_coding","processed_pseudogene","M3","ArteryCoronary",214
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000259479","SORD2P","X","15","154506159","154516242"," 44825747"," 44884694","protein_coding","transcribed_unprocessed_pseudogene","M3","ArteryTibial",378
+"chrX_155425058_T_G_b38","ENSG00000071889","FAM3A","ENSG00000203397","SHISA5P2","X","X","154506159","154516242"," 74066083"," 74066592","protein_coding","processed_pseudogene","M3","BrainAnteriorcingulatecortex",2940
+"chrX_154514867_C_T_b38","ENSG00000071889","FAM3A","ENSG00000260847",NA,"X","16","154506159","154516242"," 32188333"," 32193530","protein_coding","lncRNA","M3","BrainCaudate",4335
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000180398","MCFD2","X","2","154506159","154516242"," 46901870"," 46941855","protein_coding","protein_coding","M3","BrainCerebellarHemisphere",1156
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","BrainCerebellum",1522
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000266232","MIR3178","X","16","154506159","154516242","  2531922","  2532005","protein_coding","miRNA","M3","BrainFrontalCortex",1557
+"chrX_154506456_A_T_b38","ENSG00000071889","FAM3A","ENSG00000115138","POMC","X","2","154506159","154516242"," 25160853"," 25168903","protein_coding","protein_coding","M3","BrainHypothalamus",842
+"chrX_154600913_A_G_b38","ENSG00000071889","FAM3A","ENSG00000234548","LINC02020","X","3","154506159","154516242","186439239","186457299","protein_coding","lncRNA","M3","BrainSpinalcord",349
+"chrX_154599376_G_A_b38","ENSG00000071889","FAM3A","ENSG00000233913","RPL10P9","X","5","154506159","154516242","168616352","168616996","protein_coding","processed_pseudogene","M3","BreastMammaryTissue",209
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","CellsCulturedfibroblasts",43
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","ColonSigmoid",295
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","ColonTransverse",314
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000226278","PSPHP1","X","7","154506159","154516242"," 55764797"," 55773288","protein_coding","unprocessed_pseudogene","M3","EsophagusGastroesophagealJunction",301
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","EsophagusMucosa",455
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","EsophagusMuscularis",221
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000232177","MTND4P24","X","X","154506159","154516242","126472885","126473281","protein_coding","processed_pseudogene","M3","HeartAtrialAppendage",378
+"chrX_154506456_A_T_b38","ENSG00000071889","FAM3A","ENSG00000232177","MTND4P24","X","X","154506159","154516242","126472885","126473281","protein_coding","processed_pseudogene","M3","HeartLeftVentricle",650
+"chrX_154543081_T_C_b38","ENSG00000071889","FAM3A","ENSG00000230076","RPL10P6","X","2","154506159","154516242","214847128","214847445","protein_coding","processed_pseudogene","M3","Liver",112
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","Lung",116
+"chrX_154529974_A_G_b38","ENSG00000071889","FAM3A","ENSG00000270388","MTCO3P22","X","5","154506159","154516242","100051133","100051916","protein_coding","processed_pseudogene","M3","MinorSalivaryGland",507
+"chrX_154531643_C_T_b38","ENSG00000071889","FAM3A","ENSG00000233913","RPL10P9","X","5","154506159","154516242","168616352","168616996","protein_coding","processed_pseudogene","M3","MuscleSkeletal",1947
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","NerveTibial",445
+"chrX_154531643_C_T_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","Ovary",1502
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","Pancreas",349
+"chrX_154531643_C_T_b38","ENSG00000071889","FAM3A","ENSG00000173930","SLCO4C1","X","5","154506159","154516242","102233986","102296284","protein_coding","protein_coding","M3","Pituitary",326
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000228549",NA,"X","1","154506159","154516242"," 16870945"," 16883659","protein_coding","lncRNA","M3","Prostate",160
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","SkinNotSunExposed",988
+"chrX_154591448_G_A_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","SkinSunExposed",907
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000230076","RPL10P6","X","2","154506159","154516242","214847128","214847445","protein_coding","processed_pseudogene","M3","Spleen",257
+"chrX_154531643_C_T_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","Testis",403
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","Thyroid",463
+"chrX_154591448_G_A_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","Uterus",1264
+"chrX_154516183_G_C_b38","ENSG00000071889","FAM3A","ENSG00000225972","MTND1P23","X","1","154506159","154516242","   629062","   629433","protein_coding","unprocessed_pseudogene","M3","WholeBlood",266

@@ -22,6 +22,7 @@ sort.gt2=function(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.
   #load in gene meta data from BIO-Mart
   meta.data=read.table(file="/mnt/ceph/jarredk/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep="\t", header=T)
   meta.names=c("Gene.start.bp","Gene.end.bp","Gene.type","Gene.name","chr")
+  sum.stat.names=c("Mean.cis","SD.cis","Mean.trans","SD.trans", "Cor.SNP.cis", "Cor.SNP.trans", "Cor.cis.trans")
   
   #loading bar 2
   print("---Running:--sort.gt2()---")
@@ -47,17 +48,20 @@ sort.gt2=function(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.
       
       #-------------------Addis-Trans---------------------------
       if(mediator=="trans"){
-        trio.names=as.data.frame(matrix(0, nrow = length(addisM1$type2), ncol = 14))
+        trio.names=as.data.frame(matrix(0, nrow = length(addisM1$type2), ncol = 21))
         colnames(trio.names)=c("SNP", "Cis.Gene.ID","Trans.Gene.ID", "Mediator",
-                               paste0("trans.",meta.names), paste0("cis.",meta.names))
+                               paste0("trans.",meta.names), paste0("cis.",meta.names), sum.stat.names)
         
         for(i in 1:length(addisM1$type2)){
           
           index=(addisM1$type2[i]-1)*3+(1:3)
-          gene.names=colnames(trioData[,index])
+          trio=trioData[,index]
+          gene.names=colnames(trio)
           mediator.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[3])[1],1:5]
           nonmed.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[2])[1],1:5]
-          trio.names[i,]=c(colnames(trioData[,index]),"AM1T2", mediator.meta, nonmed.meta)
+          r=cor(trio, use = "pairwise.complete.obs")
+          sum.stats=c(mean(trio[,2]), sd(trio[,2]), mean(trio[,3]), sd(trio[,3]), r[1,2:3], r[2,3])
+          trio.names[i,]=c(colnames(trioData[,index]),"AM1T2", mediator.meta, nonmed.meta, sum.stats)
  
         }
         
@@ -66,17 +70,20 @@ sort.gt2=function(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.
         #------------------addis-cis------------------------        
       }else{
         
-        trio.names=as.data.frame(matrix(0, nrow = length(addisM1$type1), ncol = 14))
+        trio.names=as.data.frame(matrix(0, nrow = length(addisM1$type1), ncol = 21))
         colnames(trio.names)=c("SNP", "Cis.Gene.ID","Trans.Gene.ID", "Mediator",
-                               paste0("cis.",meta.names), paste0("trans.",meta.names))
+                               paste0("cis.",meta.names), paste0("trans.",meta.names), sum.stat.names)
         
         for(i in 1:length(addisM1$type1)){
           
           index=(addisM1$type1[i]-1)*3+(1:3)
-          gene.names=colnames(trioData[,index])
+          trio=trioData[,index]
+          gene.names=colnames(trio)
           mediator.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[2])[1],1:5]
           nonmed.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[3])[1],1:5]
-          trio.names[i,]=c(colnames(trioData[,index]),"AM1T1", mediator.meta, nonmed.meta)
+          r=cor(trio, use = "pairwise.complete.obs")
+          sum.stats=c(mean(trio[,2]), sd(trio[,2]), mean(trio[,3]), sd(trio[,3]), r[1,2:3], r[2,3])
+          trio.names[i,]=c(colnames(trioData[,index]),"AM1T1", mediator.meta, nonmed.meta, sum.stats)
           
         }
         
@@ -93,17 +100,20 @@ sort.gt2=function(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.
       #------------------lond---trans-----------------------   
       if(mediator=="trans"){
         
-        trio.names=as.data.frame(matrix(0, nrow = length(londM1$type2), ncol = 14))
+        trio.names=as.data.frame(matrix(0, nrow = length(londM1$type2), ncol = 21))
         colnames(trio.names)=c("SNP", "Cis.Gene.ID","Trans.Gene.ID", "Mediator",
-                               paste0("trans.",meta.names), paste0("cis.",meta.names))
+                               paste0("trans.",meta.names), paste0("cis.",meta.names), sum.stat.names)
         
         for(i in 1:length(londM1$type2)){
           
           index=(londM1$type2[i]-1)*3+(1:3)
-          gene.names=colnames(trioData[,index])
+          trio=trioData[,index]
+          gene.names=colnames(trio)
           mediator.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[3])[1],1:5]
           nonmed.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[2])[1],1:5]
-          trio.names[i,]=c(colnames(trioData[,index]),"LM1T2", mediator.meta, nonmed.meta)
+          r=cor(trio, use = "pairwise.complete.obs")
+          sum.stats=c(mean(trio[,2]), sd(trio[,2]), mean(trio[,3]), sd(trio[,3]), r[1,2:3], r[2,3])
+          trio.names[i,]=c(colnames(trioData[,index]),"LM1T2", mediator.meta, nonmed.meta, sum.stats)
           
         }
         
@@ -112,17 +122,20 @@ sort.gt2=function(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.
         #-------------------lond--cis------------------------       
       }else{
         
-        trio.names=as.data.frame(matrix(0, nrow = length(londM1$type1), ncol = 14))
+        trio.names=as.data.frame(matrix(0, nrow = length(londM1$type1), ncol = 21))
         colnames(trio.names)=c("SNP", "Cis.Gene.ID","Trans.Gene.ID", "Mediator",
-                               paste0("cis.",meta.names), paste0("trans.",meta.names))
+                               paste0("cis.",meta.names), paste0("trans.",meta.names), sum.stat.names)
         
         for(i in 1:length(londM1$type1)){
           
           index=(londM1$type1[i]-1)*3+(1:3)
-          gene.names=colnames(trioData[,index])
+          trio=trioData[,index]
+          gene.names=colnames(trio)
           mediator.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[2])[1],1:5]
           nonmed.meta=meta.data[which(meta.data$Gene.stable.ID==gene.names[3])[1],1:5]
-          trio.names[i,]=c(colnames(trioData[,index]),"LM1T1", mediator.meta, nonmed.meta)
+          r=cor(trio, use = "pairwise.complete.obs")
+          sum.stats=c(mean(trio[,2]), sd(trio[,2]), mean(trio[,3]), sd(trio[,3]), r[1,2:3], r[2,3])
+          trio.names[i,]=c(colnames(trioData[,index]),"LM1T1", mediator.meta, nonmed.meta, sum.stats)
           
         }
         
@@ -140,29 +153,31 @@ sort.gt2=function(tissue.selection=c(1:48), FDR="ADDIS", mediator="trans", save.
   
   
   #save each list as .csv
-  for(i in 1:length(tissues.vec)){
-    if(FDR=="ADDIS"){
+  if(save.data==TRUE){
+    for(i in 1:length(tissues.vec)){
+      if(FDR=="ADDIS"){
     
-      if(mediator=="trans"){
+        if(mediator=="trans"){
       
-        write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T2/",tissues.vec[i],".csv", sep = ""))
+          write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T2/",tissues.vec[i],".csv", sep = ""))
       
+        }else{
+        
+          write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T1/",tissues.vec[i],".csv", sep = ""))
+        
+        }
+    
       }else{
-        
-        write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/AM1T1/",tissues.vec[i],".csv", sep = ""))
-        
-      }
     
-    }else{
-    
-      if(mediator=="trans"){
+        if(mediator=="trans"){
         
-        write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/LM1T2/",tissues.vec[i],".csv", sep = ""))
+          write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/LM1T2/",tissues.vec[i],".csv", sep = ""))
       
-      }else{
+        }else{
         
-        write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/LM1T1/",tissues.vec[i],".csv", sep = ""))
+          write.csv(master[[i]], file = paste("/mnt/ceph/jarredk/Reg_Net/LM1T1/",tissues.vec[i],".csv", sep = ""))
         
+        }
       }
     }
   }

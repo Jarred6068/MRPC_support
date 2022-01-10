@@ -148,9 +148,10 @@ kable(table.final, caption = "The breakdown of unqiue trios with inferred signif
 
 table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/final_result_table10000.csv")
 table.unique=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/GMAC.unique.trios.breakdown.csv")
-table3=cbind.data.frame(table.totals[,2:5], table.unique[,-1], rowSums(table.unique[,-1]))
-colnames(table3)=c("Tissue", "Total Trios", "Total Cis Mediated", "Total Trans Mediated", "Unique Cis Only", "Unique Trans Only", "Unique Both", "Unique Total")
-table3$Tissue=c("AdiposeSubcut", table3$Tissue[-1])
+table3=cbind.data.frame(table.totals[,2],c(1:5), table.totals[,3:5], table.unique[,-1], rowSums(table.unique[,-1]))
+colnames(table3)=c("Tissue", "Sample Size", "Tested Trios", "Cis-Gene Mediation Trios", "Trans-Gene Mediation Trios", "Unique Cis", "Unique Trans", "Unique Both", "Unique Total")
+table3$`Sample Size`=c(581, 584, 706, 605, 670)
+table3$Tissue=c("AdiposeSubcutaneous", "ArteryTibial", "MuscleSkeletal", "SunExposedSkin", "WholeBlood")
 kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersection of the columns \"Total Cis Mediated\" and \"Total Trans Mediated\" ")
 
 
@@ -196,9 +197,9 @@ sim2=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/m
 sim3=rbind.data.frame(sim,sim2)
 
 
-sim$alternative=(sim$het+2*sim$ha)/(2*rowSums(sim[,36:38]))
-sim$reference=1-sim$alternative
-genotypes=sim[,36:38]/rowSums(sim[,36:38])
+sim3$alternative=(sim3$het+2*sim3$ha)/(2*rowSums(sim3[,36:38]))
+sim3$reference=1-sim3$alternative
+genotypes=sim3[,36:38]/rowSums(sim3[,36:38])
 
 #floor variables
 

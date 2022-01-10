@@ -44,7 +44,7 @@ File Usage and Data Assembly:
 
 GMAC Settings:
 
-*GMAC was run on all 5 tissues using first 50 permutations (nperm = 50) and later 500 (as the algorithm is slow for such a large data set). 
+*GMAC was run on all 5 tissues using first 50 permutations (nperm = 50) and later 10000 (as the algorithm is slow for such a large data set). 
 *The return p-values were the nomial p-values (nominal.p = TRUE)
 *fdr_filter which is the fdr threshold at which common child and intermediate variables are filtered left default value (fdr_filter=0.1)
 *fdr which is the fdr rate used to select confounders was left at default (fdr=0.05)
@@ -60,7 +60,8 @@ Post-Processing Results:
 1. GMAC outputs 2 sets of p-values for the mediation test (1) the p-value considering only known confounders and (2) the p-value adjusted for known and 
    selected covariates (adjusted for any/all selected PC's) we used only the latter
 
-2. The rate of type 1 errors for the p-values retained in (1.) was controlled using an FDR of 10% and the resulting q-values were returned
+2. The rate of type 1 errors for the p-values retained in (1.) was controlled using an FDR of 10% (Yang et al., 2020 reports a 5% FDR control in Table 1.)
+   and the resulting q-values were returned
    (i.e the function run.postproc() in GMACpostproc.R)
 
 3. based on the q-values, the number of remaining significant tests were counted and the significant trios were kept and non-significant removed.

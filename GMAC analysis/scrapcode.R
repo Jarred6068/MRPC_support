@@ -32,16 +32,13 @@ MRPC.fit.FDR.addis <- MRPC(test.data,
 
 as(MRPC.fit.FDR.addis@graph, "matrix")[1:3,1:3]
 
+Lond2Addis.lookup(trio.index=54, tissue.name="AdiposeSubcutaneous", with.pc=TRUE)
 
-Lond2Addis.lookup(trio.index=9711, tissue.name="AdiposeSubcutaneous", with.pc=TRUE)
-
-list.data=cross.regress(tissue="WholeBlood", trio.ind=30, mod.type="both", addis.pcs=NULL)
+list.data=cross.regress(tissue="AdiposeSubcutaneous", trio.ind=54, mod.type="both", addis.pcs=NULL)
 
 run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=FALSE, filename=NULL, Alg="GMAC", med.type="Trans.Med")
 
-
-fname1=paste0("/mnt/ceph/jarredk/GMACanalysis/GMAC.permutedREG.trio",
-              8112,".png")
+fname1=paste0("/mnt/ceph/jarredk/GMACanalysis/GMAC.permutedREG.trio", 8112,".png")
 start.t=Sys.time()
 out.permreg=run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=F, filename=fname1)
 end.t=Sys.time()
@@ -439,7 +436,7 @@ run.permuted.reg(trio=list.data$GMAC, nperms=1000, plot=FALSE, filename=NULL, Al
 
 
 
-
+#code to run multiple simulations to check the stability of the analysis
 
 #load in needed stuff
 sim=read.csv(file="/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_WB.csv", header = T)
@@ -448,25 +445,30 @@ source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 tissue="WholeBlood"
 l1=cross.analyze(tissues=tissue, save=FALSE)
 #pull out trios which were no longer significant after the GSS simulation 
-trios=sim$Trio.Num[sim$Nominal.p.GSS>0.05][1:5]
-mod.type.vec=sim$Med.type[sim$Nominal.p.GSS>0.05][1:5]
-# trios=sim$Trio.Num[sim$Nominal.p.GSS<0.05]
-# mod.type.vec=sim$Med.type[sim$Nominal.p.GSS<0.05]
+#trios=sim$Trio.Num[sim$Nominal.p.GSS>0.05][1:5]
+#mod.type.vec=sim$Med.type[sim$Nominal.p.GSS>0.05][1:5]
+trios = sim$Trio.Num
+mod.type.vec = sim$Med.type
 
+ss=1000
+storage1=vector("list", length = length(trios))
+plot.it=FALSE
+STM.median.p=NULL
+LTM.median.p=NULL
+TGM.median.p=NULL
+GSS.median.p=NULL
 
-
-for(i in 1:length(trios)){
-  
-  #testing GSS code
+for(i in 1:5){
   
   
+  print(paste0("getting data for trio # ", trios[i]))
   if(mod.type.vec[i]=="Both"){
     
     list.data=cross.regress(tissue=tissue, 
-                            trio.ind=trios[i], 
+                            trio.ind=356, 
                             mod.type="cis", 
                             #addis.pcs=addis.pcs, 
-                            verbose = FALSE)
+                            verbose = TRUE)
     
   }else if(mod.type.vec[i]=="Cis.Med"){
     
@@ -484,68 +486,77 @@ for(i in 1:length(trios)){
                             verbose = FALSE)
     
   }
+  print("...done...")
   
-  #print(list.data$GMAC[1:5,1:5])
-  p1=NULL
-  p2=NULL
-  p3=NULL
+  p1=as.data.frame(matrix(0, nrow = ss, ncol = 4))
+  b1=as.data.frame(matrix(0, nrow = ss, ncol = 4))
+  colnames(p1)=c("simu1.p", "simu2.p", "simu3.p", "simu4.p")
+  colnames(b1)=c("simu1.b", "simu2.b", "simu3.b", "simu4.b")
   
-  for(j in 1:100){
-  
+  print(paste0("running all simulations for trio # ", trios[i]))
+  for(j in 1:ss){
+    
+    
+    out=simu1(list.data$GMAC, alpha = 0.001, mod.type=mod.type.vec[i], verbose=F)
+    nn=floor(runif(1, 1, 20))
+    #print(nn)
+    out2=simu2(tissue = tissue, data=list.data$GMAC, mod.type=mod.type.vec[i], n=nn, verbose=F)
+    out3=simu3(MRPC.data=list.data$addis, GMAC.data=list.data$GMAC, mod.type=mod.type.vec[i], verbose=F)
     out4=simu4(GMAC.data=list.data$GMAC, mod.type=mod.type.vec[i], verbose=F)
-    #print(out4$sim.data[1:5,1:5])
-    #print(out4$sim.data[1:5,1:5])
-    #print(list.data$GMAC[1:5,1:5])
-    #print(out4$pvalue)
-    #print(out4$b.coef)
-    p1[j]=out4$pvalue
 
-    perm6=run.permuted.reg(out4$sim.data, nperms=1000, Alg="GMAC", med.type = mod.type.vec[i])
-    #print(perm6$nominal.p)
-    #print(perm6$p.value)
-    p2[j]=perm6$p.value
-    p3[j]=perm6$nominal.p
+    p1[j,1] = out$pvalue
+    p1[j,2] = out2$pvalue
+    p1[j,3] = out3$pvalue
+    p1[j,4] = out4$pvalue
+    
+    b1[j,1] = out$b.coef
+    b1[j,2] = out2$b.coef
+    b1[j,3] = out3$b.coef
+    b1[j,4] = out4$b.coef
+
   }
+  print("...done!")
   
-  png(paste0("/mnt/ceph/jarredk/GMACanalysis/Unstable_trios_plots/plot_", tissue, "_", trios[i], "_",mod.type.vec[i], ".png"))
-  plot(p1, p3, pch=21, bg="black",
-       xlab="Simulated Para. P-value",
-       ylab="Simulated Nominal P-value",
-       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
-  abline(a=0, b=1, lty="dotted", col="red")
-  dev.off()
+  STM.median.p[i] = median(p1$simu1.p)
+  LTM.median.p[i] = median(p1$simu2.p)
+  TGM.median.p[i] = median(p1$simu3.p)
+  GSS.median.p[i] = median(p1$simu4.p)
   
-  png(paste0("/mnt/ceph/jarredk/GMACanalysis/Unstable_trios_plots/histogram_", tissue, "_", trios[i], "_",mod.type.vec[i], ".png"))
-  par(mfrow=c(2,2))
-  hist(p1, xlab="Simulated Para. P-value",
-       ylab="Simulated Nominal P-value",
-       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
-  hist(p2,
-       xlab="Simulated Para. P-value",
-       ylab="Simulated Nominal P-value",
-       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
-  hist(p3,
-       xlab="Simulated Para. P-value",
-       ylab="Simulated Nominal P-value",
-       main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
-  dev.off()
   
+  storage1[[i]] = cbind.data.frame(p1, b1)
+  
+  
+  if(plot.it==TRUE){
+    png(paste0("/mnt/ceph/jarredk/GMACanalysis/Unstable_trios_plots/plot_", tissue, "_", trios[i], "_",mod.type.vec[i], ".png"))
+    plot(p1, p3, pch=21, bg="black",
+         xlab="Simulated Para. P-value",
+         ylab="Simulated Nominal P-value",
+         main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+    abline(a=0, b=1, lty="dotted", col="red")
+    dev.off()
+  
+    png(paste0("/mnt/ceph/jarredk/GMACanalysis/Unstable_trios_plots/histogram_", tissue, "_", trios[i], "_",mod.type.vec[i], ".png"))
+    par(mfrow=c(2,2))
+    hist(p1, xlab="Simulated Para. P-value",
+         ylab="Simulated Nominal P-value",
+         main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+    hist(p2,
+         xlab="Simulated Para. P-value",
+         ylab="Simulated Nominal P-value",
+         main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+    hist(p3,
+         xlab="Simulated Para. P-value",
+         ylab="Simulated Nominal P-value",
+         main = paste0("GSS 1000 simulations of trio = ", trios[i], ";", tissue ))
+    dev.off()
+  }
 }
 
 
-i=1
+sim.new=cbind.data.frame(sim, STM.median.p, LTM.median.p, TGM.median.p, GSS.median.p)
 
-list.data=cross.regress(tissue=tissue, 
-                        trio.ind=trios[2], 
-                        mod.type="cis", 
-                        #addis.pcs=addis.pcs, 
-                        verbose = T)
-
-p=NULL
-b=NULL
-for(i in 1:100){out4=simu4(GMAC.data=list.data$GMAC, mod.type=mod.type.vec[1], verbose=T);p[i]=out4$pvalue;b[i]=round(out4$b.coef,6)}
-
-
+save(storage1, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/multi_sim_data.RData")
+write.csv(sim.new, file = "/mnt/ceph/jarredk/GMACanalysis/master_tables/TRIOS_imbalanced_genotypes_WB_Updated_12_10_2021.csv")
 
 
 

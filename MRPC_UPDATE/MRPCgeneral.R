@@ -3,6 +3,20 @@ source("/mnt/ceph/jarredk/HiC_Analyses/HiC_search.R")
 library('ppcor', lib="/mnt/ceph/jarredk/Rpackages")
 library('psych', lib="/mnt/ceph/jarredk/Rpackages")
 
+
+#define the model cases by regression results:
+
+M0=rbind.data.frame(c(0,1,0,0, "Yes"), c(0,0,1,0, "No"))
+M1=c(1,1,1,0, "No")
+M2=c(1,1,1,1, "Yes")
+M3=c(0,1,0,1, "Yes")
+M4=c(1,1,1,1, "No")
+
+cases=rbind.data.frame(M0,M1,M2,M3,M4)
+row.names(cases)=c("M0.1","M0.2","M1","M2","M3","M4")
+colnames(cases)=c("b11","b12","b21", "b22", "Cor.V.T2")
+
+
 #-----------------------Helper-function-To-Get-Variant-Frequency---------------------
 
 get.freq=function(V=NULL, type=c("eQTL", "CNV", "Other")){
@@ -10,7 +24,7 @@ get.freq=function(V=NULL, type=c("eQTL", "CNV", "Other")){
   #remove missing values
   V=na.omit(V)
   
-  if(type="eQTL"){
+  if(type=="eQTL"){
     if(length(unique(V))>2){
       
       #get the genotype counts
@@ -66,7 +80,7 @@ get.freq=function(V=NULL, type=c("eQTL", "CNV", "Other")){
 help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
   
   #permute
-  if(med.type=="cis"){
+  if(med.type=="T1"){
     
     data[,2]=data[,2][perm.map]
     
@@ -78,7 +92,7 @@ help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
   
   
   #run regression
-  if(med.type=="cis"){
+  if(med.type=="T1"){
     
     coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
     wald.stat=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
@@ -103,46 +117,60 @@ help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
 
 #-----------------------Permuted-Regression-function----------------------
 
-permuted.reg=function(data=NULL, nperms=1000, med.type=c("T1","T2")){
+#runs both T1 as mediator and T2 as mediator and reports cor(V,T2)
+permuted.reg=function(data=NULL, nperms=1000, return.indicator=FALSE, alpha=0.05){
   
   #allocation of space
+  result=NULL
   wald.stat=NULL
+  med.type=c("T1","T2")
   mediator_perm=matrix(c(1:dim(data)[1]), nrow=dim(data)[1], ncol = nperms)
   
-  #get obs. wald statistic
-  if(med.type=="T1"){
-    
-    coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
-    test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
-    var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
-    
-  }else{
-    
-    coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
-    test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
-    var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
-    
-  }
+  for(i in 1:2){
   
-  
-  #preallocate all permutations
-  for (j in 0:2) {
-    ind <- which(data[,1] == j)
-    if (length(ind) > 1) {
-      mediator_perm[ind, ] <- apply(mediator_perm[ind, ], 2, sample)
+    #get obs. wald statistic
+    if(med.type[i]=="T1"){
+    
+      coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
+      test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
+      var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
+    
+    }else{
+    
+      coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
+      test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
+      var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
+    
     }
+  
+  
+    #preallocate all permutations
+    for (j in 0:2) {
+      ind <- which(data[,1] == j)
+      if (length(ind) > 1) {
+        mediator_perm[ind, ] <- apply(mediator_perm[ind, ], 2, sample)
+      }
+    }
+  
+    #apply permutation regression
+    wald.stat=apply(mediator_perm, 2, help.fn1, data=data, med.type=med.type[i])
+    
+    
+    #p.value=2*min(sum(wald.stat<test.wald)/length(wald.stat),sum(wald.stat>test.wald)/length(wald.stat) )
+  
+    nominal.p.value=2 * (1 - pnorm(abs((test.wald - mean(wald.stat))/sd(wald.stat))))
+    
+    X=c(nominal.p.value, var.p)
+    result=c(result, X)
   }
   
-  #apply permutation regression
-  wald.stat=apply(mediator_perm, 2, help.fn1, data=data, med.type=med.type)
-  
-  
-  #p.value=2*min(sum(wald.stat<test.wald)/length(wald.stat),sum(wald.stat>test.wald)/length(wald.stat) )
-  
-  nominal.p.value=2 * (1 - pnorm(abs((test.wald - mean(wald.stat))/sd(wald.stat))))
-  
-  
-  return(list(nominal.p=nominal.p.value, variant.p=var.p))
+  ct=corr.test(data, use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
+  result=c(result, ct$p[1,3])
+  names(result)=c("T1.med", "T1.V", "T2.med", "T2.V", "Cor.V.T2")
+  if(return.indicator==TRUE){
+    result=replace(result, result<alpha, 1)
+  }
+  return(list(X=result, trio.name=colnames(data)))
   
 }
 
@@ -152,7 +180,7 @@ permuted.reg=function(data=NULL, nperms=1000, med.type=c("T1","T2")){
 allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL){
   
   #preallocate list
-  trio.list=vector('list', length = length(combs))
+  trio.list=vector('list', length = dim(combs)[2])
   
   if(with.variant==TRUE){
     
@@ -160,7 +188,7 @@ allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL){
       
       #create n x 3 dataframes for each trio formed with the variant
       trio.list[[i]] = cbind.data.frame(V, data[,combs[1,i]], data[,combs[2,i]])
-      
+      colnames(trio.list[[i]])=c("V", names(data[,combs[1:2,i]]))
     }
     
   }else{
@@ -169,6 +197,7 @@ allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL){
       
       #create n x 3 dfs for each trio of nodes only
       trio.list[[i]] = cbind.data.frame(data[,combs[1,i]], data[,combs[2,i]], data[,combs[3,i]])
+      colnames(trio.list[[i]])=c(colnames(data[,combs[1:3,i]]))
       
     }
     
@@ -188,12 +217,18 @@ get.skel=function(V=NULL, data=NULL, U=NULL, p=NULL){
   
   #merge all variables
   X=cbind.data.frame(V,data,U)
+  if(sum(is.na(X))>0){
+   X=na.omit(X)
+   message("NA's detected in get.skel()...removing")
+  }
   #get partial correlations obj
   H=pcor(X)$p.value
   #acquire adjacency based on pcor.test pvalues
-  A=replace(H[,1:p], H[,1:p]<0.05, 1)
+  A=replace(H, H<0.05, 1)[1:p,1:p]
+  B=replace(A, A!=1, 0)
+  diag(B)=0
   
-  return(A)
+  return(B)
   
 }
 
@@ -219,23 +254,19 @@ MRPC.update=function(V=NULL, data=NULL, U=NULL, gamma=0.05, m=1000, variant.type
                                             with.variant=TRUE, 
                                             V=V)
   
-  trio.list.with.variant=allocate.all.trios(data=data, 
-                                            combs=combs.Tnodes, 
-                                            with.variant=TRUE, 
-                                            V=V)
+  trio.list.wo.variant=allocate.all.trios(data=data, 
+                                          combs=combs.Tnodes, 
+                                          with.variant=FALSE, 
+                                          V=V)
   
   #get the graph skeleton
-  A=get.skel(V=V, data=data, U=U)
+  A=get.skel(V=V, data=data, U=U, p=p)
   #calculate minor variant frequency
   variant.freq=get.freq(V=V, type=variant.type)
   
   if(variant.freq<gamma){
     
-    out.coeffs.T1=lapply(trio.list.with.variant, permuted.reg, nperms=m, med.type="T1")
-    out.coeffs.T2=lapply(trio.list.with.variant, permuted.reg, nperms=m, med.type="T2")
-    
-  }else{
-    
+    out.coeffs=lapply(trio.list.with.variant, permuted.reg, nperms=m, return.indicator=TRUE)
     
   }
   

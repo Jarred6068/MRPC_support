@@ -169,6 +169,7 @@ permuted.reg=function(data=NULL, nperms=1000, return.indicator=FALSE, alpha=0.05
   names(result)=c("T1.med", "T1.V", "T2.med", "T2.V", "Cor.V.T2")
   if(return.indicator==TRUE){
     result=replace(result, result<alpha, 1)
+    result=replace(result, result!=1, 0)
   }
   return(list(X=result, trio.name=colnames(data)))
   
@@ -177,7 +178,7 @@ permuted.reg=function(data=NULL, nperms=1000, return.indicator=FALSE, alpha=0.05
 
 #-------------------------Helper-fn-to-get-all-combinations-of-trios---------------------
 
-allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL){
+allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL, U=NULL){
   
   #preallocate list
   trio.list=vector('list', length = dim(combs)[2])
@@ -187,8 +188,8 @@ allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL){
     for(i in 1:length(trio.list)){
       
       #create n x 3 dataframes for each trio formed with the variant
-      trio.list[[i]] = cbind.data.frame(V, data[,combs[1,i]], data[,combs[2,i]])
-      colnames(trio.list[[i]])=c("V", names(data[,combs[1:2,i]]))
+      trio.list[[i]] = cbind.data.frame(V, data[,combs[1,i]], data[,combs[2,i]], U)
+      colnames(trio.list[[i]])=c("V", names(data[,combs[1:2,i]]), colnames(U))
     }
     
   }else{
@@ -196,8 +197,8 @@ allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL){
     for(i in 1:length(trio.list)){
       
       #create n x 3 dfs for each trio of nodes only
-      trio.list[[i]] = cbind.data.frame(data[,combs[1,i]], data[,combs[2,i]], data[,combs[3,i]])
-      colnames(trio.list[[i]])=c(colnames(data[,combs[1:3,i]]))
+      trio.list[[i]] = cbind.data.frame(data[,combs[1,i]], data[,combs[2,i]], data[,combs[3,i]], U)
+      colnames(trio.list[[i]])=c(colnames(data[,combs[1:3,i]]), colnames(U))
       
     }
     
@@ -213,12 +214,10 @@ allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL){
 
 #--------------------------Function-to-get-graph-skeleton--------------------------------
 
-get.skel=function(V=NULL, data=NULL, U=NULL, p=NULL){
+get.skel=function(data=NULL, p=NULL){
   
-  #merge all variables
-  X=cbind.data.frame(V,data,U)
-  if(sum(is.na(X))>0){
-   X=na.omit(X)
+  if(sum(is.na(data))>0){
+   X=na.omit(data)
    message("NA's detected in get.skel()...removing")
   }
   #get partial correlations obj
@@ -231,6 +230,13 @@ get.skel=function(V=NULL, data=NULL, U=NULL, p=NULL){
   return(B)
   
 }
+
+
+
+#----------------------Function-for-standard-regression--------------------
+#for the alternative case when the minor variant is not "rare" and for all
+#trios not including the variant
+
 
 
 #------------------------wrapper-function---------------------------
@@ -252,21 +258,27 @@ MRPC.update=function(V=NULL, data=NULL, U=NULL, gamma=0.05, m=1000, variant.type
   trio.list.with.variant=allocate.all.trios(data=data, 
                                             combs=combs.with.variant, 
                                             with.variant=TRUE, 
-                                            V=V)
+                                            V=V,
+                                            U=U)
   
   trio.list.wo.variant=allocate.all.trios(data=data, 
                                           combs=combs.Tnodes, 
                                           with.variant=FALSE, 
-                                          V=V)
+                                          V=V,
+                                          U=U)
   
   #get the graph skeleton
-  A=get.skel(V=V, data=data, U=U, p=p)
+  A=get.skel(data=cbind.data.frame(V,data,U), p=p)
   #calculate minor variant frequency
   variant.freq=get.freq(V=V, type=variant.type)
   
   if(variant.freq<gamma){
     
     out.coeffs=lapply(trio.list.with.variant, permuted.reg, nperms=m, return.indicator=TRUE)
+    
+  }else{
+    
+    
     
   }
   

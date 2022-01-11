@@ -112,7 +112,31 @@ help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
 }
 
 
+#------------------------Helper-fn2-Regression----------------------------
 
+do.reg=function(data=NULL, med.type=c("T1","T2")){
+  
+    #get obs. wald statistic
+  if(med.type[i]=="T1"){
+      
+    coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
+    test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
+    wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[2])]
+    var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
+      
+  }else{
+      
+    coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
+    test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
+    wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[3])]
+    var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
+      
+  }
+  
+  
+  return(list(coef.mat=coef.mat, test.wald=test.wald, wald.p=wald.p, var.p=var.p))
+  
+}
 
 
 #-----------------------Permuted-Regression-function----------------------
@@ -123,29 +147,32 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
   #allocation of space
   result=NULL
   wald.stat=NULL
-  med.type=c("T1","T2")
   mediator_perm=matrix(c(1:dim(data)[1]), nrow=dim(data)[1], ncol = nperms)
+
   
-  for(i in 1:2){
-  
-    #get obs. wald statistic
-    if(med.type[i]=="T1"){
+  if(permuted==FALSE){
     
-      coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
-      test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
-      wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[2])]
-      var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
+    #preform standard regressions
+    T1.med=do.reg(data=data, med.type = "T1")
+    T2.med=do.reg(data=data, med.type = "T2")
     
-    }else{
+    ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
+    result=c(T1.med$wald.p, T1.med$var.p, T2.med$wald.p, T2.med$var.p, ct$p[1,3])
+    names(result)=c("T1.med", "T1.V", "T2.med", "T2.V", "Cor.V.T2")
     
-      coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
-      test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
-      wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[3])]
-      var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
-    
+    #returns indicator values for significant tests
+    if(return.indicator==TRUE){
+      result=replace(result, result<alpha, 1)
+      result=replace(result, result!=1, 0)
     }
-  
-  
+    
+    return(list(X=result, trio.name=colnames(data[,1:3])))
+    
+  }else{
+      
+    T1.med=do.reg(data=data, med.type = "T1")
+    T2.med=do.reg(data=data, med.type = "T2")
+      
     #preallocate all permutations
     for (j in 0:2) {
       ind <- which(data[,1] == j)
@@ -153,27 +180,29 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
         mediator_perm[ind, ] <- apply(mediator_perm[ind, ], 2, sample)
       }
     }
-  
+      
     #apply permutation regression
-    wald.stat=apply(mediator_perm, 2, help.fn1, data=data, med.type=med.type[i])
-    
-    
+    wald.stat.T1=apply(mediator_perm, 2, help.fn1, data=data, med.type="T1")
+    wald.stat.T2=apply(mediator_perm, 2, help.fn1, data=data, med.type="T2")
+      
+      
     #p.value=2*min(sum(wald.stat<test.wald)/length(wald.stat),sum(wald.stat>test.wald)/length(wald.stat) )
-  
-    nominal.p.value=2 * (1 - pnorm(abs((test.wald - mean(wald.stat))/sd(wald.stat))))
+    nominal.p.value.T1=2 * (1 - pnorm(abs((T1.med$test.wald - mean(wald.stat.T1))/sd(wald.stat.T2))))
+    nominal.p.value.T2=2 * (1 - pnorm(abs((T2.med$test.wald - mean(wald.stat.T2))/sd(wald.stat.T2))))
     
-    X=c(nominal.p.value, var.p)
-    result=c(result, X)
+    ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
+    result=c(nominal.p.value.T1, T1.med$var.p, nominal.p.value.T2, T2.med$var.p, ct$p[1,3])
+    names(result)=c("T1.med", "T1.V", "T2.med", "T2.V", "Cor.V.T2")
+    
+    #returns indicator values for significant tests
+    if(return.indicator==TRUE){
+      result=replace(result, result<alpha, 1)
+      result=replace(result, result!=1, 0)
+    }
+    
+    return(list(X=result, trio.name=colnames(data[,1:3])))
+    
   }
-  
-  ct=corr.test(data, use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
-  result=c(result, ct$p[1,3])
-  names(result)=c("T1.med", "T1.V", "T2.med", "T2.V", "Cor.V.T2")
-  if(return.indicator==TRUE){
-    result=replace(result, result<alpha, 1)
-    result=replace(result, result!=1, 0)
-  }
-  return(list(X=result, trio.name=colnames(data)))
   
 }
 

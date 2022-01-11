@@ -118,7 +118,7 @@ help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
 #-----------------------Permuted-Regression-function----------------------
 
 #runs both T1 as mediator and T2 as mediator and reports cor(V,T2)
-permuted.reg=function(data=NULL, nperms=1000, return.indicator=FALSE, alpha=0.05){
+reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicator=FALSE, alpha=0.05){
   
   #allocation of space
   result=NULL
@@ -133,12 +133,14 @@ permuted.reg=function(data=NULL, nperms=1000, return.indicator=FALSE, alpha=0.05
     
       coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
       test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
+      wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[2])]
       var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
     
     }else{
     
       coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
       test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
+      wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[3])]
       var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
     
     }
@@ -236,7 +238,23 @@ get.skel=function(data=NULL, p=NULL){
 #----------------------Function-for-standard-regression--------------------
 #for the alternative case when the minor variant is not "rare" and for all
 #trios not including the variant
-
+standard.reg=function(data=NULL, with.variant=FALSE, return.indicator=FALSE, alpha=0.05){
+  
+  med.type=c("T1","T2","T3")
+  
+  if(with.variant==TRUE){
+    
+    for(i in 1:2){
+      
+      
+    }
+    
+  }else{
+    
+    
+  }
+  
+}
 
 
 #------------------------wrapper-function---------------------------

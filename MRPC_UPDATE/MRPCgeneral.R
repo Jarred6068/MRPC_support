@@ -66,10 +66,10 @@ get.freq=function(V=NULL, type=c("eQTL", "CNV", "Other")){
 #-----------------------Helper-function-for-permuted.reg----------------------
 
 
-help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
+help.fn1=function(perm.map=NULL, data=NULL, response=NULL){
   
   #permute
-  if(med.type=="T1"){
+  if(response=="T2"){
     
     data[,2]=data[,2][perm.map]
     
@@ -81,7 +81,7 @@ help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
   
   
   #run regression
-  if(med.type=="T1"){
+  if(response=="T2"){
     
     coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
     wald.stat=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
@@ -103,10 +103,10 @@ help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
 
 #------------------------Helper-fn2-Regression----------------------------
 
-do.reg=function(data=NULL, med.type=c("T1","T2")){
+do.reg=function(data=NULL, response=c("T1","T2")){
   
     #get obs. wald statistic
-  if(med.type=="T1"){
+  if(response=="T2"){
       
     coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
     test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
@@ -142,12 +142,13 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
   if(permuted==FALSE){
     
     #preform standard regressions
-    T1.med=do.reg(data=data, med.type = "T1")
-    T2.med=do.reg(data=data, med.type = "T2")
+    T1.resp=do.reg(data=data, response = "T1")
+    T2.resp=do.reg(data=data, response = "T2")
     
+    #get the marginal result for V_i and T_j
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
-    result=c(T1.med$wald.p, T1.med$var.p, T2.med$wald.p, T2.med$var.p, ct$p[1,3])
-    names(result)=c("B22", "B12", "B21", "B11", "V indep T2")
+    result=c(T1.resp$var.p, T1.resp$wald.p, T2.resp$var.p, T2.resp$wald.p, ct$p[1,3])
+    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.not.indep.T2")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){
@@ -158,9 +159,9 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
     return(list(X=result, trio.name=colnames(data[,1:3])))
     
   }else{
-      
-    T1.med=do.reg(data=data, med.type = "T1")
-    T2.med=do.reg(data=data, med.type = "T2")
+    #preform regressions on trios w/ variant and with permutation
+    T1.resp=do.reg(data=data, response = "T1")
+    T2.resp=do.reg(data=data, response = "T2")
       
     #preallocate all permutations
     for (j in 0:2) {
@@ -171,17 +172,17 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
     }
       
     #apply permutation regression
-    wald.stat.T1=apply(mediator_perm, 2, help.fn1, data=data, med.type="T1")
-    wald.stat.T2=apply(mediator_perm, 2, help.fn1, data=data, med.type="T2")
+    wald.stat.T1.resp=apply(mediator_perm, 2, help.fn1, data=data, response="T1")
+    wald.stat.T2.resp=apply(mediator_perm, 2, help.fn1, data=data, response="T2")
       
       
     #p.value=2*min(sum(wald.stat<test.wald)/length(wald.stat),sum(wald.stat>test.wald)/length(wald.stat) )
-    nominal.p.value.T1=2 * (1 - pnorm(abs((T1.med$test.wald - mean(wald.stat.T1))/sd(wald.stat.T2))))
-    nominal.p.value.T2=2 * (1 - pnorm(abs((T2.med$test.wald - mean(wald.stat.T2))/sd(wald.stat.T2))))
+    nominal.p.value.T1.resp=2 * (1 - pnorm(abs((T1.med$test.wald - mean(wald.stat.T1))/sd(wald.stat.T2))))
+    nominal.p.value.T2.resp=2 * (1 - pnorm(abs((T2.med$test.wald - mean(wald.stat.T2))/sd(wald.stat.T2))))
     
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
-    result=c(nominal.p.value.T1, T1.med$var.p, nominal.p.value.T2, T2.med$var.p, ct$p[1,3])
-    names(result)=c("B22", "B12", "B21", "B11", "V indep T2")
+    result=c(T1.resp$var.p, nominal.p.value.T1.resp, T2.resp$var.p, nominal.p.value.T2.resp, ct$p[1,3])
+    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.not.indep.T2")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){
@@ -250,9 +251,11 @@ get.skel=function(data=NULL, p=NULL){
   if(sum(is.na(data))>0){
    X=na.omit(data)
    message("NA's detected in get.skel()...removing")
+   #get partial correlations obj
+   H=pcor(X)$p.value
   }
-  #get partial correlations obj
-  H=pcor(X)$p.value
+  
+  H=pcor(data)$p.value
   #acquire adjacency based on pcor.test pvalues
   A=replace(H, H<0.05, 1)[1:p,1:p]
   B=replace(A, A!=1, 0)

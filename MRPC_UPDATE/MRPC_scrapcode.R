@@ -58,9 +58,9 @@ for (m in 1:(dim(PCs)[1]-1)) {
   Significant.asso <- qobj$significant
   List.significant.asso1[[m]] <- which(Significant.asso,useNames = TRUE)
 }
-
+variant.type="eQTL"
 V=XX[,1]
-data=XX[,-1]
+data=as.data.frame(XX[,-1])
 U=NULL
 
 

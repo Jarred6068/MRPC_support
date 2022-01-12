@@ -148,7 +148,7 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
     #get the marginal result for V_i and T_j
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
     result=c(T1.resp$var.p, T1.resp$wald.p, T2.resp$var.p, T2.resp$wald.p, ct$p[1,3])
-    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.not.indep.T2")
+    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.dep.T2")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){
@@ -182,7 +182,7 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
     
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
     result=c(T1.resp$var.p, nominal.p.value.T1.resp, T2.resp$var.p, nominal.p.value.T2.resp, ct$p[1,3])
-    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.not.indep.T2")
+    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.dep.T2")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){
@@ -440,7 +440,7 @@ MRPC.update=function(V=NULL, data=NULL, U=NULL, gamma=0.05, m=1000, variant.type
     
   }else{
     
-    out.coeffs=lapply(trio.list.with.variant, reg.with.variant, permuted=FALSE, nperms=m, return.indicator=TRUE)
+    out.coeffs=lapply(trio.list.with.variant, reg.with.variant, permuted=FALSE, return.indicator=TRUE)
     out.coeffs2=lapply(trio.list.wo.variant, reg.without.variant, return.indicator = TRUE, alpha = 0.05)
     
   }

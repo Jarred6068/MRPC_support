@@ -4,17 +4,6 @@ library('ppcor', lib="/mnt/ceph/jarredk/Rpackages")
 library('psych', lib="/mnt/ceph/jarredk/Rpackages")
 
 
-#define the model cases by regression results:
-
-M0=rbind.data.frame(c(0,1,0,0, "Yes"), c(0,0,1,0, "No"))
-M1=c(1,1,1,0, "No")
-M2=c(1,1,1,1, "Yes")
-M3=c(0,1,0,1, "Yes")
-M4=c(1,1,1,1, "No")
-
-cases=rbind.data.frame(M0,M1,M2,M3,M4)
-row.names(cases)=c("M0.1","M0.2","M1","M2","M3","M4")
-colnames(cases)=c("b11","b12","b21", "b22", "Cor.V.T2")
 
 
 #-----------------------Helper-function-To-Get-Variant-Frequency---------------------
@@ -117,7 +106,7 @@ help.fn1=function(perm.map=NULL, data=NULL, med.type=NULL){
 do.reg=function(data=NULL, med.type=c("T1","T2")){
   
     #get obs. wald statistic
-  if(med.type[i]=="T1"){
+  if(med.type=="T1"){
       
     coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
     test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
@@ -158,7 +147,7 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
     
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
     result=c(T1.med$wald.p, T1.med$var.p, T2.med$wald.p, T2.med$var.p, ct$p[1,3])
-    names(result)=c("T1.med", "T1.V", "T2.med", "T2.V", "Cor.V.T2")
+    names(result)=c("B22", "B12", "B21", "B11", "V indep T2")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){
@@ -192,7 +181,7 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
     
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
     result=c(nominal.p.value.T1, T1.med$var.p, nominal.p.value.T2, T2.med$var.p, ct$p[1,3])
-    names(result)=c("T1.med", "T1.V", "T2.med", "T2.V", "Cor.V.T2")
+    names(result)=c("B22", "B12", "B21", "B11", "V indep T2")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){
@@ -219,8 +208,14 @@ allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL, U=
     for(i in 1:length(trio.list)){
       
       #create n x 3 dataframes for each trio formed with the variant
-      trio.list[[i]] = cbind.data.frame(V, data[,combs[1,i]], data[,combs[2,i]], U)
-      colnames(trio.list[[i]])=c("V", names(data[,combs[1:2,i]]), colnames(U))
+      if(is.null(U)){
+        trio.list[[i]] = cbind.data.frame(V, data[,combs[1,i]], data[,combs[2,i]])
+        colnames(trio.list[[i]])=c("V", names(data[,combs[1:2,i]]))
+      }else{
+        trio.list[[i]] = cbind.data.frame(V, data[,combs[1,i]], data[,combs[2,i]], U)
+        colnames(trio.list[[i]])=c("V", names(data[,combs[1:2,i]]), colnames(U))
+      }
+      
     }
     
   }else{
@@ -228,8 +223,13 @@ allocate.all.trios=function(data=NULL, combs=NULL, with.variant=TRUE, V=NULL, U=
     for(i in 1:length(trio.list)){
       
       #create n x 3 dfs for each trio of nodes only
-      trio.list[[i]] = cbind.data.frame(data[,combs[1,i]], data[,combs[2,i]], data[,combs[3,i]], U)
-      colnames(trio.list[[i]])=c(colnames(data[,combs[1:3,i]]), colnames(U))
+      if(is.null(U)){
+        trio.list[[i]] = cbind.data.frame(data[,combs[1,i]], data[,combs[2,i]], data[,combs[3,i]])
+        colnames(trio.list[[i]])=c(colnames(data[,combs[1:3,i]]))
+      }else{
+        trio.list[[i]] = cbind.data.frame(data[,combs[1,i]], data[,combs[2,i]], data[,combs[3,i]], U)
+        colnames(trio.list[[i]])=c(colnames(data[,combs[1:3,i]]), colnames(U))
+      }
       
     }
     
@@ -264,22 +264,128 @@ get.skel=function(data=NULL, p=NULL){
 
 
 
-#----------------------Function-for-standard-regression--------------------
+#--------------------------Helper-fn-for-reg.without.variant()---------------------
+do.reg.wo.var=function(data=NULL, response=c("T1","T2","T3"), return.indicator=FALSE, alpha=0.05){
+
+  
+  #get obs. wald statistic
+  if(response=="T1"){
+    
+    coef.mat=as.data.frame(summary(lm(data[,1]~., data=data[,-1]))$coefficients)
+    #test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
+    wald.p.T2=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[2])]
+    wald.p.T3=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[3])]
+    
+    wald.stats=c(wald.p.T2, wald.p.T3)
+    names(wald.stats)=c("wald.p.T2","wald.p.T3")
+    #returns indicator values for significant tests
+    if(return.indicator==TRUE){
+      wald.stats=replace(wald.stats, wald.stats<alpha, 1)
+      wald.stats=replace(wald.stats, wald.stats!=1, 0)
+    }
+    
+    return(list(coef.mat=coef.mat, pvalues=wald.stats))
+    
+  }else if(response=="T2"){
+    
+    coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
+    #test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
+    wald.p.T1=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
+    wald.p.T3=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[3])]
+    
+    wald.stats=c(wald.p.T1, wald.p.T3)
+    names(wald.stats)=c("wald.p.T1","wald.p.T3")
+    #returns indicator values for significant tests
+    if(return.indicator==TRUE){
+      wald.stats=replace(wald.stats, wald.stats<alpha, 1)
+      wald.stats=replace(wald.stats, wald.stats!=1, 0)
+    }
+    
+    return(list(coef.mat=coef.mat, pvalues=wald.stats))
+    
+  }else if(response=="T3"){
+    
+    coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
+    #test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
+    wald.p.T1=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
+    wald.p.T2=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[2])]
+    
+    wald.stats=c(wald.p.T1, wald.p.T2)
+    names(wald.stats)=c("wald.p.T1","wald.p.T2")
+    #returns indicator values for significant tests
+    if(return.indicator==TRUE){
+      wald.stats=replace(wald.stats, wald.stats<alpha, 1)
+      wald.stats=replace(wald.stats, wald.stats!=1, 0)
+    }
+    
+    return(list(coef.mat=coef.mat, pvalues=wald.stats))
+  }
+  
+}
+
+#----------------------Wrapper-Function-for-standard-regression--------------------
 #for the alternative case when the minor variant is not "rare" and for all
 #trios not including the variant
-standard.reg=function(data=NULL, with.variant=FALSE, return.indicator=FALSE, alpha=0.05){
+reg.without.variant=function(data=NULL, return.indicator = TRUE, alpha = 0.05){
   
-  med.type=c("T1","T2","T3")
+  A=as.data.frame(matrix(0, nrow = 3, ncol = 3))
+  row.names(A)=colnames(data[,1:3])
+  colnames(A)=colnames(data[,1:3])
   
-  if(with.variant==TRUE){
+  resp.T1=do.reg.wo.var(data=data, response="T1", return.indicator = TRUE, alpha = 0.05)
+  resp.T2=do.reg.wo.var(data=data, response="T2", return.indicator = TRUE, alpha = 0.05)
+  resp.T3=do.reg.wo.var(data=data, response="T3", return.indicator = TRUE, alpha = 0.05)
+  
+  A[1,2:3]=resp.T1$pvalues
+  A[2,1]=resp.T2$pvalues[1]
+  A[2,3]=resp.T2$pvalues[2]
+  A[3,1:2]=resp.T3$pvalues
+  
+  return(A)
+  
+}
+
+
+#------------------------------Classifying-Function-----------------------------------
+#a function which classifies each trio with a variant
+
+class.Vtrios=function(pvalues=NULL){
+  
+  #define the model cases by regression results:
+  
+  M0=rbind.data.frame(c(0,0,0,1,0), c(0,1,0,0,1))
+  M1=c(1,1,1,0,1)
+  M2=c(1,1,1,1,0)
+  M3=c(0,1,0,1,0)
+  M4=c(1,1,1,1,1)
+  
+  cases=rbind.data.frame(M0,M1,M2,M3,M4)
+  row.names(cases)=c("M0.1","M0.2","M1","M2","M3","M4")
+  colnames(cases)=c("b11","b12","b21", "b22", "Cor.V.T2")
+  
+  
+  if(all.equal(pvalues, M0[1,], check.attributes=FALSE)){
     
-    for(i in 1:2){
-      
-      
-    }
+    
+    
+  }else if(all.equal(pvalues, M0[2,], check.attributes=FALSE)){
+    
+    
+  }else if(all.equal(pvalues, M1, check.attributes=FALSE)){
+    
+    
+  }else if(all.equal(pvalues, M2, check.attributes=FALSE)){
+    
+    
+  }else if(all.equal(pvalues, M3, check.attributes=FALSE)){
+    
+    
+  }else if(all.equal(pvalues, M4, check.attributes=FALSE)){
+    
     
   }else{
     
+    return("No matching model types")
     
   }
   
@@ -315,17 +421,24 @@ MRPC.update=function(V=NULL, data=NULL, U=NULL, gamma=0.05, m=1000, variant.type
                                           U=U)
   
   #get the graph skeleton
-  A=get.skel(data=cbind.data.frame(V,data,U), p=p)
+  if(is.null(U)){
+    A=get.skel(data=cbind.data.frame(V,data), p=p)
+  }else{
+    A=get.skel(data=cbind.data.frame(V,data,U), p=p)
+  }
+  
   #calculate minor variant frequency
   variant.freq=get.freq(V=V, type=variant.type)
   
   if(variant.freq<gamma){
     
-    out.coeffs=lapply(trio.list.with.variant, permuted.reg, nperms=m, return.indicator=TRUE)
+    out.coeffs=lapply(trio.list.with.variant, reg.with.variant, permuted=TRUE, nperms=m, return.indicator=TRUE)
+    out.coeffs2=lapply(trio.list.wo.variant, reg.without.variant, return.indicator = TRUE, alpha = 0.05)
     
   }else{
     
-    
+    out.coeffs=lapply(trio.list.with.variant, reg.with.variant, permuted=FALSE, nperms=m, return.indicator=TRUE)
+    out.coeffs2=lapply(trio.list.wo.variant, reg.without.variant, return.indicator = TRUE, alpha = 0.05)
     
   }
   

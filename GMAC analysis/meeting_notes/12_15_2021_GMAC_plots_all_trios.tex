@@ -276,51 +276,27 @@ seen from \textbf{Table 2}, the consistency in inferred mediation edges
 between the two methods varied between \(39\%\) and \(50\%\) of the
 trios across tissues.
 
-To uncover the computational differences between MRPC and GMAC, we
-focused on trios with conflicting results between the two methods (trios
-inferred M0 or M3 under MRPC). The primary differences we observed
-between the two algorithms for these trios were that the inclusion of a
-larger set of confounding variables by GMAC often had the effect of
-strengthening the association between the cis and trans genes. That is,
-let \({\bf Z}_{ij}\) denote the set of confounding variables used under
-MRPC and \({\bf X}_{ij}\) the larger set used by GMAC such that the
-columns \(\{z_{ij} \} \subset \{x_{ij}\}\). Because the confounding
-variables under GMAC are selected such that they have a significant
-association with either the cis trans trans genes, the partial
-correlation between the cis gene and trans gene tends to strengthen as
-the column dimension of \({\bf Z}_{ij}\) approaches the column dimension
-of \({\bf X}_{ij}\). The result for GMAC is that under the mediation
-test, relatively weak associations (\(0.1 \leq \rho \leq 0.2\)) can be
-deemed significant. Conversely, for MRPC, as the size of the network
-increases, the method becomes increasingly conservative. Therefore, when
-\({\bf Z}_{ij} = {\bf X}_{ij}\) MRPC tends to infer the null model
-unless the association between two nodes in the network is substantial.
-
 \subsection*{3.2 Simulation Results}
 
-To observe the predictive differences between the MRPC-ADDIS and GMAC
-methods, we simulated the GMAC mediation test under two models for the
-trans gene: (i) when the true model generating the trans gene is smaller
-than the analysis model (STM), and (ii) when the model generating the
-trans gene is larger than the analysis model (LTM) see section
-\({\bf 2.3}\) for details. The STM simulated mediation test from (i)
-represents the case when the analysis model includes additional
-confounders not involved in the true trans gene generating process (i.e
-when we include more confounders than needed). Alternatively, the LTM
-simulated mediation test from (ii) represents a scenario similar to the
-test preformed by MRPC-ADDIS where the number of confounders included in
-the mediation test is a subset of the confounders in the model
-generating the trans gene with the greatest contribution to the response
-(i.e when we don't include enough confounders).
+\(\bullet\) - We noticed that the mediation parametric p-value can vary
+quite a bit. we ran each simulation scenario 1000 times on each trio and
+obtained the median p-value from each of the 4 scenarios. We used this
+as a robust estimate of the parametric p-value
 
-In general, over-specifying or under-specifying the model does little to
-change the inference of the mediation test (\textbf{Figure 4}) when the
-number of confounders is already large (relative to the MRPC model).
-However,
+\(\bullet\) - The nominal p-value and mediation p-value give more or
+less the same value except for rare variant trios
 
-The blue dots in \textbf{Figure 4} distinguish specific trios which
-contain an eQTL with a rare allele present in the sample (typically with
-an allele frequency \(\approx 1\%\)).
+\(\bullet\) - We noticed that Badsha implemented the PC selection code
+for MRPC in a way that led to the qvalues of each correlation test being
+applied after the p-values had already been bonferroni adjusted. This
+lead to extremely few PCs being selected for each trio. After
+implementing the correct PC selection process, MRPC and GMAC select
+equivalent numbers of PCs
+
+\(\bullet\) - The nominal p-value appears to be better at determining
+the presence of a mediation edge for rare variants. Thus we may need to
+preform the permuted regression test when the instrumental variable/
+cis-eQTL contains a rare variant allele
 
 \newpage
 \section{Tables and Figures}

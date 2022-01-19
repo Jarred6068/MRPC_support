@@ -66,31 +66,32 @@ get.freq=function(V=NULL, type=c("eQTL", "CNV", "Other")){
 #-----------------------Helper-function-for-permuted.reg----------------------
 
 
-help.fn1=function(perm.map=NULL, data=NULL, response=NULL){
+help.fn1=function(perm.map=NULL, V=NULL, T1=NULL, T2=NULL, U=NULL, coln=NULL, response=NULL){
   
   #permute
   if(response=="T2"){
     
-    data[,2]=data[,2][perm.map]
+    new.data=cbind.data.frame(V, T1[perm.map], T2, U)
     
   }else{
     
-    data[,3]=data[,3][perm.map]
+    new.data=cbind.data.frame(V, T1, T2[perm.map], U)
     
   }
   
+  colnames(new.data)=coln
   
   #run regression
   if(response=="T2"){
     
-    coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
-    wald.stat=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
+    coef.mat=as.data.frame(summary(lm(new.data[,3]~., data=new.data[,-3]))$coefficients)
+    wald.stat=coef.mat$`t value`[which(row.names(coef.mat)==colnames(new.data)[2])]
     #print(coef.mat)
     
   }else{
     
-    coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
-    wald.stat=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
+    coef.mat=as.data.frame(summary(lm(new.data[,2]~., data=new.data[,-2]))$coefficients)
+    wald.stat=coef.mat$`t value`[which(row.names(coef.mat)==colnames(new.data)[3])]
     #print(coef.mat)
     
   }
@@ -109,6 +110,7 @@ do.reg=function(data=NULL, response=c("T1","T2")){
   if(response=="T2"){
       
     coef.mat=as.data.frame(summary(lm(data[,3]~., data=data[,-3]))$coefficients)
+    #if(verbose==TRUE){summary(lm(data[,3]~., data=data[,-3]))}
     test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[2])]
     wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[2])]
     var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
@@ -116,6 +118,7 @@ do.reg=function(data=NULL, response=c("T1","T2")){
   }else{
       
     coef.mat=as.data.frame(summary(lm(data[,2]~., data=data[,-2]))$coefficients)
+    #if(verbose==TRUE){summary(lm(data[,2]~., data=data[,-2]))}
     test.wald=coef.mat$`t value`[which(row.names(coef.mat)==colnames(data)[3])]
     wald.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[3])]
     var.p=coef.mat$`Pr(>|t|)`[which(row.names(coef.mat)==colnames(data)[1])]
@@ -138,17 +141,16 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
   wald.stat=NULL
   mediator_perm=matrix(c(1:dim(data)[1]), nrow=dim(data)[1], ncol = nperms)
 
+  #preform regressions on trios w/ variant and with permutation
+  T1.resp=do.reg(data=data, response = "T1")
+  T2.resp=do.reg(data=data, response = "T2")
   
   if(permuted==FALSE){
     
-    #preform standard regressions
-    T1.resp=do.reg(data=data, response = "T1")
-    T2.resp=do.reg(data=data, response = "T2")
-    
     #get the marginal result for V_i and T_j
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
-    result=c(T1.resp$var.p, T1.resp$wald.p, T2.resp$var.p, T2.resp$wald.p, ct$p[1,3])
-    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.dep.T2")
+    result=c(T1.resp$var.p, T1.resp$wald.p, T2.resp$var.p, T2.resp$wald.p, ct$p[1,3], ct$p[1,2])
+    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.dep.T2", "V.dep.T1")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){
@@ -159,9 +161,7 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
     return(list(X=result, trio.name=colnames(data[,1:3])))
     
   }else{
-    #preform regressions on trios w/ variant and with permutation
-    T1.resp=do.reg(data=data, response = "T1")
-    T2.resp=do.reg(data=data, response = "T2")
+
       
     #preallocate all permutations
     for (j in 0:2) {
@@ -171,18 +171,30 @@ reg.with.variant=function(data=NULL, permuted=TRUE, nperms=1000, return.indicato
       }
     }
       
-    #apply permutation regression
-    wald.stat.T1.resp=apply(mediator_perm, 2, help.fn1, data=data, response="T1")
-    wald.stat.T2.resp=apply(mediator_perm, 2, help.fn1, data=data, response="T2")
+    #apply permuted regression
+    wald.stat.T1.resp=apply(mediator_perm, 2, help.fn1, 
+                            V=data[,1], 
+                            T1=data[,2], 
+                            T2=data[,3], 
+                            U=data[,-c(1:3)], 
+                            coln=colnames(data), 
+                            response="T1")
+    wald.stat.T2.resp=apply(mediator_perm, 2, help.fn1, 
+                            V=data[,1], 
+                            T1=data[,2], 
+                            T2=data[,3], 
+                            U=data[,-c(1:3)], 
+                            coln=colnames(data), 
+                            response="T2")
       
       
     #p.value=2*min(sum(wald.stat<test.wald)/length(wald.stat),sum(wald.stat>test.wald)/length(wald.stat) )
-    nominal.p.value.T1.resp=2 * (1 - pnorm(abs((T1.med$test.wald - mean(wald.stat.T1))/sd(wald.stat.T2))))
-    nominal.p.value.T2.resp=2 * (1 - pnorm(abs((T2.med$test.wald - mean(wald.stat.T2))/sd(wald.stat.T2))))
+    nominal.p.value.T1.resp=2 * (1 - pnorm(abs((T1.resp$test.wald - mean(wald.stat.T1.resp))/sd(wald.stat.T1.resp))))
+    nominal.p.value.T2.resp=2 * (1 - pnorm(abs((T2.resp$test.wald - mean(wald.stat.T2.resp))/sd(wald.stat.T2.resp))))
     
     ct=corr.test(data[,1:3], use="pairwise.complete.obs")  #set adjust = "none" to remove bonf.adj.
-    result=c(T1.resp$var.p, nominal.p.value.T1.resp, T2.resp$var.p, nominal.p.value.T2.resp, ct$p[1,3])
-    names(result)=c("B1i", "B2i", "B1j", "B2j", "V.dep.T2")
+    result=c(T1.resp$var.p, nominal.p.value.T1.resp, T2.resp$var.p, nominal.p.value.T2.resp, ct$p[1,3], ct$p[1,2])
+    names(result)=c("B11", "B21", "B12", "B22", "V.dep.T2", "V.dep.T1")
     
     #returns indicator values for significant tests
     if(return.indicator==TRUE){

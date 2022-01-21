@@ -28,6 +28,10 @@ In a network consisting of three nodes: $G(V_1, T_1, T_2)$ we can identify the 5
 
 \noindent \textbf{Step 1.} Calculate the frequency of the minor variant $f_{\text{minor}}$. If $V_1$ is an eQTL, then $f_{\text{minor}}$ is the frequency of the minor allele. If $V_1$ is not and eQTL, then calculate $f_{\text{minor}}$ as the frequency of the least common count or class. \\
 
+\begin{quote}
+\textbf{Step 1.2} - If the minor variant frequency $f_{\text{minor}}$ (allele frequency or copy number variation) from \textbf{Step 1.} is less than the predetermined threshold $\gamma$, preform the permuted regressions described in \textbf{Section 1.2} else proceed to \textbf{Step 2}
+\end{quote}
+
 \noindent \textbf{Step 2.} Preform two regressions treating each non-instumental variable as the response once:  
 \begin{eqnarray}
 T_1 = \beta_0 +\beta_{11}V_1+\beta_{21}T_2+{\bf \Gamma U}+ \epsilon \\
@@ -35,9 +39,7 @@ T_1 = \beta_0 +\beta_{11}V_1+\beta_{21}T_2+{\bf \Gamma U}+ \epsilon \\
 T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}T_1+{\bf \Gamma U}+ \epsilon 
 \end{eqnarray}
 
-\begin{quote}
-\textbf{Step 2.2} - If the minor variant frequency $f_{\text{minor}}$ (allele frequency or copy number variation) from \textbf{Step 1.} is less than the predetermined threshold $\gamma$, preform the permuted regressions described in \textbf{Section 1.2}. 
-\end{quote}
+
 \noindent \textbf{Step 3.} calculate the correlation matrix for $[V_1, T_1, T_2]$ and preform hypothesis testing on $r_{V_1,T_2}$ and $r_{V_1, T_1}$ i.e the marginal relationships between $V_1,T_2$ and $V_1, T_1$ \\
 
 
@@ -56,15 +58,13 @@ T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}T_1+{\bf \Gamma U}+ \epsilon
 \subsection*{1.2 - Permuted Regression for Rare Variants} - We will apply the permuted regression described by Yang et al., 2017 whenever the instrumental variable contains a rare count at frequency $< \gamma$. The permuted regression is preformed to obtain a robust estimate of the mediation effect between the nodes $T_i$ and $T_j$ in $G(V_k, T_i, T_j)$ which may be masked in the standard regression when $V_k$ contains few observations for the minor variant. The algorithm for preforming the permuted regression is as follows:\\
 
 
-\noindent\textbf{Step 1.} - Let $f_{\text{minor}}$ be the frequency of the minor variant of $V_1$. If $f_{\text{minor}} < \gamma$ proceed to \textbf{Step 2.}\\
-
-\noindent\textbf{Step 2.} - Preform the standard regressions given in \textbf{(1) and (2)} and retain the observed $t$-statistics for the tests on $\beta_{21}$ and $\beta_{22}$ (which we will denote as $t_{\text{obs}_{21}}$ and $t_{\text{obs}_{22}}$, respectively)
+\noindent\textbf{Step 1.} - Preform the standard regressions given in \textbf{(1) and (2)} and retain the observed $t$-statistics for the tests on $\beta_{21}$ and $\beta_{22}$ (which we will denote as $t_{\text{obs}_{21}}$ and $t_{\text{obs}_{22}}$, respectively)
 
 \begin{quote}
-\textbf{Step 2.2} - Similarly, retain the observed $p$-values for the tests on $\beta_{11}$ and $\beta_{12}$ (which we will denote $p_{\beta_{11}}$ and $p_{\beta_{12}}$ respectively)
+\textbf{Step 1.2} - Similarly, retain the observed $p$-values for the tests on $\beta_{11}$ and $\beta_{12}$ (which we will denote $p_{\beta_{11}}$ and $p_{\beta_{12}}$ respectively)
 \end{quote}
 
-\noindent \textbf{Step 3.} - permute $T_2$ in $\bf (1)$ within the levels of $V_1$ denoted $T_2^{\ast}$. Similarly, permute $T_1$ in $\bf (2)$ within the levels of $V_1$ denoted $T_1^{\ast}$. 
+\noindent \textbf{Step 2.} - permute $T_2$ in $\bf (1)$ within the levels of $V_1$ denoted $T_2^{\ast}$. Similarly, permute $T_1$ in $\bf (2)$ within the levels of $V_1$ denoted $T_1^{\ast}$. 
 \begin{quote}
 \textbf{Step 3.1} - Next preform the regressions in \textbf{Section 1.1} using the permuted variables:
 \begin{eqnarray}
@@ -75,18 +75,18 @@ T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}^{\ast}T_1^{\ast}+{\bf \Gamma U}+ \epsilo
 \end{quote}
 
 \begin{quote}
-\textbf{Step 3.2} - store the observed $t$-statistic for $\beta_{21}^{\ast}$ in the vector ${\bf \Theta}_{21}$ and the $t$-statistic for $\beta_{22}^{\ast}$ in the vector ${\bf \Theta}_{22}$
+\textbf{Step 2.2} - store the observed $t$-statistic for $\beta_{21}^{\ast}$ in the vector ${\bf \Theta}_{21}$ and the $t$-statistic for $\beta_{22}^{\ast}$ in the vector ${\bf \Theta}_{22}$
 \end{quote}
 
-\noindent \textbf{Step 4.} repeat \textbf{Steps 3 - 3.2} $m$ times to obtain the $m \times 1$ vectors of observed $t$-statistics ${\bf \Theta}_{21}$ and ${\bf \Theta}_{22}$. \\
+\noindent \textbf{Step 3.} repeat \textbf{Steps 3 - 3.2} $m$ times to obtain the $m \times 1$ vectors of observed $t$-statistics ${\bf \Theta}_{21}$ and ${\bf \Theta}_{22}$. \\
 
 \begin{quote}
-\textbf{Step 4.1} - Using ${\bf \Theta}_{21}$, ${\bf \Theta}_{22}$, $t_{\text{obs}_{21}}$, and $t_{\text{obs}_{21}}$, calculate the permutation nominal p-values for $\beta_{21}$ and $\beta_{22}$ (which we will denote $p_{\beta_{21}}^{\ast}$ and $p_{\beta_{22}}^{\ast}$ respectively)
+\textbf{Step 3.1} - Using ${\bf \Theta}_{21}$, ${\bf \Theta}_{22}$, $t_{\text{obs}_{21}}$, and $t_{\text{obs}_{21}}$, calculate the permutation nominal p-values for $\beta_{21}$ and $\beta_{22}$ (which we will denote $p_{\beta_{21}}^{\ast}$ and $p_{\beta_{22}}^{\ast}$ respectively)
 \end{quote}
 
-\noindent \textbf{Step 5.} calculate the correlation matrix for $[V_1, T_1, T_2]$ and preform hypothesis testing on $r_{V_1,T_2}$ and $r_{V_1, T_1}$ i.e the marginal relationships between $V_1,T_2$ and $V_1, T_1$ \\
+\noindent \textbf{Step 4.} calculate the correlation matrix for $[V_1, T_1, T_2]$ and preform hypothesis testing on $r_{V_1,T_2}$ and $r_{V_1, T_1}$ i.e the marginal relationships between $V_1,T_2$ and $V_1, T_1$ \\
 
-\noindent \textbf{Step 6.} - allocate the vector of $p$-values for hypothesis tests on $\beta_{11}, \beta_{21}, \beta_{12}, \beta_{22}, r_{V_1,T_2}$, and $r_{V_1, T_1}$ (in this order) as the vector $\bf {p}$ (using the nominal $p$-values for $\beta_{21}$ and $\beta_{22}$) and proceed to \textbf{Step 4.1} in \textbf{Section 1.1} \\
+\noindent \textbf{Step 5.} - allocate the vector of $p$-values for hypothesis tests on $\beta_{11}, \beta_{21}, \beta_{12}, \beta_{22}, r_{V_1,T_2}$, and $r_{V_1, T_1}$ (in this order) as the vector $\bf {p}$ (using the nominal $p$-values for $\beta_{21}$ and $\beta_{22}$) and proceed to \textbf{Step 4.1} in \textbf{Section 1.1} \\
 
 
 %%%%%%%%%%%%%
@@ -429,8 +429,33 @@ Therefore, we require the step of inferring $G(T_1, T_2, T_3)$ to identify v-str
 
 \[ G(V_1, T_1, T_2, T_3)=\begin{cases}G(V_1,T_1,T_2):M1 \\ G(V_1, T_1,T_3):M2 \\ G(V_1, T_2,T_3):Other \\ G(T_1, T_2, T_3):M4 \end{cases}\]
 
-This is a counter example where the inference for the subnetwork for $T_1, T_2, T_3$ would be returned as M4 which is undirectable in the absence of the PMR assumption. As a result the subnetworks for the combinations of nodes involving the variant fully specify the graph $G((V_1, T_1, T_2, T_3)$
+This is a counter example where the inference for the subnetwork for $T_1, T_2, T_3$ would be returned as M4 which is undirectable in the absence of the PMR assumption. As a result the subnetworks for the combinations of nodes involving the variant fully specify the graph $G((V_1, T_1, T_2, T_3)$\\
 
+\textbf{Example 3: Multi-instrumental Variable Network with T-node V-structure }
+
+\begin{center}
+\begin{tikzpicture}[node distance={3cm}, thick, main/.style = {draw, circle}] 
+\node[main] (1) {$T_1$};
+\node[main] (2) [below left of=1] {$T_2$};
+\node[main] (3) [below right of=1] {$T_3$};
+\node[main] (4) [below of=1] {$T_4$};
+\node[circle, draw, fill=green] (5) [above left of=2] {$V_1$};
+\node[circle, draw, fill=green] (6) [above right of=3] {$V_2$};
+\draw[->] (6) -- (3);
+\draw[->] (5) -- (2);
+\draw[->] (3) -- (1);
+\draw[->] (4) -- (1);
+\end{tikzpicture}
+\end{center}
+
+\[ G(V_1, V_2, T_1, T_2, T_3, T_4)=\begin{cases}G(V_1,T_1,T_2):M0 \\ G(V_1, T_1,T_3):Other \\ G(V_1, T_1,T_4):Other \\ 
+									 G(V_1, T_2,T_3):M0 \\G(V_1, T_2,T_4):M0 \\ G(V_1, T_3,T_4):Other \\  
+                                                                         G(V_2,T_1,T_2):Other \\ G(V_2, T_1,T_3):M1 \\ G(V_2, T_1,T_4):Other \\ 
+									 G(V_2, T_2,T_3):M0 \\G(V_2, T_2,T_4):Other \\ G(V_2, T_3,T_4):M0 \\
+                                                                        G(T_1, T_2, T_3):M0 \\ G(T_1, T_2, T_4):M0 \\ G(T_1, T_3, T_4):M2 \\
+                                                                        G(T_2, T_3, T_4):Other\end{cases}\]
+
+This is a counter example where the inference for the subnetwork for $T_1, T_2, T_3$ would be returned as M4 which is undirectable in the absence of the PMR assumption. As a result the subnetworks for the combinations of nodes involving the variant fully specify the graph $G((V_1, T_1, T_2, T_3)$
 
 
 

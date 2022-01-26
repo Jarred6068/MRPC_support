@@ -4,7 +4,10 @@
 #each of the model types M0,M1,M2,M3,M4
 
 #load necessary packages
-
+#relevant packages
+library(MRPC)
+library(psych)
+library(prodlim)
 library('MRPC', lib="/mnt/ceph/jarredk/Rpackages")
 library('qvalue', lib="/mnt/ceph/jarredk/Rpackages")
 library('psych', lib="/mnt/ceph/jarredk/Rpackages")
@@ -14,21 +17,24 @@ library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
 # source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 
 
-library(MRPC)
-library(psych)
-library(prodlim)
 #set initial parameters for simulation
-n=c(50, 100, 500)
+#sample sizes
+n=c(50, 100, 500, 1000)
+#noise in the data/SD of errors
 noise=c(0.2, 0.5, 0.8, 1.2)
+#frequency of the minor allele
 minor.allele=c(0.1, 0.2, 0.3)
+#signal strength of edge
 b1.1=c(0.2, 0.4, 0.6)
 b1.2=c(0.2, 0.4, 0.6)
 
+#expand to all get all combos of simulation conditions
 model.params=expand.grid(n, noise, minor.allele, b1.1, b1.2)
 colnames(model.params)=c("sample.size","SD", "minor.freq", "b1.1","b1.2")
+#the number of simulations for each set of conditions
 sims=100
 
-
+####################################################################
 #a function to preform the standard regression for minor allele frequencies above gamma
 regress=function(trio=NULL, alpha=0.01, verbose=FALSE){
   
@@ -55,6 +61,8 @@ regress=function(trio=NULL, alpha=0.01, verbose=FALSE){
   return(indicator)
 }
 
+
+####################################################################
 #A function to classify each indicator vector returned by regress()
 class.vec=function(vec=NULL, trio=NULL, alpha=0.01){
   
@@ -69,6 +77,8 @@ class.vec=function(vec=NULL, trio=NULL, alpha=0.01){
   which.mod=row.names(ind.mat)[row.match(vec, ind.mat)]
   #print(which.mod)
   
+  #a series of {if} statements to parse each trio into one of the 
+  #5 topologies (or into the "Other" class if no topology matches)
   if(is.na(which.mod)==TRUE){ct="Other"}else{
     
     if(which.mod=="M0.1"){
@@ -100,34 +110,46 @@ class.vec=function(vec=NULL, trio=NULL, alpha=0.01){
   
 }
 
+####################################################################
+
 ##----------M0-----------
 
 store.vectors=list()
 #data.sets=list()
 accuracy=NULL
 
+#looping for all combos of simulation conditions
 for(i in 1:dim(model.params)[1]){
   
+  #pre-allocate for inner loop
   vec.mat=as.data.frame(matrix(NA, nrow = sims, ncol=4))
   colnames(vec.mat)=c("b11", "b21", "b12", "b22")
   classes=NULL
   #all.sim=list()
   
+  #run simulations
   for(j in 1:sims){
+    #simulate trio under parameters
     X=SimulateData(N=model.params$sample.size[i], 
                    p=model.params$minor.freq[i], 
                    model="model0", 
                    b0.1=0, 
                    b1.1=model.params$b1.1[i], 
                    sd.1=model.params$SD[i])
+    
+    #store regression test indicator vector
     vec.mat[j,]=regress(X)
     #print(vec.mat[j,])
+    #Store inferred class
     classes[j]=class.vec(vec = vec.mat[j,], trio = X)
     #all.sim[[j]]=X
   }
   #print(vec.mat)
+  #store inner loop objects into outer loop lists
   store.vectors[[i]]=cbind.data.frame(vec.mat, inf.class=classes)
+  #calculate a basic prediction accuracy for each set of simulation conditions
   accuracy[i]=length(which(store.vectors[[i]]$inf.class="M0"))/dim(store.vectors[[i]])[1]
+  
   print(paste0("finished sim ", i, " of ", dim(model.params)[1]))
   
 }

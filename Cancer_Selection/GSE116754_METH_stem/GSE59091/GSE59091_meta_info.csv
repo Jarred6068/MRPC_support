@@ -1,0 +1,196 @@
+,Donor_ID,Cell_Line_Num,Donor_Cell_Type,Reprogram_Method,Sex,Replicate_Num,Diff_Capacity,GSE59091_Sample_ID
+0,230,: 79, dermal fibroblast, retorviral, female,1, low  ,GSM1427147
+1,230,: 79, dermal fibroblast, retorviral, female,2, low  ,GSM1427148
+2,230,: 79, dermal fibroblast, retorviral, female,3, low  ,GSM1427149
+3,230,: 79, dermal fibroblast, retorviral, female,4, low  ,GSM1427150
+4,230,: 79, dermal fibroblast, retorviral, female,5, low  ,GSM1427151
+5,230,: 79, dermal fibroblast, retorviral, female,6, low  ,GSM1427152
+6,230,: 96, dermal fibroblast, retorviral, female,1, low  ,GSM1427153
+7,230,: 96, dermal fibroblast, retorviral, female,2, low  ,GSM1427154
+8,230,: 96, dermal fibroblast, retorviral, female,3, low  ,GSM1427155
+9,230,: 96, dermal fibroblast, retorviral, female,5, low  ,GSM1427156
+10,230,: 25, dermal fibroblast, retorviral, female,1, low  ,GSM1427157
+11,230,: 25, dermal fibroblast, retorviral, female,2, low  ,GSM1427158
+12,230,: 25, dermal fibroblast, retorviral, female,3, low  ,GSM1427159
+13,230,: 25, dermal fibroblast, retorviral, female,4, low  ,GSM1427160
+14,230,: 25, dermal fibroblast, retorviral, female,5, low  ,GSM1427161
+15,230,: 25, dermal fibroblast, retorviral, female,6, low  ,GSM1427162
+16,230,: 57, endothelial precursor, retorviral, female,1, low  ,GSM1427163
+17,230,: 57, endothelial precursor, retorviral, female,2, low  ,GSM1427164
+18,230,: 57, endothelial precursor, retorviral, female,3, low  ,GSM1427165
+19,230,: 57, endothelial precursor, retorviral, female,4, low  ,GSM1427166
+20,230,: 57, endothelial precursor, retorviral, female,5, low  ,GSM1427167
+21,230,: 57, endothelial precursor, retorviral, female,6, low  ,GSM1427168
+22, FES22,: NA, embryonic stem cell, NA, male,1, low  ,GSM1427169
+23, FES22,: NA, embryonic stem cell, NA, male,2, low  ,GSM1427170
+24, FES22,: NA, embryonic stem cell, NA, male,3, low  ,GSM1427171
+25, hSF6,: NA, embryonic stem cell, NA, female,1, low  ,GSM1427172
+26, hSF6,: NA, embryonic stem cell, NA, female,2, low  ,GSM1427173
+27, hSF6,: NA, embryonic stem cell, NA, female,3, low  ,GSM1427174
+28, hSF6,: NA, embryonic stem cell, NA, female,4, low  ,GSM1427175
+29, hSF6,: NA, embryonic stem cell, NA, female,5, low  ,GSM1427176
+30, 657,: 75, dermal fibroblast, retorviral, male,1, low  ,GSM1427177
+31, 657,: 75, dermal fibroblast, retorviral, male,2, low  ,GSM1427178
+32, 657,: 75, dermal fibroblast, retorviral, male,3, low  ,GSM1427179
+33, 657,: 75, dermal fibroblast, retorviral, male,4, low  ,GSM1427180
+34, 657,: 19, dermal fibroblast, retorviral, male,1, low  ,GSM1427181
+35, 657,: 19, dermal fibroblast, retorviral, male,2, low  ,GSM1427182
+36, 657,: 19, dermal fibroblast, retorviral, male,3, low  ,GSM1427183
+37, 657,: 19, dermal fibroblast, retorviral, male,4, low  ,GSM1427184
+38, 657,: 19, dermal fibroblast, retorviral, male,5, low  ,GSM1427185
+39, 657,: 19, dermal fibroblast, retorviral, male,6, low  ,GSM1427186
+40, 657,: 48, dermal fibroblast, retorviral, male,1, low  ,GSM1427187
+41, 657,: 48, dermal fibroblast, retorviral, male,2, low  ,GSM1427188
+42, 657,: 48, dermal fibroblast, retorviral, male,3, low  ,GSM1427189
+43, 657,: 48, dermal fibroblast, retorviral, male,4, low  ,GSM1427190
+44, 657,: 48, dermal fibroblast, retorviral, male,5, low  ,GSM1427191
+45, 657,: 48, dermal fibroblast, retorviral, male,6, low  ,GSM1427192
+46, 973,: 92, dermal fibroblast, retorviral, female,1, low  ,GSM1427193
+47, 973,: 92, dermal fibroblast, retorviral, female,2, low  ,GSM1427194
+48, 973,: 92, dermal fibroblast, retorviral, female,3, low  ,GSM1427195
+49, 973,: 92, dermal fibroblast, retorviral, female,4, low  ,GSM1427196
+50, 973,: 92, dermal fibroblast, retorviral, female,5, low  ,GSM1427197
+51, 973,: 92, dermal fibroblast, retorviral, female,6, low  ,GSM1427198
+52, 263,: 92, dermal fibroblast, retorviral, female,1, low  ,GSM1427199
+53, 263,: 92, dermal fibroblast, retorviral, female,2, low  ,GSM1427200
+54, 263,: 92, dermal fibroblast, retorviral, female,3, low  ,GSM1427201
+55, 263,: 92, dermal fibroblast, retorviral, female,4, low  ,GSM1427202
+56, 263,: 92, dermal fibroblast, retorviral, female,5, low  ,GSM1427203
+57, 263,: 92, dermal fibroblast, retorviral, female,6, low  ,GSM1427204
+58, 263,: 55, dermal fibroblast, retorviral, female,1, low  ,GSM1427205
+59, 263,: 55, dermal fibroblast, retorviral, female,2, low  ,GSM1427206
+60, 263,: 55, dermal fibroblast, retorviral, female,3, low  ,GSM1427207
+61, 263,: 55, dermal fibroblast, retorviral, female,4, low  ,GSM1427208
+62, 852,: 64, dermal fibroblast, retorviral, female,1, low  ,GSM1427209
+63, 852,: 64, dermal fibroblast, retorviral, female,2, low  ,GSM1427210
+64, 852,: 64, dermal fibroblast, retorviral, female,3, low  ,GSM1427211
+65, 852,: 64, dermal fibroblast, retorviral, female,4, low  ,GSM1427212
+66, 852,: 64, dermal fibroblast, retorviral, female,5, low  ,GSM1427213
+67, 852,: 64, dermal fibroblast, retorviral, female,6, low  ,GSM1427214
+68, 852,: 87, dermal fibroblast, retorviral, female,1, low  ,GSM1427215
+69, 852,: 87, dermal fibroblast, retorviral, female,2, low  ,GSM1427216
+70, 852,: 87, dermal fibroblast, retorviral, female,3, low  ,GSM1427217
+71, 852,: 87, dermal fibroblast, retorviral, female,4, low  ,GSM1427218
+72, 852,: 87, dermal fibroblast, retorviral, female,5, low  ,GSM1427219
+73, 852,: 87, dermal fibroblast, retorviral, female,6, low  ,GSM1427220
+74, 852,: 94, dermal fibroblast, retorviral, female,1, low  ,GSM1427221
+75, 852,: 94, dermal fibroblast, retorviral, female,2, low  ,GSM1427222
+76, 852,: 94, dermal fibroblast, retorviral, female,3, low  ,GSM1427223
+77, 852,: 94, dermal fibroblast, retorviral, female,4, low  ,GSM1427224
+78, 852,: 94, dermal fibroblast, retorviral, female,5, low  ,GSM1427225
+79, 852,: 94, dermal fibroblast, retorviral, female,6, low  ,GSM1427226
+80, 627,: 10, dermal fibroblast, retorviral, female,1, high  ,GSM1427227
+81, 627,: 10, dermal fibroblast, retorviral, female,3, high  ,GSM1427228
+82, 627,: 10, dermal fibroblast, retorviral, female,4, high  ,GSM1427229
+83, 627,: 10, dermal fibroblast, retorviral, female,5, high  ,GSM1427230
+84, 627,: 10, dermal fibroblast, retorviral, female,6, high  ,GSM1427231
+85, 627,: 10, dermal fibroblast, retorviral, female,7, high  ,GSM1427232
+86, 627,: 46, dermal fibroblast, retorviral, female,1, high  ,GSM1427233
+87, 627,: 46, dermal fibroblast, retorviral, female,2, high  ,GSM1427234
+88, 627,: 46, dermal fibroblast, retorviral, female,3, high  ,GSM1427235
+89, 627,: 46, dermal fibroblast, retorviral, female,4, high  ,GSM1427236
+90, 627,: 46, dermal fibroblast, retorviral, female,5, high  ,GSM1427237
+91, 627,: 46, dermal fibroblast, retorviral, female,6, high  ,GSM1427238
+92, 627,: 36, dermal fibroblast, retorviral, female,1, high  ,GSM1427239
+93, 627,: 36, dermal fibroblast, retorviral, female,2, high  ,GSM1427240
+94, 627,: 36, dermal fibroblast, retorviral, female,3, high  ,GSM1427241
+95, 627,: 36, dermal fibroblast, retorviral, female,4, high  ,GSM1427242
+96, 627,: 36, dermal fibroblast, retorviral, female,5, high  ,GSM1427243
+97, 627,: 36, dermal fibroblast, retorviral, female,6, high  ,GSM1427244
+98, 700,: 25, dermal fibroblast, retorviral, male,1, high  ,GSM1427245
+99, 700,: 25, dermal fibroblast, retorviral, male,2, high  ,GSM1427246
+100, 700,: 25, dermal fibroblast, retorviral, male,3, high  ,GSM1427247
+101, 700,: 25, dermal fibroblast, retorviral, male,4, high  ,GSM1427248
+102, 700,: 25, dermal fibroblast, retorviral, male,5, high  ,GSM1427249
+103, 700,: 25, dermal fibroblast, retorviral, male,6, high  ,GSM1427250
+104, 700,: 13, dermal fibroblast, retorviral, male,1, high  ,GSM1427251
+105, 700,: 13, dermal fibroblast, retorviral, male,2, high  ,GSM1427252
+106, 700,: 13, dermal fibroblast, retorviral, male,3, high  ,GSM1427253
+107, 700,: 13, dermal fibroblast, retorviral, male,4, high  ,GSM1427254
+108, 700,: 13, dermal fibroblast, retorviral, male,5, high  ,GSM1427255
+109, 700,: 13, dermal fibroblast, retorviral, male,6, high  ,GSM1427256
+110, 700,: 89, endothelial precursor, retorviral, male,1, high  ,GSM1427257
+111, 700,: 89, endothelial precursor, retorviral, male,2, high  ,GSM1427258
+112, 700,: 89, endothelial precursor, retorviral, male,3, high  ,GSM1427259
+113, 700,: 89, endothelial precursor, retorviral, male,5, high  ,GSM1427260
+114, 700,: 47, dermal fibroblast, retorviral, male,1, high  ,GSM1427261
+115, 700,: 47, dermal fibroblast, retorviral, male,2, high  ,GSM1427262
+116, 700,: 47, dermal fibroblast, retorviral, male,3, high  ,GSM1427263
+117, 700,: 47, dermal fibroblast, retorviral, male,4, high  ,GSM1427264
+118, 700,: 47, dermal fibroblast, retorviral, male,5, high  ,GSM1427265
+119, 700,: 47, dermal fibroblast, retorviral, male,6, high  ,GSM1427266
+120, 700,: 59, endothelial progenitor, retorviral, male,1, high  ,GSM1427267
+121, 700,: 59, endothelial progenitor, retorviral, male,2, high  ,GSM1427268
+122, 700,: 59, endothelial progenitor, retorviral, male,3, high  ,GSM1427269
+123, 700,: 59, endothelial progenitor, retorviral, male,4, high  ,GSM1427270
+124, 700,: 59, endothelial progenitor, retorviral, male,5, high  ,GSM1427271
+125, 700,: 59, endothelial progenitor, retorviral, male,6, high  ,GSM1427272
+126, 700,: 54, endothelial progenitor, Sendai virus, male,1, high  ,GSM1427273
+127, 700,: 54, endothelial progenitor, Sendai virus, male,2, high  ,GSM1427274
+128, 700,: 54, endothelial progenitor, Sendai virus, male,3, high  ,GSM1427275
+129, 700,: 54, endothelial progenitor, Sendai virus, male,4, high  ,GSM1427276
+130, 700,: 54, endothelial progenitor, Sendai virus, male,5, high  ,GSM1427277
+131, 700,: 54, endothelial progenitor, Sendai virus, male,6, high  ,GSM1427278
+132, 700,: 62, dermal fibroblast, Sendai virus, male,1, high  ,GSM1427279
+133, 700,: 62, dermal fibroblast, Sendai virus, male,2, high  ,GSM1427280
+134, 700,: 62, dermal fibroblast, Sendai virus, male,3, high  ,GSM1427281
+135, 700,: 62, dermal fibroblast, Sendai virus, male,4, high  ,GSM1427282
+136, 700,: 62, dermal fibroblast, Sendai virus, male,5, high  ,GSM1427283
+137, H9,: NA, embryonic stem cell, NA, female,1, high  ,GSM1427284
+138, H9,: NA, embryonic stem cell, NA, female,2, high  ,GSM1427285
+139, H9,: NA, embryonic stem cell, NA, female,4, high  ,GSM1427286
+140, H9,: NA, embryonic stem cell, NA, female,5, high  ,GSM1427287
+141, H9,: NA, embryonic stem cell, NA, female,6, high  ,GSM1427288
+142, 832,: 44, foreskin fibroblast, retorviral, male,1, high  ,GSM1427289
+143, 832,: 44, foreskin fibroblast, retorviral, male,2, high  ,GSM1427290
+144, 832,: 44, foreskin fibroblast, retorviral, male,3, high  ,GSM1427291
+145, 832,: 44, foreskin fibroblast, retorviral, male,4, high  ,GSM1427292
+146, 832,: 44, foreskin fibroblast, retorviral, male,5, high  ,GSM1427293
+147, 832,: 44, foreskin fibroblast, retorviral, male,6, high  ,GSM1427294
+148, 367,: 32, dermal fibroblast, retorviral, male,1, high  ,GSM1427295
+149, 367,: 32, dermal fibroblast, retorviral, male,2, high  ,GSM1427296
+150, 367,: 32, dermal fibroblast, retorviral, male,3, high  ,GSM1427297
+151, 367,: 32, dermal fibroblast, retorviral, male,4, high  ,GSM1427298
+152, 367,: 32, dermal fibroblast, retorviral, male,5, high  ,GSM1427299
+153, 367,: 32, dermal fibroblast, retorviral, male,6, high  ,GSM1427300
+154, 230,: NA, dermal fibroblast, NA, female,1, NA  ,GSM1427301
+155, 230,: NA, dermal fibroblast, NA, female,2, NA  ,GSM1427302
+156, 230,: NA, dermal fibroblast, NA, female,3, NA  ,GSM1427303
+157, 230,: NA, dermal fibroblast, NA, female,4, NA  ,GSM1427304
+158, 230,: NA, dermal fibroblast, NA, female,5, NA  ,GSM1427305
+159, 230,: NA, dermal fibroblast, NA, female,6, NA  ,GSM1427306
+160, 230,: NA, endothelial precursor, NA, female,1, NA  ,GSM1427307
+161, 230,: NA, endothelial precursor, NA, female,2, NA  ,GSM1427308
+162, 230,: NA, endothelial precursor, NA, female,3, NA  ,GSM1427309
+163, 230,: NA, endothelial precursor, NA, female,4, NA  ,GSM1427310
+164, 230,: NA, endothelial precursor, NA, female,5, NA  ,GSM1427311
+165, 263,: NA, dermal fibroblast, NA, female,1, NA  ,GSM1427312
+166, 263,: NA, dermal fibroblast, NA, female,2, NA  ,GSM1427313
+167, 263,: NA, dermal fibroblast, NA, female,3, NA  ,GSM1427314
+168, 263,: NA, dermal fibroblast, NA, female,4, NA  ,GSM1427315
+169, 263,: NA, dermal fibroblast, NA, female,5, NA  ,GSM1427316
+170, 852,: NA, dermal fibroblast, NA, female,1, NA  ,GSM1427317
+171, 852,: NA, dermal fibroblast, NA, female,2, NA  ,GSM1427318
+172, 852,: NA, dermal fibroblast, NA, female,3, NA  ,GSM1427319
+173, 852,: NA, dermal fibroblast, NA, female,4, NA  ,GSM1427320
+174, 852,: NA, dermal fibroblast, NA, female,5, NA  ,GSM1427321
+175, 627,: NA, dermal fibroblast, NA, female,2, NA  ,GSM1427322
+176, 627,: NA, dermal fibroblast, NA, female,3, NA  ,GSM1427323
+177, 700,: NA, dermal fibroblast, NA, male,1, NA  ,GSM1427324
+178, 700,: NA, dermal fibroblast, NA, male,2, NA  ,GSM1427325
+179, 700,: NA, dermal fibroblast, NA, male,3, NA  ,GSM1427326
+180, 700,: NA, dermal fibroblast, NA, male,4, NA  ,GSM1427327
+181, 700,: NA, dermal fibroblast, NA, male,5, NA  ,GSM1427328
+182, 832,: NA, foreskin fibroblast, NA, male,1, NA  ,GSM1427329
+183, 832,: NA, foreskin fibroblast, NA, male,2, NA  ,GSM1427330
+184, 832,: NA, foreskin fibroblast, NA, male,3, NA  ,GSM1427331
+185, 832,: NA, foreskin fibroblast, NA, male,4, NA  ,GSM1427332
+186, 832,: NA, foreskin fibroblast, NA, male,5, NA  ,GSM1427333
+187, 832,: NA, foreskin fibroblast, NA, male,6, NA  ,GSM1427334
+188, 447,: 39, dermal fibroblast, episomal, male,1, LDC  ,GSM1427335
+189, 685,: 68, erythroblast, Sendai virus, female,1, LDC  ,GSM1427336
+190, 283,: 79, dermal fibroblast, episomal, male,1, HDC  ,GSM1427337
+191, 983,: 15, dermal fibroblast, episomal, female,1, HDC  ,GSM1427338
+192, 447,: 64, erythroblast, Sendai virus, male,1, HDC  ,GSM1427339
+193, 283,: 78, erythroblast, Sendai virus, male,1, HDC  ,GSM1427340
+194, 844,: 53, erythroblast, Sendai virus, male,1, HDC  ,GSM1427341

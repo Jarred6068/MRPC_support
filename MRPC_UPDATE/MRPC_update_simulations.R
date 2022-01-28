@@ -148,15 +148,46 @@ for(i in 1:dim(model.params)[1]){
   #store inner loop objects into outer loop lists
   store.vectors[[i]]=cbind.data.frame(vec.mat, inf.class=classes)
   #calculate a basic prediction accuracy for each set of simulation conditions
-  accuracy[i]=length(which(store.vectors[[i]]$inf.class="M0"))/dim(store.vectors[[i]])[1]
+  accuracy[i]=length(which(store.vectors[[i]]$inf.class=="M0"))/dim(store.vectors[[i]])[1]
   
   print(paste0("finished sim ", i, " of ", dim(model.params)[1]))
   
 }
 
+#pre-allocate stats
+mean.acc=NULL
+mean.acc4=NULL
+mean.acc3=NULL
+mean.acc2=NULL
+#average accruacy across sample size
+for(i in 1:length(n)){mean.acc[i]=mean(accuracy[which(model.params$sample.size==n[i])])}
+
+#average accruacy across error SD
+for(i in 1:length(noise)){mean.acc2[i]=mean(accuracy[which(model.params$SD==noise[i])])}
+
+#average accruacy across b1.1 coeff
+for(i in 1:length(b1.1)){mean.acc3[i]=mean(accuracy[which(model.params$b1.1==b1.1[i])])}
+
+#average accruacy across minor allele freq.
+for(i in 1:length(minor.allele)){mean.acc4[i]=mean(accuracy[which(model.params$minor.freq==minor.allele[i])])}
 
 
+par(mfrow=c(2,2))
 
+plot(minor.allele, mean.acc4, type="b", pch=21, bg="black",
+     main="Avg. Accruacy Across Minor Allele Freq")
+
+plot(b1.1, mean.acc3, type="b", pch=21, bg="black",
+     main="Avg. Accruacy Across Signal")
+
+plot(noise, mean.acc2, type="b", pch=21, bg="black",
+     main="Avg. Accruacy Across Error SD")
+
+plot(n, mean.acc, type="b", pch=21, bg="black",
+     main="Avg. Accruacy Across Sample Size")
+par(mfrow=c(1,1))
+
+#summary(as.factor(store.vectors[[1]]$inf.class))
 
 ##----------M1-----------
 

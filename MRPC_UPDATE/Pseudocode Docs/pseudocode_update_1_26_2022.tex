@@ -34,29 +34,20 @@ T_1 = \beta_0 +\beta_{11}V_1+\beta_{21}T_2+{\bf \Gamma U}+ \epsilon \\
 T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}T_1+{\bf \Gamma U}+ \epsilon 
 \end{eqnarray}
 
-and retain the $p$-values $p_{\beta_{11}}, p_{\beta_{21}}, p_{\beta_{12}}, p_{\beta_{22}}$ for tests on the coefficients $\beta_{11}, \beta_{21}, \beta_{12}, \beta_{22}$\\
+and retain the $p$-values $p_{\beta_{11}}, p_{\beta_{21}}, p_{\beta_{12}}, p_{\beta_{22}}$ and t-statistics $t_{\text{obs}_{11}},t_{\text{obs}_{21}},t_{\text{obs}_{12}},t_{\text{obs}_{22}}$ for tests on the coefficients $\beta_{11}, \beta_{21}, \beta_{12}, \beta_{22}$\\
 
 \noindent \textbf{Step 2.} Calculate the frequency of the minor allele of the variant/instrumental variable as $f_{\text{minor}}$. \\
 
 \begin{quote}
-\textbf{Step 2.1} - If the minor variant frequency $f_{\text{minor}}$ (allele frequency or copy number variation) from \textbf{Step 1.} is less than the predetermined threshold $\gamma$, preform the permuted regressions described in \textbf{Section 1.2} else proceed directly to \textbf{Step 3}
+\textbf{Step 2.1} - If the minor variant frequency $f_{\text{minor}}$ (allele frequency or copy number variation) is less than the predetermined threshold $\gamma$, preform the permuted regressions described in \textbf{Section 1.2} else proceed to \textbf{Step 3}
 \end{quote}
 
-\noindent \textbf{Step 3.} following \textbf{Steps 1 - 2} obtain the vector of $p$-values for hypothesis tests on $\beta_{11}, \beta_{21}, \beta_{12}, \beta_{22}$ (in this order and using the nominal pvalues for $\beta_{21}, \beta_{22}$ if the permuted regression was preformed) as the vector $\bf {p}$\\
-
-\begin{quote}
-\textbf{Step 3.1} Convert the vector of $p$-values $\bf {p}$ into the indicator vector ${\bf x}_p$ where $1$ denotes a significant $p$-value at threshold $\alpha$ and $0$ denotes a nonsignificant $p$-value \\
-\end{quote}
+\noindent \textbf{Step 3.} Obtain the vector of $p$-values for hypothesis tests on $\beta_{11}, \beta_{21}, \beta_{12}, \beta_{22}$ (in this order) as the vector $\bf {p}$. If permuted regression was preformed we will use the nominal pvalues $p^{\ast}_{21}, p^{\ast}_{22}$ for $\beta_{21}, \beta_{22}$. Convert $\bf {p}$ into the indicator vector ${\bf x}_p$ where $1$ denotes a significant $p$-value at threshold $\alpha$ and $0$ denotes a nonsignificant $p$-value \\
 
 
 \noindent \textbf{Step 4.} If ${\bf x}_p$ matches the expected result for the M3 topology given in \textbf{Tables 1 and 2} allocate the trio to M3, return the correct adjacency matrix for M3, and \textbf{Stop}. \\
 \\
-Else, calculate the correlations between the instrumental variable and $T_1$ and $T_2$, and then preform hypothesis testing on $r_{V_1,T_2}$ and $r_{V_1, T_1}$ and proceed to \textbf{Step 4.2} (i.e infer the marginal relationships between $V_1,T_2$ and $V_1, T_1$) \\
-
-
-\begin{quote}
-\noindent \textbf{Step 4.2} Convert the $p$-values for the marginal test \textbf{Step 4} into the indicator vector ${\bf r}_p$  where $1$ denotes a significant $p$-value at threshold $\alpha$ and $0$ denotes a nonsignificant $p$-value \\
-\end{quote}
+Else, test the marginal associations between $V_1$ and the T-nodes $T_1$ and $T_2$ ) Convert the $p$-values for the marginal tests into the indicator vector ${\bf r}_p$  where $1$ denotes a significant $p$-value at threshold $\alpha$ and $0$ denotes a nonsignificant $p$-value \\
 
 
 \noindent\textbf{Step 5.} - Compare ${\bf x}_p$ and ${\bf r}_p$ with the expected results for the other four model topologies given in \textbf{Tables 1 and 2} in the \textbf{Appendix} and allocate the trio to model type for which it matches (note that models M0, M1, and M2 have two cases each depending on the directions of the edges). If no match is available allocate the trio the class "other". \\
@@ -85,8 +76,13 @@ T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}^{\ast}T_1^{\ast}+{\bf \Gamma U}+ \epsilo
 \noindent \textbf{Step 2.} repeat \textbf{Steps 1 - 1.2} $m$ times to obtain the $m \times 1$ vectors of observed $t$-statistics ${\bf \Theta}_{21}$ and ${\bf \Theta}_{22}$. \\
 
 \begin{quote}
-\textbf{Step 2.1} - Using ${\bf \Theta}_{21}$, ${\bf \Theta}_{22}$, $t_{\text{obs}_{21}}$, and $t_{\text{obs}_{21}}$, calculate the permutation nominal p-values for $\beta_{21}$ and $\beta_{22}$ (which we will denote  respectively)
+\textbf{Step 2.1} - Using ${\bf \Theta}_{21}$, ${\bf \Theta}_{22}$, $t_{\text{obs}_{21}}$, and $t_{\text{obs}_{22}}$, calculate the permutation nominal p-values for $\beta_{21}$ and $\beta_{22}$ (which we will denote  respectively)
 \end{quote}
+
+\[ Z_{\text{obs}_{ij}} = \frac{T_{\text{obs}_{ij}} - \frac{\sum {\bf \Theta}_{ij}}{m} }{SE({\bf \Theta}_{ij})} \]
+
+\[ p^{\ast}_{ij} = 2\times P(Z >  |Z_{\text{obs}_{ij}}|) \]
+
 
 \noindent \textbf{Step 3.} - retain $p_{\beta_{21}}^{\ast}$ and $p_{\beta_{22}}^{\ast}$ and return to \textbf{Step 3} in \textbf{Section 1.1} \\
 
@@ -241,8 +237,8 @@ T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}T_1+{\bf \Gamma U}+ \epsilon
 \begin{tabular}{|c||c|c|c|c||c|c|}
 \hline
 \bf Model  & $H_0: \bf\beta_{11} = 0$  &  $H_0:\bf\beta_{21}=0$   & $H_0:\bf\beta_{12}=0$    & $H_0:\bf\beta_{22}=0$    & $ H_0: V_1 \indep T_2$    & $H_0: V_1 \indep T_1$    \\ \hline \hline
-\bf M0      &  $1$            & $ 0$                  & $0$                & $0$                    & 1                      &           \\ \hline 
-               &  $0$            & $ 0$                  & $1$                & $0$                    &                         &1           \\ \hline
+\bf M0      &  $1$            & $ 0$                  & $0$                & $0$                    & 0                      &           \\ \hline 
+               &  $0$            & $ 0$                  & $1$                & $0$                    &                         &0           \\ \hline
 \bf M1      &  $1$            & $1$                  & $0$                & $1$                   & 1                        &            \\ \hline
                &  $0$            & $1$                 & $1$                & $1$                    &                           &1       \\ \hline
 \bf M2      &  $1$            & $1$                 & $1$                & $1$                   & 0                         &           \\ \hline

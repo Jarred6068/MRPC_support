@@ -204,7 +204,7 @@ class.vec=function(vec=NULL){
   M3=c(1,0,1,0)
 
   ind.mat=rbind.data.frame(M0,M1,M3,M2.M4)
-  row.names(ind.mat)=c("M0.1","M0.2","M1.1","M3","M2/M4")
+  row.names(ind.mat)=c("M0.1","M0.2","M1.1","M1.2","M3","M2/M4")
 
   which.mod=row.names(ind.mat)[row.match(vec[1:4], ind.mat)]
   #print(which.mod)

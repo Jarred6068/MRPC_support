@@ -200,7 +200,7 @@ class.vec=function(vec=NULL){
 
   M0=matrix(c(1,0,0,0,0,0,1,0), nrow = 2, ncol = 4, byrow = T)
   M1=matrix(c(1,1,0,1,0,1,1,1), nrow = 2, ncol = 4, byrow = T)
-  M2.M4=matrix(c(1,1,1,1), nrow = 2, ncol = 4, byrow = T)
+  M2.M4=c(1,1,1,1)
   M3=c(1,0,1,0)
 
   ind.mat=rbind.data.frame(M0,M1,M3,M2.M4)

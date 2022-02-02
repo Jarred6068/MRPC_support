@@ -149,11 +149,13 @@ infer.trio=function(trio=NULL, gamma=0.05, alpha=0.01, nperms=1000, verbose=FALS
   
   #preform the standard regressions and outputs t-stat and p-values
   #input is a trio with the variant in the first column
+  #step 1
   pt.out=Reg(data = trio, verbose=verbose)
   
 
   
   #check the frequency of the minor allele using get.freq()
+  #step 2
   minor=get.freq(V=trio[,1])
   
   if(minor<gamma){
@@ -196,25 +198,30 @@ infer.trio=function(trio=NULL, gamma=0.05, alpha=0.01, nperms=1000, verbose=FALS
 class.vec=function(vec=NULL){
 
 
-  M0=matrix(c(1,0,0,0,0,1,0,0,1,0,1,0), nrow = 2, ncol = 6, byrow = T)
-  M1=matrix(c(1,1,0,1,1,1,0,1,1,1,1,1), nrow = 2, ncol = 6, byrow = T)
-  M2=matrix(c(1,1,1,1,0,1,1,1,1,1,1,0), nrow = 2, ncol = 6, byrow = T)
-  M4=matrix(c(1,1,1,1,1,1), nrow = 1, ncol = 6, byrow = T)
+  M0=matrix(c(1,0,0,0,0,0,1,0), nrow = 2, ncol = 4, byrow = T)
+  M1=matrix(c(1,1,0,1,0,1,1,1), nrow = 2, ncol = 4, byrow = T)
+  M2.M4=matrix(c(1,1,1,1), nrow = 2, ncol = 4, byrow = T)
   M3=c(1,0,1,0)
 
-  ind.mat=rbind.data.frame(M0,M1,M2,M4)
-  row.names(ind.mat)=c("M0.1","M0.2","M1.1","M1.2","M2.1", "M2.2","M4")
+  ind.mat=rbind.data.frame(M0,M1,M2,M3,M4)
+  row.names(ind.mat)=c("M0.1","M0.2","M1.1","M3","M2/M4")
 
-  #which.mod=row.names(ind.mat)[row.match(vec, ind.mat)]
+  which.mod=row.names(ind.mat)[row.match(vec[1:4], ind.mat)]
   #print(which.mod)
-
-  #check M3 first
-  if(sum(vec[1:4]-M3)==0){return(ct="M3")}
-
-  else{
-    which.mod=row.names(ind.mat)[row.match(vec[1:6], ind.mat)]
-    ct=ifelse(is.na(which.mod), "Other", which.mod)
-  }
+  if(is.na(row.match(vec[1:4], ind.mat))){ct="Other"}
+  
+  else if(which.mod=="M2/M4"){
+    
+    rp=vec[5:6]
+    if(sum(rp)==2){ct="M4"}
+    
+    else if(sum(rp==c(0,1))==2){ct="M2.1"}
+    
+    else if(sum(rp==c(1,0))==2){ct="M2.2"}
+    
+    else{ct="Other"}
+    
+  }else{ct=which.mod}
 
   return(ct)
 

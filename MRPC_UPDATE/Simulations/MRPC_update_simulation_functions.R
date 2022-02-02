@@ -203,7 +203,7 @@ class.vec=function(vec=NULL){
   M2.M4=matrix(c(1,1,1,1), nrow = 2, ncol = 4, byrow = T)
   M3=c(1,0,1,0)
 
-  ind.mat=rbind.data.frame(M0,M1,M2,M3,M4)
+  ind.mat=rbind.data.frame(M0,M1,M3,M2.M4)
   row.names(ind.mat)=c("M0.1","M0.2","M1.1","M3","M2/M4")
 
   which.mod=row.names(ind.mat)[row.match(vec[1:4], ind.mat)]

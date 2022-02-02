@@ -13,9 +13,8 @@ library('qvalue', lib="/mnt/ceph/jarredk/Rpackages")
 library('psych', lib="/mnt/ceph/jarredk/Rpackages")
 library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
 
-# source("/mnt/ceph/jarredk/MRPC_UPDATE/MRPCgeneral.R")
-# source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-source("/mnt/ceph/jarredk/MRPC_UPDATE/MRPC_update_simulation_functions.R")
+
+source("/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/MRPC_update_simulation_functions.R")
 
 
 #set initial parameters for simulation
@@ -24,7 +23,7 @@ n=c(50, 100, 500, 1000)
 #noise in the data/SD of errors
 noise=c(0.2, 0.5, 0.8, 1.2)
 #frequency of the minor allele
-minor.allele=c(0.02, 0.1, 0.2, 0.3)
+minor.allele=c(0.1, 0.2, 0.3, 0.4)
 #signal strength of edge
 b1.1=c(0.2, 0.4, 0.6, 0.8)
 b1.2=c(0.2, 0.4, 0.6, 0.8)
@@ -35,6 +34,7 @@ colnames(model.params)=c("sample.size","SD", "minor.freq", "b1.1","b1.2")
 #the number of simulations for each set of conditions
 sims=100
 
+#model.params[sample(1:dim(model.params)[1],10),]
 
 
 
@@ -44,23 +44,37 @@ sims=100
 
 all.data=list()
 #data.sets=list()
-accuracy=NULL
 
 #looping for all combos of simulation conditions
 for(i in 1:dim(model.params)[1]){
   #all.sim=list()
   samples100=list()
   #run simulations
+  resamp.vec=NULL
   for(j in 1:sims){
+    init=0
+    k=1
+    resamples=NULL
     #simulate trio under parameters
-    samples100[[j]]=SimulateData(N=model.params$sample.size[i], 
-                                 p=model.params$minor.freq[i], 
-                                 model="model0", 
-                                 b0.1=0, 
-                                 b1.1=model.params$b1.1[i], 
-                                 sd.1=model.params$SD[i])
+    while(length(init)==1){
+      X=SimulateData(N=model.params$sample.size[i], 
+                     p=model.params$minor.freq[i], 
+                     model="model2", 
+                     b0.1=0, 
+                     b1.1=model.params$b1.1[i], 
+                     b1.2=model.params$b1.2[i],
+                     sd.1=model.params$SD[i])
+      init=unique(X$V1)
+      resamples[k]=k
+      k=k+1
+      
+    }
+    resamp.vec[j]=resamples
+    samples100[[j]]=X
     
   }
+  
+  print(paste0("Average resamples: ",mean(resamp.vec) , " times before a minor allele appeared in variant"))
   
   all.data[[i]]=samples100
   
@@ -68,15 +82,24 @@ for(i in 1:dim(model.params)[1]){
   
 }
 
+
+#preform regressions and classify model types
 reg.res=list()
 inf.mods=list()
+accuracy=NULL
 
 for(i in 1:length(all.data)){
   
-  reg.res[[i]]=sapply(all.data[[i]], regress)
-  inf.mods[[i]]=sapply(reg.res[[i]], class.vec)
+  reg.res[[i]]=sapply(all.data[[i]], infer.trio)
+  inf.mods[[i]]=apply(reg.res[[i]],2, class.vec)
   
 }
+
+#calculate the accruacy for each combination of parameters
+accuracy=sapply(inf.mods, FUN = function(x) length(which(x=="M2.1" | x=="M2.2"))/length(x) )
+
+save(reg.res, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M2.reg.res.RData")
+save(inf.mods, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M2.inf.mods.RData")
 
 #pre-allocate stats
 mean.acc=NULL
@@ -95,38 +118,33 @@ for(i in 1:length(b1.1)){mean.acc3[i]=mean(accuracy[which(model.params$b1.1==b1.
 #average accruacy across minor allele freq.
 for(i in 1:length(minor.allele)){mean.acc4[i]=mean(accuracy[which(model.params$minor.freq==minor.allele[i])])}
 
-
+png("/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/M2_simulation_results.png")
 par(mfrow=c(2,2))
 
 plot(minor.allele, mean.acc4, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Minor Allele Freq")
+     main="Avg. Accruacy Across Minor Allele Freq",
+     ylab = "Mean Accuracy")
 
 plot(b1.1, mean.acc3, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Signal")
+     main="Avg. Accruacy Across Signal",
+     ylab = "Mean Accuracy")
 
 plot(noise, mean.acc2, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Error SD")
+     main="Avg. Accruacy Across Error SD",
+     ylab = "Mean Accuracy")
 
 plot(n, mean.acc, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Sample Size")
+     main="Avg. Accruacy Across Sample Size",
+     ylab = "Mean Accuracy")
 par(mfrow=c(1,1))
 
-#summary(as.factor(store.vectors[[1]]$inf.class))
-
-##----------M1-----------
+dev.off()
 
 
 
 
 
-##----------M2-----------
-
-
-
-##----------M3-----------
 
 
 
 
-
-##----------M4-----------

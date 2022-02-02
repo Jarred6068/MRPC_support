@@ -72,12 +72,12 @@ T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}^{\ast}T_1^{\ast}+{\bf \Gamma U}+ \epsilo
 \noindent \textbf{Step 2.} repeat \textbf{Steps 1 - 1.2} $m$ times to obtain the $m \times 1$ vectors of observed $t$-statistics ${\bf \Theta}_{21}$ and ${\bf \Theta}_{22}$. \\
 
 \begin{quote}
-\textbf{Step 2.1} - Using ${\bf \Theta}_{21}$, ${\bf \Theta}_{22}$, $t_{\text{obs}_{21}}$, and $t_{\text{obs}_{22}}$, calculate the permutation nominal p-values for $\beta_{21}$ and $\beta_{22}$ (which we will denote  respectively)
+\textbf{Step 2.1} - Using ${\bf \Theta}_{21}$, ${\bf \Theta}_{22}$, $t_{\text{obs}_{21}}$, and $t_{\text{obs}_{22}}$, calculate the permutation nominal p-values for $\beta_{21}$ and $\beta_{22}$
 \end{quote}
 
 \[ Z_{\text{obs}_{ij}} = \frac{T_{\text{obs}_{ij}} - \frac{\sum {\bf \Theta}_{ij}}{m} }{SE({\bf \Theta}_{ij})} \]
 
-\[ p^{\ast}_{ij} = 2\times P(Z >  |Z_{\text{obs}_{ij}}|) \]
+\[ p^{\ast}_{\beta_{ij}} = 2\times P(Z >  |Z_{\text{obs}_{ij}}|) \]
 
 
 \noindent \textbf{Step 3.} - retain $p_{\beta_{21}}^{\ast}$ and $p_{\beta_{22}}^{\ast}$ and return to \textbf{Step 3} in \textbf{Section 1.1} \\
@@ -129,7 +129,7 @@ T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}^{\ast}T_1^{\ast}+{\bf \Gamma U}+ \epsilo
 \begin{quote}
 \noindent \textbf{Step 3.2.1} - If ${\bf A}_{3\times3}^{\text{sub}}$ contains a single directed edge after it has been updated by \textbf{Step 2}, determine if the trio is M2 or M1 by treating the parent node of the directed edge as the variant (see \textbf{Figure 7}): \\
 \\
-Check the sub-adjacency matrix ${\bf A}_{3\times3}^{\text{sub}}$ for the trio (after \textbf{Step 3.1}) if we have $T_1 \rightarrow T_2$ and $T_2 - T_3$ then we preform only a single regression \textbf{Section 1.1, Step 1}:
+if we have $T_1 \rightarrow T_2$ and $T_2 - T_3$ then we preform only a single regression from \textbf{Section 1.1, Step 1}:
 \[ T_2 = \beta_0 + \beta_{12}T_1 + \beta_{22} T_3 + {\bf \Gamma U} + \epsilon \] 
 to determine the direction of $T_2 - T_3$\\
 \end{quote}
@@ -137,7 +137,7 @@ to determine the direction of $T_2 - T_3$\\
 
 \begin{quote}
 \begin{quote}
-\noindent\textbf{Step 3.2.2} - If ${\bf A}_{3\times3}^{\text{sub}}$ has no directed edges after updating, replace $V_1$ in \textbf{Section 1.1, Step 1} with one of the T-nodes:
+\noindent\textbf{Step 3.2.2} - If ${\bf A}_{3\times3}^{\text{sub}}$ has two undirected edges after updating, replace $V_1$ in \textbf{Section 1.1, Step 1} with one of the T-nodes:
 \begin{eqnarray}
 T_1 = \beta_0 +\beta_{11}T_3+\beta_{21}^{\ast}T_2^{\ast}+{\bf \Gamma U}+ \epsilon \\
 \nonumber\\
@@ -148,7 +148,7 @@ and determine if the network is M2 using the regressions and tests from \textbf{
 \end{quote}
 
 \begin{quote}
-Return A
+Return $\bf A$
 \end{quote}
 
 \section*{3. Simulation Strategy to Validate Section 1.1}
@@ -218,17 +218,21 @@ T_2 = \beta_0 +\beta_{12}V_1+\beta_{22}T_1+{\bf \Gamma U}+ \epsilon
 \begin{tabular}{|c||c|c|c|c||c|c|}
 \hline
 \bf Model  & $H_0: \bf\beta_{11} = 0$  &  $H_0:\bf\beta_{21}=0$   & $H_0:\bf\beta_{12}=0$    & $H_0:\bf\beta_{22}=0$    & $ H_0: V_1 \indep T_2$    & $H_0: V_1 \indep T_1$    \\ \hline \hline
-\bf M0      &  $1$            & $ 0$                  & $0$                & $0$                    & 0                      &           \\ \hline 
-               &  $0$            & $ 0$                  & $1$                & $0$                    &                         &0           \\ \hline
-\bf M1      &  $1$            & $1$                  & $0$                & $1$                   & 1                        &            \\ \hline
-               &  $0$            & $1$                 & $1$                & $1$                    &                           &1       \\ \hline
-\bf M2      &  $1$            & $1$                 & $1$                & $1$                   & 0                         &           \\ \hline
-               &  $1$            & $1$                 & $1$                & $1$                   &                            & 0          \\ \hline
-\bf M3      &  $1$            & $0$                 & $1$               & $0$                   &                          &            \\ \hline
-\bf M4      &  $1$            & $1$                 & $1$               & $1$                  & 1                         &             \\ \hline \hline
+\bf M0      &  $1$            & $ 0$                  & $0$                & $0$                    & 0                      &1           \\ \hline 
+               &  $0$            & $ 0$                  & $1$                & $0$                    &1                         &0           \\ \hline
+\bf M1      &  $1$            & $1$                  & $0$                & $1$                   & 1                        &1            \\ \hline
+               &  $0$            & $1$                 & $1$                & $1$                    & 1                          &1       \\ \hline
+\bf M2      &  $1$            & $1$                 & $1$                & $1$                   & 0                         & 1          \\ \hline
+               &  $1$            & $1$                 & $1$                & $1$                   &  1                          & 0          \\ \hline
+\bf M3      &  $1$            & $0$                 & $1$               & $0$                   &1                          &  1          \\ \hline
+\bf M4      &  $1$            & $1$                 & $1$               & $1$                  & 1                         &  1           \\ \hline \hline
 
 \end{tabular}
 \end{table}
+
+\[ {\bf x}_p = \begin{cases} 1 & \text{if} \ \ {\bf\beta_{ij} \neq 0} \\ 0 & \text{else} \end{cases} \]
+
+\[  {\bf r}_p = \begin{cases} 1 & \text{if} \ \ V_i \not\indep T_j \\ 0 & \text{else} \end{cases} \]
 
 \begin{table}[H]
 \centering

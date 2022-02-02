@@ -4,7 +4,7 @@
 ####################################################################
 #function To Get Minor Variant Frequency
 get.freq=function(V=NULL){
-  
+  #used in step 2
   #remove missing values
   V=na.omit(V)
   
@@ -20,8 +20,8 @@ get.freq=function(V=NULL){
 
 
 ####################################################################
-#A function which preforms the standard regressions from step.1
-Reg=function(data=NULL){
+#A function which preforms the standard regressions from step 1
+Reg=function(data=NULL, verbose=FALSE){
   
   #data should be a n x (3+g) matrix with the variant in the first column
   #preallocate p and t vectors
@@ -43,6 +43,7 @@ Reg=function(data=NULL){
   names(pvals)=c("p11","p21","p12","p22")
   names(tvals)=c("tobs11","tobs21","tobs12","tobs22")
   
+  #output pvalues and t-stats for b11,b21,b12,b22
   return(pt.list=list(pvals=pvals,tvals=tvals))
   
 }
@@ -116,7 +117,7 @@ PermReg=function(trio=NULL, t.obs21=NULL, t.obs22=NULL, p11=NULL, p12=NULL, m=NU
                 coln=colnames(trio), 
                 response="T1")
   #outputs Theta22
-  Theta22=apply(mediator_perm2, 2, PermRef.help.fn, 
+  Theta22=apply(mediator_perm2, 2, PermReg.help.fn, 
                 V=trio[,1], 
                 T1=trio[,2], 
                 T2=trio[,3], 
@@ -125,8 +126,8 @@ PermReg=function(trio=NULL, t.obs21=NULL, t.obs22=NULL, p11=NULL, p12=NULL, m=NU
   
   #Step 2.1 - calculating the nominal p-values using Theta21 and Theta22
   
-  nominal.p21=2 * (1 - pnorm(abs((t.obs21 - mean(wald.stat.T1.resp))/sd(wald.stat.T1.resp))))
-  nominal.p22=2 * (1 - pnorm(abs((t.obs22 - mean(wald.stat.T2.resp))/sd(wald.stat.T2.resp))))
+  nominal.p21=2 * (1 - pnorm(abs((t.obs21 - mean(Theta21))/sd(Theta21))))
+  nominal.p22=2 * (1 - pnorm(abs((t.obs22 - mean(Theta22))/sd(Theta22))))
   
   #concat
   pvals=c(p11, nominal.p21, p12, nominal.p22)
@@ -148,7 +149,7 @@ infer.trio=function(trio=NULL, gamma=0.05, alpha=0.01, nperms=1000, verbose=FALS
   
   #preform the standard regressions and outputs t-stat and p-values
   #input is a trio with the variant in the first column
-  pt.out=Reg(data = trio)
+  pt.out=Reg(data = trio, verbose=verbose)
   
 
   
@@ -158,10 +159,10 @@ infer.trio=function(trio=NULL, gamma=0.05, alpha=0.01, nperms=1000, verbose=FALS
   if(minor<gamma){
     #preform permuted regression for rare variants
     pvals=PermReg(trio = trio, 
-                  t.obs21 = pt.out$tvals[,2], 
-                  t.obs22 = pt.out$tvals[,4], 
-                  p11 = pt.out$pvals[,1],
-                  p12 = pt.out$pvals[,3],
+                  t.obs21 = pt.out$tvals[2], 
+                  t.obs22 = pt.out$tvals[4], 
+                  p11 = pt.out$pvals[1],
+                  p12 = pt.out$pvals[3],
                   m = nperms)
     
   }else{
@@ -182,9 +183,8 @@ infer.trio=function(trio=NULL, gamma=0.05, alpha=0.01, nperms=1000, verbose=FALS
   #combine all useful stats - add indicator 
   all.stats=c(append(xp, rp), append(pvals, cors), minor)
   
-  names(indicator)=c("b11","b21", "b12","b22", "V1:T1", "V1:T2", 
-                        "pb11","pb21", "pb12","pb22", "pV1:T1", "pV1:T2", 
-                        "Minor.freq")
+  names(all.stats)=c("b11","b21", "b12","b22", "V1:T2", "V1:T1", "pb11", 
+                     "pb21", "pb12","pb22","pV1:T2","pV1:T1", "Minor.freq")
   
   return(all.stats)
 }
@@ -194,27 +194,118 @@ infer.trio=function(trio=NULL, gamma=0.05, alpha=0.01, nperms=1000, verbose=FALS
 #A function to classify each indicator vector returned by inf.trio()
 #section 1.1 steps 4-5
 class.vec=function(vec=NULL){
-  
+
+
   M0=matrix(c(1,0,0,0,0,1,0,0,1,0,1,0), nrow = 2, ncol = 6, byrow = T)
-  M1=matrix(c(1,1,0,1,1,0,0,1,1,1,0,1), nrow = 2, ncol = 6, byrow = T)
+  M1=matrix(c(1,1,0,1,1,1,0,1,1,1,1,1), nrow = 2, ncol = 6, byrow = T)
   M2=matrix(c(1,1,1,1,0,1,1,1,1,1,1,0), nrow = 2, ncol = 6, byrow = T)
   M4=matrix(c(1,1,1,1,1,1), nrow = 1, ncol = 6, byrow = T)
   M3=c(1,0,1,0)
-  
+
   ind.mat=rbind.data.frame(M0,M1,M2,M4)
   row.names(ind.mat)=c("M0.1","M0.2","M1.1","M1.2","M2.1", "M2.2","M4")
-  
+
   #which.mod=row.names(ind.mat)[row.match(vec, ind.mat)]
   #print(which.mod)
-  
-  #check M3 first 
+
+  #check M3 first
   if(sum(vec[1:4]-M3)==0){return(ct="M3")}
-  
+
   else{
     which.mod=row.names(ind.mat)[row.match(vec[1:6], ind.mat)]
     ct=ifelse(is.na(which.mod), "Other", which.mod)
   }
-  
+
   return(ct)
-  
+
 }
+
+
+####################################################################\
+#Version 2
+#A function to classify each indicator vector returned by inf.trio()
+#section 1.1 steps 4-5
+# class.vec=function(vec=NULL){
+#   
+#   number.of.pos=sum(vec[1:4])
+#   M0=matrix(c(1,0,0,0,0,0,1,0), nrow = 2, ncol = 4, byrow = T)
+#   #row.names(M0)=c("M0.1","M0.2")
+#   M1=matrix(c(1,1,0,1,0,1,1,1), nrow = 2, ncol = 4, byrow = T)
+#   #row.names(M1)=c("M1.1","M1.2")
+#   M2.M4=c(1,1,1,1)
+#   M3=c(1,0,1,0)
+#   
+#   ind.mat=rbind.data.frame(M0,M1,M2.M4,M3)
+#   row.names(ind.mat)=c("M0.1","M0.2","M1.1","M1.2","M2/M4","M3")
+#   which.mod=row.names(ind.mat)[row.match(vec[1:4], ind.mat)]
+#   
+#   if(which.mod=="M3"){ct="M3"}
+#   
+#   else if(which.mod=="M0.1" | which.mod=="M0.2" & sum(vec[5:6])==1){
+#     
+#     ct=which.mod
+#     
+#   }
+#   
+#   else if(which.mod=="M1.1" | which.mod=="M1.2" & sum(vec[5:6])==2){
+#     ct=which.mod
+#   }
+#   
+#   else if(which.mod=="M2/M4" & sum(vec[5:6])==2){ct="M4"}
+#   
+#   else if(which.mod=="M2/M4" & sum(vec[5:6])==1){
+#     
+#     ct=ifelse(vec[5]==0, "M2.1", "M2.2")
+#     
+#   }else{ct="Other"}
+#     
+# 
+#   
+#   return(ct)
+#   
+# }
+
+
+####################################################################\
+#Version 3
+#A function to classify each indicator vector returned by inf.trio()
+#section 1.1 steps 4-5
+# class.vec=function(vec=NULL){
+#   
+#   number.of.pos=sum(vec[1:4])
+#   M0=matrix(c(1,0,0,0,0,0,1,0), nrow = 2, ncol = 4, byrow = T)
+#   #row.names(M0)=c("M0.1","M0.2")
+#   M1=matrix(c(1,1,0,1,0,1,1,1), nrow = 2, ncol = 4, byrow = T)
+#   #row.names(M1)=c("M1.1","M1.2")
+#   M2.M4=c(1,1,1,1)
+#   M3=c(1,0,1,0)
+#   
+#   ind.mat=rbind.data.frame(M0,M1,M2.M4,M3)
+#   row.names(ind.mat)=c("M0.1","M0.2","M1.1","M1.2","M2/M4","M3")
+#   which.mod=row.names(ind.mat)[row.match(vec[1:4], ind.mat)]
+#   
+#   if(which.mod=="M3"){ct="M3"}
+#   
+#   else if(which.mod=="M0.1" | which.mod=="M0.2" & sum(vec[5:6])==1){
+#     
+#     ct=which.mod
+#     
+#   }
+#   
+#   else if(which.mod=="M1.1" | which.mod=="M1.2" & sum(vec[5:6])==2){
+#     ct=which.mod
+#   }
+#   
+#   else if(which.mod=="M2/M4" & sum(vec[5:6])==2){ct="M4"}
+#   
+#   else if(which.mod=="M2/M4" & sum(vec[5:6])==1){
+#     
+#     ct=ifelse(vec[5]==0, "M2.1", "M2.2")
+#     
+#   }else{ct="Other"}
+#   
+#   
+#   
+#   return(ct)
+#   
+# }

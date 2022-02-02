@@ -23,10 +23,10 @@ n=c(50, 100, 500, 1000)
 #noise in the data/SD of errors
 noise=c(0.2, 0.5, 0.8, 1.2)
 #frequency of the minor allele
-minor.allele=c(0.02, 0.1, 0.2, 0.3)
+minor.allele=c(0.1, 0.2, 0.3, 0.4)
 #signal strength of edge
-b1.1=c(0.2, 0.4, 0.6)
-b1.2=c(0.2, 0.4, 0.6)
+b1.1=c(0.2, 0.4, 0.6, 0.8)
+b1.2=c(0.2, 0.4, 0.6, 0.8)
 
 #expand to all get all combos of simulation conditions
 model.params=expand.grid(n, noise, minor.allele, b1.1, b1.2)
@@ -34,6 +34,7 @@ colnames(model.params)=c("sample.size","SD", "minor.freq", "b1.1","b1.2")
 #the number of simulations for each set of conditions
 sims=100
 
+#=model.params[sample(1:dim(model.params)[1],10),]
 
 
 
@@ -49,6 +50,7 @@ for(i in 1:dim(model.params)[1]){
   #all.sim=list()
   samples100=list()
   #run simulations
+  resamp.vec=NULL
   for(j in 1:sims){
     init=0
     k=1
@@ -66,10 +68,12 @@ for(i in 1:dim(model.params)[1]){
       k=k+1
       
     }
-    print(paste0("Sampled ", length(resamples), " times before a minor allele appeared in variant"))
+    resamp.vec[j]=resamples
     samples100[[j]]=X
     
   }
+  
+  print(paste0("Average resamples: ",mean(resamp.vec) , " times before a minor allele appeared in variant"))
   
   all.data[[i]]=samples100
   
@@ -77,17 +81,24 @@ for(i in 1:dim(model.params)[1]){
   
 }
 
+
+#preform regressions and classify model types
 reg.res=list()
 inf.mods=list()
-#accuracy=list()
+accuracy=NULL
 
 for(i in 1:length(all.data)){
   
-  reg.res[[i]]=sapply(all.data[[i]], regress)
+  reg.res[[i]]=sapply(all.data[[i]], infer.trio)
   inf.mods[[i]]=apply(reg.res[[i]],2, class.vec)
-  #accuracy[[i]]=apply(inf.mods[[i]], FUN = function(x) length(which(x=="M0.1" | x=="M0.2"))/length(x) )
   
 }
+
+#calculate the accruacy for each combination of parameters
+accuracy=sapply(inf.mods, FUN = function(x) length(which(x=="M0.1" | x=="M0.2"))/length(x) )
+
+save(reg.res, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M0.reg.res.RData")
+save(inf.mods, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M0.inf.mods.RData")
 
 #pre-allocate stats
 mean.acc=NULL
@@ -110,16 +121,20 @@ png("/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/M0_simulation_results.png")
 par(mfrow=c(2,2))
 
 plot(minor.allele, mean.acc4, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Minor Allele Freq")
+     main="Avg. Accruacy Across Minor Allele Freq",
+     ylab = "Mean Accuracy")
 
 plot(b1.1, mean.acc3, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Signal")
+     main="Avg. Accruacy Across Signal",
+     ylab = "Mean Accuracy")
 
 plot(noise, mean.acc2, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Error SD")
+     main="Avg. Accruacy Across Error SD",
+     ylab = "Mean Accuracy")
 
 plot(n, mean.acc, type="b", pch=21, bg="black",
-     main="Avg. Accruacy Across Sample Size")
+     main="Avg. Accruacy Across Sample Size",
+     ylab = "Mean Accuracy")
 par(mfrow=c(1,1))
 
 dev.off()

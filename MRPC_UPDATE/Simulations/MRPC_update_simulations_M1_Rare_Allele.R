@@ -23,7 +23,7 @@ n=c(50, 100, 500, 1000)
 #noise in the data/SD of errors
 noise=c(0.2, 0.5, 0.8, 1.2)
 #frequency of the minor allele
-minor.allele=c(0.1, 0.2, 0.3, 0.4)
+minor.allele=c(0.01, 0.02, 0.03, 0.04)
 #signal strength of edge
 b1.1=c(0.2, 0.4, 0.6, 0.8)
 b1.2=c(0.2, 0.4, 0.6, 0.8)
@@ -98,8 +98,8 @@ for(i in 1:length(all.data)){
 #calculate the accruacy for each combination of parameters
 accuracy=sapply(inf.mods, FUN = function(x) length(which(x=="M1.1" | x=="M1.2"))/length(x) )
 
-save(reg.res, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M1.reg.res.RData")
-save(inf.mods, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M1.inf.mods.RData")
+save(reg.res, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M1.reg.res.Rare.Alleles.RData")
+save(inf.mods, file = "/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/Sim_result_Data/M1.inf.mods.Rare.Alleles.RData")
 
 #pre-allocate stats
 mean.acc=NULL
@@ -118,7 +118,7 @@ for(i in 1:length(b1.1)){mean.acc3[i]=mean(accuracy[which(model.params$b1.1==b1.
 #average accruacy across minor allele freq.
 for(i in 1:length(minor.allele)){mean.acc4[i]=mean(accuracy[which(model.params$minor.freq==minor.allele[i])])}
 
-png("/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/M1_simulation_results.png")
+png("/mnt/ceph/jarredk/MRPC_UPDATE/Simulations/M1_simulation_results_Rare_Alleles.png")
 par(mfrow=c(2,2))
 
 plot(minor.allele, mean.acc4, type="b", pch=21, bg="black",

@@ -34,7 +34,7 @@ colnames(model.params)=c("sample.size","SD", "minor.freq", "b1.1","b1.2")
 #the number of simulations for each set of conditions
 sims=100
 
-model.params=model.params[sample(1:dim(model.params)[1],20),]
+#model.params=model.params[sample(1:dim(model.params)[1],20),]
 
 
 

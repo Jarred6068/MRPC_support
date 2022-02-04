@@ -68,7 +68,7 @@ for(i in 1:dim(model.params)[1]){
       k=k+1
       
     }
-    resamp.vec[j]=resamples
+    resamp.vec[j]=length(resamples)
     samples100[[j]]=X
     
   }

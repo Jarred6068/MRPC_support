@@ -1,3 +1,11 @@
+
+#dependencies
+
+library('MRPC', lib="/mnt/ceph/jarredk/Rpackages")
+library('qvalue', lib="/mnt/ceph/jarredk/Rpackages")
+library('psych', lib="/mnt/ceph/jarredk/Rpackages")
+library('prodlim', lib="/mnt/ceph/jarredk/Rpackages")
+
 #These are the funtions to preform the trio-specific analysis from Section 1.1-1.2 of the pseudocode
 
 

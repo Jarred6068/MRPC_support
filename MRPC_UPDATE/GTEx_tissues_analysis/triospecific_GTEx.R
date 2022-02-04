@@ -45,7 +45,7 @@ mrnet.analyze=function(GTEx.tissname="WholeBlood", save=TRUE, verbose=TRUE){
       
     }
     
-    #trio.list=trio.list[1:5]
+    #trio.list=trio.list[1:100]
     #print(lapply(trio.list, head))
     #preform regressions and classify model types
     reg.res=list()

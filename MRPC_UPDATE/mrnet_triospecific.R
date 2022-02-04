@@ -52,14 +52,24 @@ Reg=function(data=NULL, verbose=FALSE){
 
 ####################################################################
 #-------------------Helper-function-for-permuted-reg---------------
-PermReg.help.fn=function(perm.map=NULL, V=NULL, T1=NULL, T2=NULL, coln=NULL, response=NULL){
+PermReg.help.fn=function(perm.map=NULL, V=NULL, T1=NULL, T2=NULL, U=NULL, coln=NULL, response=NULL){
   
   #written for parallelization
   #permute
   if(response=="T2"){
-    new.data=cbind.data.frame(V, T1[perm.map], T2)
+    if(is.null(U)){
+      new.data=cbind.data.frame(V, T1[perm.map], T2)
+    }else{
+      new.data=cbind.data.frame(V, T1, T2[perm.map], U)
+    }
+    
   }else{
-    new.data=cbind.data.frame(V, T1, T2[perm.map])
+    if(is.null(U)){
+      new.data=cbind.data.frame(V, T1, T2[perm.map])
+    }else{
+      new.data=cbind.data.frame(V, T1, T2[perm.map], U)
+    }
+    
   }
   
   if(isFALSE(is.null(coln))){colnames(new.data)=coln}
@@ -108,12 +118,19 @@ PermReg=function(trio=NULL, t.obs21=NULL, t.obs22=NULL, p11=NULL, p12=NULL, m=NU
     }
   }
   
+  
+  if(dim(trio)[2]>3){
+    confounders=trio[,-c(1:3)]
+  }else{
+    confounders=NULL
+  }
   #preforms all permutations of eqn (3) in parallel
   #outputs Theta21
   Theta21=apply(mediator_perm1, 2, PermReg.help.fn, 
                 V=trio[,1], 
                 T1=trio[,2], 
                 T2=trio[,3], 
+                U=confounders,
                 coln=colnames(trio), 
                 response="T1")
   #outputs Theta22
@@ -121,6 +138,7 @@ PermReg=function(trio=NULL, t.obs21=NULL, t.obs22=NULL, p11=NULL, p12=NULL, m=NU
                 V=trio[,1], 
                 T1=trio[,2], 
                 T2=trio[,3], 
+                U=confounders,
                 coln=colnames(trio), 
                 response="T2")
   

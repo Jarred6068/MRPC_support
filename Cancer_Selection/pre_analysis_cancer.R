@@ -29,9 +29,9 @@ BSGS.meta=read.csv("/mnt/ceph/jarredk/Methyl/GPL13534_HumanMethylation450_150174
 
 TCGA.pca=prcomp(t(TCGA.meth), retx=T)$x
 
-png("/mnt/ceph/jarredk/Cancer_Selection/TCGA.pca.plot.png")
+#png("/mnt/ceph/jarredk/Cancer_Selection/TCGA.pca.plot.png")
 
-plot(TCGA.pca[,1], TCGA.pca[,2], color=as.factor(TCGA.meta$))
+#plot(TCGA.pca[,1], TCGA.pca[,2], color=as.factor(TCGA.meta$))
 
 
 #####################################################################

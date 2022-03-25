@@ -4,10 +4,10 @@
 %
 \documentclass[
 ]{article}
+\usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{amssymb,amsmath}
-\usepackage{ifxetex,ifluatex}
-\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage{iftex}
+\ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
@@ -42,7 +42,8 @@
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=1in]{geometry}
-\usepackage{longtable,booktabs}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
 \makeatletter
@@ -51,7 +52,7 @@
 % Allow footnotes in longtable head/foot
 \IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
 \makesavenoteenv{longtable}
-\usepackage{graphicx,grffile}
+\usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
 \def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
@@ -68,6 +69,9 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
 
 \title{12/1/2021 GMAC analysis and pvalue plots}
 \author{Jarred Kvamme, University of Idaho}
@@ -222,31 +226,33 @@ test(s).
 
 \indent \(\bullet\) True GMAC Model Simulation (TGM)
 
-We preformed a third and final simulation of the trans gene using the
-analysis model in GMAC given by \textbf{(1)} as the trans gene
-generating process. We then applied the MRPC model
+We preformed a third simulation of the trans gene using the analysis
+model in GMAC given by \textbf{(1)} as the trans gene generating
+process. We then applied the MRPC model
 
 \begin{eqnarray}  T_j = \beta_0 + \beta_1 C_i +\beta_2 L_i + {\bf \Gamma}_z {\bf Z}_{ij} \end{eqnarray}
 
-where \({\bf Z}_{ij}\) is a subset of both \({bf X}_{ij}\) and
-\({W}_{ij}\) representing only the confounders selected under the MRPC
-methodology. The goal was to analyze the power of MRPC when infer the
-larger GMAC model under the assumption that the GMAC model is the true.
+where the column dimension \({\bf Z}_{ij}\) is a less than or equal to
+the column dimension of \({W}_{ij}\) and represents only the confounders
+selected under the MRPC PC-selection methodology. The goal was to
+analyze the power of MRPC in detecting the mediation edge when the data
+is generated from the much larger GMAC model.
 
 \indent \(\bullet\) GMAC Self Simulation (GSS)
 
 We created a fourth simulation scenario to test the importance of
-permutation on the analysis result. Each of the above simualtions uses
-variations understanding the inferential power of MRPC/GMAC when we know
-we have the incorrect model. In this scenario we take a different
-approach and use the model suggested by GMAC for each trio given by
-\textbf{eqn. (1)} to generate the trans gene such that:
+permutation on the analysis result. Each of the above simulations seeks
+to understanding the inferential power of MRPC/GMAC under model
+misspecification. In this scenario we take a different approach and use
+the model suggested by GMAC for each trio given by \textbf{eqn. (1)} to
+generate the trans gene such that:
 
 \[ T_j^{\ast} = \hat{\beta}_0 + \hat{\beta}_1 C_i + \hat{\beta}_2 L_i + \hat{{\bf \Gamma}} {\bf X}_{ij} + \epsilon  \]
 
-where \(\epsilon \sim N(0, \hat{\sigma})\). We the apply \({\bf 1}\) to
-each simulated trio under this scenario to obtain the parametric and
-permutation inferences when we know the analysis model is correct.
+where \(\epsilon \sim N(0, \hat{\sigma})\). We then apply the correct
+model \({\bf (1)}\) to each simulated trio under this scenario to obtain
+the parametric and permutation inferences when we know the analysis
+model is correct.
 
 \section*{3. Results}
 \subsection*{3.1 Comparing GMAC and MRPC}
@@ -293,324 +299,236 @@ lead to extremely few PCs being selected for each trio. After
 implementing the correct PC selection process, MRPC and GMAC select
 equivalent numbers of PCs
 
-\(\bullet\) - The nominal p-value appears to be better at determining
-the presence of a mediation edge for rare variants. Thus we may need to
-preform the permuted regression test when the instrumental variable/
-cis-eQTL contains a rare variant allele
+\(\bullet\) - Figure 1 panel D supports that the nominal p-value appears
+to be better at determining the presence of a mediation edge for rare
+variants. This indicates we may need to preform the permuted regression
+test when the instrumental variable/ cis-eQTL contains a rare allele
+
+\(\bullet\) - Figure 1 panels A-C supports the need to skip the marginal
+tests and instead proceed directly to the conditional tests for each
+edge. However, these plots do not consider the entire model topology
+only the presence or absence of the mediation edge: \(T_1 - T_2\)
 
 \newpage
 \section{Tables and Figures}
 
-\begin{longtable}[]{@{}lrrrrr@{}}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.0909}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.2386}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1591}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1818}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1932}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1364}}@{}}
 \caption{Descriptive statistics for the distribution of missing values
 across the eQTL's for each tissue used in GMAC}\tabularnewline
 \toprule
-\begin{minipage}[b]{0.08\columnwidth}\raggedright
-\strut
-\end{minipage} & \begin{minipage}[b]{0.20\columnwidth}\raggedleft
-Adipose Subcutaneous\strut
-\end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\raggedleft
-Artery Tibial\strut
-\end{minipage} & \begin{minipage}[b]{0.15\columnwidth}\raggedleft
-Muscle Skeletal\strut
-\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedleft
-Skin Sun Exposed\strut
-\end{minipage} & \begin{minipage}[b]{0.11\columnwidth}\raggedleft
-Whole Blood\strut
-\end{minipage}\tabularnewline
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Adipose Subcutaneous
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Artery Tibial
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Muscle Skeletal
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Skin Sun Exposed
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Whole Blood
+\end{minipage} \\
 \midrule
 \endfirsthead
 \toprule
-\begin{minipage}[b]{0.08\columnwidth}\raggedright
-\strut
-\end{minipage} & \begin{minipage}[b]{0.20\columnwidth}\raggedleft
-Adipose Subcutaneous\strut
-\end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\raggedleft
-Artery Tibial\strut
-\end{minipage} & \begin{minipage}[b]{0.15\columnwidth}\raggedleft
-Muscle Skeletal\strut
-\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedleft
-Skin Sun Exposed\strut
-\end{minipage} & \begin{minipage}[b]{0.11\columnwidth}\raggedleft
-Whole Blood\strut
-\end{minipage}\tabularnewline
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Adipose Subcutaneous
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Artery Tibial
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Muscle Skeletal
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Skin Sun Exposed
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Whole Blood
+\end{minipage} \\
 \midrule
 \endhead
-\begin{minipage}[t]{0.08\columnwidth}\raggedright
-Min.\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.08\columnwidth}\raggedright
-1st Qu.\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.08\columnwidth}\raggedright
-Median\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\raggedleft
-0.000000\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.08\columnwidth}\raggedright
-Mean\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\raggedleft
-0.006365\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-0.006625\strut
-\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\raggedleft
-0.006560\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedleft
-0.006701\strut
-\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\raggedleft
-0.006103\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.08\columnwidth}\raggedright
-3rd Qu.\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\raggedleft
-0.003442\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-0.003425\strut
-\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\raggedleft
-0.002833\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedleft
-0.003306\strut
-\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\raggedleft
-0.002985\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.08\columnwidth}\raggedright
-Max.\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\raggedleft
-0.156627\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-0.159247\strut
-\end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\raggedleft
-0.158640\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedleft
-0.160331\strut
-\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\raggedleft
-0.155224\strut
-\end{minipage}\tabularnewline
+Min. & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
+1st Qu. & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
+Median & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
+Mean & 0.006365 & 0.006625 & 0.006560 & 0.006701 & 0.006103 \\
+3rd Qu. & 0.003442 & 0.003425 & 0.002833 & 0.003306 & 0.002985 \\
+Max. & 0.156627 & 0.159247 & 0.158640 & 0.160331 & 0.155224 \\
 \bottomrule
 \end{longtable}
 
-\begin{longtable}[]{@{}lrrrrrrrr@{}}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.2353}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0471}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0353}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0353}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0471}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0471}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0706}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.2353}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.2471}}@{}}
 \caption{The breakdown of unqiue trios with inferred significant cis or
 trans mediation under GMAC across their respective ADDIS inferred
 regulatory networks. The column ``Percentage In Common'' is the
 proportion of significant trios that also contained a mediation edge in
 the regulatory network inferred under ADDIS}\tabularnewline
 \toprule
-Tissue & M0 & M1 & M2 & M3 & M4 & Other & Total GMAC Inferred &
-Percentage In Common\tabularnewline
+\begin{minipage}[b]{\linewidth}\raggedright
+Tissue
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M0
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Other
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Total GMAC Inferred
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Percentage In Common
+\end{minipage} \\
 \midrule
 \endfirsthead
 \toprule
-Tissue & M0 & M1 & M2 & M3 & M4 & Other & Total GMAC Inferred &
-Percentage In Common\tabularnewline
+\begin{minipage}[b]{\linewidth}\raggedright
+Tissue
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M0
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+M4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Other
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Total GMAC Inferred
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Percentage In Common
+\end{minipage} \\
 \midrule
 \endhead
-AdiposeSubcutaneous & 107 & 47 & 12 & 102 & 134 & 2 & 404 &
-0.4777\tabularnewline
-ArteryTibial & 88 & 37 & 10 & 108 & 112 & 0 & 355 &
-0.4479\tabularnewline
-MuscleSkeletal & 126 & 37 & 8 & 145 & 132 & 2 & 450 &
-0.3933\tabularnewline
-SkinSunExposed & 118 & 42 & 12 & 132 & 139 & 0 & 443 &
-0.4357\tabularnewline
-WholeBlood & 107 & 55 & 29 & 142 & 171 & 4 & 508 & 0.5020\tabularnewline
+AdiposeSubcutaneous & 107 & 47 & 12 & 102 & 134 & 2 & 404 & 0.4777 \\
+ArteryTibial & 88 & 37 & 10 & 108 & 112 & 0 & 355 & 0.4479 \\
+MuscleSkeletal & 126 & 37 & 8 & 145 & 132 & 2 & 450 & 0.3933 \\
+SkinSunExposed & 118 & 42 & 12 & 132 & 139 & 0 & 443 & 0.4357 \\
+WholeBlood & 107 & 55 & 29 & 142 & 171 & 4 & 508 & 0.5020 \\
 \bottomrule
 \end{longtable}
 
-\begin{longtable}[]{@{}lrrrrrrrr@{}}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1370}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0822}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0890}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1712}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.1849}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0753}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0890}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0822}}
+  >{\raggedleft\arraybackslash}p{(\columnwidth - 16\tabcolsep) * \real{0.0890}}@{}}
 \caption{Breakdown of trios with inferred mediation under GMAC across
 both cis and trans mediation types. The column ``Unique Both''
 represents the intersection of the columns ``Total Cis Mediated'' and
 ``Total Trans Mediated''}\tabularnewline
 \toprule
-\begin{minipage}[b]{0.10\columnwidth}\raggedright
-Tissue\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
-Sample Size\strut
-\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\raggedleft
-Tested Trios\strut
-\end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\raggedleft
-Cis-Gene Mediation Trios\strut
-\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\raggedleft
-Trans-Gene Mediation Trios\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
-Unique Cis\strut
-\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\raggedleft
-Unique Trans\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
-Unique Both\strut
-\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\raggedleft
-Unique Total\strut
-\end{minipage}\tabularnewline
+\begin{minipage}[b]{\linewidth}\raggedright
+Tissue
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Sample Size
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Tested Trios
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Cis-Gene Mediation Trios
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Trans-Gene Mediation Trios
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Cis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Trans
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Both
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Total
+\end{minipage} \\
 \midrule
 \endfirsthead
 \toprule
-\begin{minipage}[b]{0.10\columnwidth}\raggedright
-Tissue\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
-Sample Size\strut
-\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\raggedleft
-Tested Trios\strut
-\end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\raggedleft
-Cis-Gene Mediation Trios\strut
-\end{minipage} & \begin{minipage}[b]{0.14\columnwidth}\raggedleft
-Trans-Gene Mediation Trios\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
-Unique Cis\strut
-\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\raggedleft
-Unique Trans\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedleft
-Unique Both\strut
-\end{minipage} & \begin{minipage}[b]{0.07\columnwidth}\raggedleft
-Unique Total\strut
-\end{minipage}\tabularnewline
+\begin{minipage}[b]{\linewidth}\raggedright
+Tissue
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Sample Size
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Tested Trios
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Cis-Gene Mediation Trios
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Trans-Gene Mediation Trios
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Cis
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Trans
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Both
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Unique Total
+\end{minipage} \\
 \midrule
 \endhead
-\begin{minipage}[t]{0.10\columnwidth}\raggedright
-AdiposeSubcutaneous\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-581\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-11850\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-374\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
-282\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-122\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-30\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-252\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-404\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.10\columnwidth}\raggedright
-ArteryTibial\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-584\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-11471\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-334\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
-226\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-129\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-21\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-205\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-355\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.10\columnwidth}\raggedright
-MuscleSkeletal\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-706\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-10257\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-401\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
-314\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-136\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-49\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-265\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-450\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.10\columnwidth}\raggedright
-SunExposedSkin\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-605\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-13045\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-404\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
-333\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-110\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-39\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-294\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-443\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.10\columnwidth}\raggedright
-WholeBlood\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-670\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-8823\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\raggedleft
-451\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\raggedleft
-398\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-110\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-57\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedleft
-341\strut
-\end{minipage} & \begin{minipage}[t]{0.07\columnwidth}\raggedleft
-508\strut
-\end{minipage}\tabularnewline
+AdiposeSubcutaneous & 581 & 11850 & 374 & 282 & 122 & 30 & 252 & 404 \\
+ArteryTibial & 584 & 11471 & 334 & 226 & 129 & 21 & 205 & 355 \\
+MuscleSkeletal & 706 & 10257 & 401 & 314 & 136 & 49 & 265 & 450 \\
+SunExposedSkin & 605 & 13045 & 404 & 333 & 110 & 39 & 294 & 443 \\
+WholeBlood & 670 & 8823 & 451 & 398 & 110 & 57 & 341 & 508 \\
 \bottomrule
 \end{longtable}
 
 \begin{figure}
 \centering
 \includegraphics{C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/GMACwriteup_sim_diagram.png}
-\caption{A visual depiction of the relationship between the simulation
-models for the trans gene and the regression used for the mediation
-test}
+\caption{A visual depiction of the relationship between the STM and LTM
+simulation models for the trans gene and the regression used for the
+mediation test}
 \end{figure}
 
 \hypertarget{variance-across-tissues-plots}{%
 \subsection{variance across tissues
 plots}\label{variance-across-tissues-plots}}
 
+\begin{figure}
+\centering
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-4-1.pdf}
+\caption{A) The number of PC's included for each trio in whole blood
+after using the corrected PC selection for MRPC with the number of PC's
+selected by GMAC. B) compares the number of PC's selected for each trio
+under Badsha's original code vs the corrected version of PC selection}
+\end{figure}
 
 \hypertarget{simulations-median-p-value-plots}{%
 \subsection{simulation(s) Median P-value
 plots}\label{simulations-median-p-value-plots}}
 
+\begin{figure}
+\centering
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-5-1.pdf}
+\caption{All panels: comparison of the median \(p\)-value from the test
+for the mediation edge from 1000 iterations of each simulation scenario
+for each trio (y-axis) with the nominal p-value for the edge from the
+true model (x-axis). Each panel corresponds to a specific simulation
+scenario. These graphs support the need to use conditional tests
+directly as well as the need for the permutation test when the genotype
+has a low frequency allele.}
+\end{figure}
 
 \hypertarget{simulations-nominal-p-value-plots}{%
 \subsection{simulation(s) Nominal P-value

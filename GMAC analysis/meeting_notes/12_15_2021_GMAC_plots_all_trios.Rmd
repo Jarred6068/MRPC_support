@@ -70,20 +70,20 @@ where ${\bf G}_{ij}$ represents the additional explanatory variables in ${\bf V}
 
 \indent $\bullet$ True GMAC Model Simulation (TGM)
 
-We preformed a third and final simulation of the trans gene using the analysis model in GMAC given by \textbf{(1)} as the trans gene generating process. We then applied the MRPC model 
+We preformed a third simulation of the trans gene using the analysis model in GMAC given by \textbf{(1)} as the trans gene generating process. We then applied the MRPC model 
 
 \begin{eqnarray}  T_j = \beta_0 + \beta_1 C_i +\beta_2 L_i + {\bf \Gamma}_z {\bf Z}_{ij} \end{eqnarray}
 
-where ${\bf Z}_{ij}$ is a subset of both ${bf X}_{ij}$ and ${W}_{ij}$ representing only the confounders selected under the MRPC methodology. The goal was to analyze the power of MRPC when infer the larger GMAC model under the assumption that the GMAC model is the true.  
+where the column dimension ${\bf Z}_{ij}$ is a less than or equal to the column dimension of ${W}_{ij}$ and represents only the confounders selected under the MRPC PC-selection methodology. The goal was to analyze the power of MRPC in detecting the mediation edge when the data is generated from the much larger GMAC model.
 
 
 \indent $\bullet$ GMAC Self Simulation (GSS)
 
-We created a fourth simulation scenario to test the importance of permutation on the analysis result. Each of the above simualtions uses variations understanding the inferential power of MRPC/GMAC when we know we have the incorrect model. In this scenario we take a different approach and use the model suggested by GMAC for each trio given by \textbf{eqn. (1)} to generate the trans gene such that:
+We created a fourth simulation scenario to test the importance of permutation on the analysis result. Each of the above simulations seeks to understanding the inferential power of MRPC/GMAC under model misspecification. In this scenario we take a different approach and use the model suggested by GMAC for each trio given by \textbf{eqn. (1)} to generate the trans gene such that:
 
 \[ T_j^{\ast} = \hat{\beta}_0 + \hat{\beta}_1 C_i + \hat{\beta}_2 L_i + \hat{{\bf \Gamma}} {\bf X}_{ij} + \epsilon  \]
 
-where $\epsilon \sim N(0, \hat{\sigma})$. We the apply ${\bf 1}$ to each simulated trio under this scenario to obtain the parametric and permutation inferences when we know the analysis model is correct.  
+where $\epsilon \sim N(0, \hat{\sigma})$. We then apply the correct model ${\bf (1)}$ to each simulated trio under this scenario to obtain the parametric and permutation inferences when we know the analysis model is correct.  
 
 
 
@@ -104,7 +104,9 @@ $\bullet$ - The nominal p-value and mediation p-value give more or less the same
 
 $\bullet$ - We noticed that Badsha implemented the PC selection code for MRPC in a way that led to the qvalues of each correlation test being applied after the p-values had already been bonferroni adjusted. This lead to extremely few PCs being selected for each trio. After implementing the correct PC selection process, MRPC and GMAC select equivalent numbers of PCs
 
-$\bullet$ - The nominal p-value appears to be better at determining the presence of a mediation edge for rare variants. Thus we may need to preform the permuted regression test when the instrumental variable/ cis-eQTL contains a rare variant allele
+$\bullet$ - Figure 1 panel D supports that the nominal p-value appears to be better at determining the presence of a mediation edge for rare variants. This indicates we may need to preform the permuted regression test when the instrumental variable/ cis-eQTL contains a rare allele
+
+$\bullet$ - Figure 1 panels A-C supports the need to skip the marginal tests and instead proceed directly to the conditional tests for each edge. However, these plots do not consider the entire model topology only the presence or absence of the mediation edge: $T_1 - T_2$
 
 
 \newpage
@@ -153,12 +155,13 @@ table3$`Sample Size`=c(581, 584, 706, 605, 670)
 table3$Tissue=c("AdiposeSubcutaneous", "ArteryTibial", "MuscleSkeletal", "SunExposedSkin", "WholeBlood")
 kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersection of the columns \"Total Cis Mediated\" and \"Total Trans Mediated\" ")
 
+write.csv(table3, file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/GMAC_MRPC_comparison_final2.csv")
 
 ```
 
 
 
-![A visual depiction of the relationship between the simulation models for the trans gene and the regression used for the mediation test](C:\Users\Bruin\Documents\GitHub\MRPC_support\Manuscript\GMACwriteup_sim_diagram.png)
+![A visual depiction of the relationship between the STM and LTM simulation models for the trans gene and the regression used for the mediation test](C:\Users\Bruin\Documents\GitHub\MRPC_support\Manuscript\GMACwriteup_sim_diagram.png)
 
 
 ## variance across tissues plots
@@ -166,7 +169,7 @@ kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC a
 
 
 
-```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
+```{r, fig.cap="A) The number of PC's included for each trio in whole blood after using the corrected PC selection for MRPC with the number of PC's selected by GMAC. B) compares the number of PC's selected for each trio under Badsha's original code vs the corrected version of PC selection", echo=FALSE, message=FALSE, warning=FALSE}
 #sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
 library(ggpubr)
 library(prodlim)
@@ -227,7 +230,7 @@ ggarrange(A, B, nrow = 2, labels = c("A", "B"))
 
 
 
-```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+```{r, fig.cap="All panels: comparison of the median $p$-value from the test for the mediation edge from 1000 iterations of each simulation scenario for each trio (y-axis) with the nominal p-value for the edge from the true model (x-axis). Each panel corresponds to a specific simulation scenario. These graphs support the need to use conditional tests directly as well as the need for the permutation test when the genotype has a low frequency allele.", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
 
 #set.seed(222)
 

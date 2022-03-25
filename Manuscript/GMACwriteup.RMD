@@ -139,7 +139,9 @@ table.final=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis
 table.final[,9]=(table.final$M1+table.final$M2+table.final$M4)/table.final[,8]
 colnames(table.final)=c("Tissue", paste0("M", c(0:4)), "Other", "Total GMAC Inferred", "Percentage In Common")
 
-kable(table.final, caption = "The breakdown of unqiue trios with inferred significant cis or trans mediation under GMAC across their respective ADDIS inferred regulatory networks. The column \"Percentage In Common\" is the proportion of significant trios that also contained a mediation edge in the regulatory network inferred under ADDIS", digits = 4)
+kable(table.final, caption = "The breakdown of unqiue trios with inferred significant cis or trans mediation under GMAC across their respective ADDIS inferred regulatory networks. The column \"Percentage In Common\" is the proportion of significant trios that also contained a mediation edge in the regulatory network inferred under MRPC-ADDIS", digits = 4)
+
+write.csv(table.final, "C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/GMAC_MRPC_comparison_final.csv")
 ```
 
 
@@ -203,30 +205,30 @@ genotypes=sim3[,36:38]/rowSums(sim3[,36:38])
 
 #floor variables
 
-sim$Perm.p.GMAC.floored=sim$Perm.p.GMAC
-sim$Perm.p.GMAC.floored=replace(sim$Perm.p.GMAC.floored, which(sim$Perm.p.GMAC.floored==0), 1e-05)
+sim3$Perm.p.GMAC.floored=sim3$Perm.p.GMAC
+sim3$Perm.p.GMAC.floored=replace(sim3$Perm.p.GMAC.floored, which(sim3$Perm.p.GMAC.floored==0), 1e-05)
 
-sim$Perm.p.MRPC.floored=sim$Perm.p.MRPC
-sim$Perm.p.MRPC.floored=replace(sim$Perm.p.MRPC.floored, which(sim$Perm.p.MRPC.floored==0), 1e-05)
+sim3$Perm.p.MRPC.floored=sim3$Perm.p.MRPC
+sim3$Perm.p.MRPC.floored=replace(sim3$Perm.p.MRPC.floored, which(sim3$Perm.p.MRPC.floored==0), 1e-05)
 
 #LTM-STM permutation pvalues 
-sim$STM.perm.p.floored=sim$STM.perm.p
-sim$STM.perm.p.floored=replace(sim$STM.perm.p.floored, which(sim$STM.perm.p.floored==0), 1e-05)
+sim3$STM.perm.p.floored=sim3$STM.perm.p
+sim3$STM.perm.p.floored=replace(sim3$STM.perm.p.floored, which(sim3$STM.perm.p.floored==0), 1e-05)
 
-sim$LTM.perm.p.floored=sim$LTM.perm.p
-sim$LTM.perm.p.floored=replace(sim$LTM.perm.p.floored, which(sim$LTM.perm.p.floored==0), 1e-05)
+sim3$LTM.perm.p.floored=sim3$LTM.perm.p
+sim3$LTM.perm.p.floored=replace(sim3$LTM.perm.p.floored, which(sim3$LTM.perm.p.floored==0), 1e-05)
 
-sim$TGM.perm.floored=sim$TGM.perm.p
-sim$TGM.perm.floored=replace(sim$TGM.perm.floored, which(sim$TGM.perm.floored==0), 1e-05)
+sim3$TGM.perm.floored=sim3$TGM.perm.p
+sim3$TGM.perm.floored=replace(sim3$TGM.perm.floored, which(sim3$TGM.perm.floored==0), 1e-05)
 
-sim$GSS.perm.floored=sim$GSS.perm.p
-sim$GSS.perm.floored=replace(sim$GSS.perm.floored, which(sim$GSS.perm.floored==0), 1e-05)
+sim3$GSS.perm.floored=sim3$GSS.perm.p
+sim3$GSS.perm.floored=replace(sim3$GSS.perm.floored, which(sim3$GSS.perm.floored==0), 1e-05)
 
 #create color for allele frequencies of alternative or reference < 5% 
-cv1=rep(0, dim(sim)[1])
-cv2=replace(cv1, which(sim$alternative<=0.05 | sim$reference<=0.05), 1)
+cv1=rep(0, dim(sim3)[1])
+cv2=replace(cv1, which(sim3$alternative<=0.05 | sim3$reference<=0.05), 1)
 h=0.05
-sim$colvar=as.factor(cv2)
+sim3$colvar=as.factor(cv2)
 
 A=ggplot(data = sim3, aes(x=Num.pcs.GMAC, y=Per.var.GMAC, color=Tissue))+
   geom_point()+
@@ -261,10 +263,10 @@ ggarrange(A, B, nrow = 2, labels = c("A", "B"))
 
 
 h=0.05
-A=ggplot(data = sim)+
+A=ggplot(data = sim3)+
   geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(STM.med.p), color=colvar))+
   theme(legend.position = "none")+
-  labs(y = expression(log10('Sim. Parametric P-value')),
+  labs(y = expression(log10('sim. Parametric P-value')),
        x = expression(log10('GMAC Obs. Parametric P-value')),
        subtitle = "Small True Model Simulation")+
   scale_x_continuous(limits = c(-15,0))+
@@ -273,7 +275,7 @@ A=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-B=ggplot(data = sim)+
+B=ggplot(data = sim3)+
   geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(LTM.med.p), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Parametric P-value')),
@@ -285,7 +287,7 @@ B=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-A1=ggplot(data = sim)+
+A1=ggplot(data = sim3)+
    geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(STM.perm.p.floored), color=colvar))+
    theme(legend.position = "none")+
    labs(y = expression(log10('Sim. Permutation P-value')),
@@ -298,7 +300,7 @@ A1=ggplot(data = sim)+
    geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
-B1=ggplot(data = sim)+
+B1=ggplot(data = sim3)+
    geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(LTM.perm.p.floored), color=colvar))+
    theme(legend.position = "none")+
    labs(y = expression(log10('Sim. Permutation P-value')),
@@ -336,7 +338,7 @@ ggarrange(A, B, A1, B1, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 h=0.05
-A=ggplot(data = sim)+
+A=ggplot(data = sim3)+
   geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(TGM.med.p), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Parametric P-value')),
@@ -350,7 +352,7 @@ A=ggplot(data = sim)+
 
 
 
-B=ggplot(data = sim)+
+B=ggplot(data = sim3)+
   geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(TGM.perm.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Permutation P-value')),
@@ -363,7 +365,7 @@ B=ggplot(data = sim)+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
-C=ggplot(data = sim)+
+C=ggplot(data = sim3)+
   geom_point(aes(x=log10(TGM.med.p), y=log10(TGM.perm.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. TGM Perm. P-value')),
@@ -375,7 +377,7 @@ C=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-D=ggplot(data = sim)+
+D=ggplot(data = sim3)+
   geom_point(aes(x=log10(Med.pvalue.MRPC), y=log10(Perm.p.MRPC.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('MRPC Permutation P-value')),
@@ -404,7 +406,7 @@ ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 h=0.05
-A=ggplot(data = sim)+
+A=ggplot(data = sim3)+
   geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(GSS.med.p), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Parametric P-value')),
@@ -418,7 +420,7 @@ A=ggplot(data = sim)+
 
 
 
-B=ggplot(data = sim)+
+B=ggplot(data = sim3)+
   geom_point(aes(x=log10(Perm.p.GMAC.floored), y=log10(GSS.perm.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Permutation P-value')),
@@ -431,7 +433,7 @@ B=ggplot(data = sim)+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
-C=ggplot(data = sim)+
+C=ggplot(data = sim3)+
   geom_point(aes(x=log10(GSS.med.p), y=log10(GSS.perm.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Perm. P-value')),
@@ -443,7 +445,7 @@ C=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-D=ggplot(data = sim)+
+D=ggplot(data = sim3)+
   geom_point(aes(x=log10(Med.pvalue.GMAC), y=log10(Perm.p.GMAC.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('GMAC Permutation P-value')),
@@ -470,7 +472,7 @@ ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 h=0.05
-A=ggplot(data = sim)+
+A=ggplot(data = sim3)+
   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.STM), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Nominal P-value')),
@@ -484,7 +486,7 @@ A=ggplot(data = sim)+
 
 
 
-B=ggplot(data = sim)+
+B=ggplot(data = sim3)+
   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.LTM), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Nominal P-value')),
@@ -497,7 +499,7 @@ B=ggplot(data = sim)+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
-C=ggplot(data = sim)+
+C=ggplot(data = sim3)+
   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.TGM), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Nominal P-value')),
@@ -509,7 +511,7 @@ C=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-D=ggplot(data = sim)+
+D=ggplot(data = sim3)+
   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.GSS), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Sim. Nominal P-value')),
@@ -521,7 +523,7 @@ D=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-E=ggplot(data = sim)+
+E=ggplot(data = sim3)+
   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.MRPC), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Obs. MRPC Nominal P-value')),
@@ -533,7 +535,7 @@ E=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
-G=ggplot(data = sim)+
+G=ggplot(data = sim3)+
   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Perm.p.GMAC.floored), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Obs. Perm. P-value')),
@@ -554,7 +556,7 @@ ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 ```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
 
-E=ggplot(data = sim)+
+E=ggplot(data = sim3)+
   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.MRPC), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Obs. MRPC Nominal P-value')),
@@ -566,8 +568,8 @@ E=ggplot(data = sim)+
   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 h=0.05
-G=ggplot(data = sim)+
-  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(sim$Med.pvalue.GMAC), color=colvar))+
+G=ggplot(data = sim3)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(sim3$Med.pvalue.GMAC), color=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('Obs. Para. P-value')),
        x = expression(log10('Obs. Nominal P-value')),
@@ -590,19 +592,19 @@ ggarrange(E, G, labels = c("E","G") , nrow=2, ncol=2)
 
 ```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE, results='hide',fig.keep='all'}
 
-sim$STM.med.p.floored=sim$STM.med.p
-sim$STM.med.p.floored=replace(sim$STM.med.p.floored, which(sim$STM.med.p.floored<=2e-16), 2e-16)
+sim3$STM.med.p.floored=sim3$STM.med.p
+sim3$STM.med.p.floored=replace(sim3$STM.med.p.floored, which(sim3$STM.med.p.floored<=2e-16), 2e-16)
 
-sim$LTM.med.p.floored=sim$LTM.med.p
-sim$LTM.med.p.floored=replace(sim$LTM.med.p.floored, which(sim$LTM.med.p.floored<=2e-16), 2e-16)
+sim3$LTM.med.p.floored=sim3$LTM.med.p
+sim3$LTM.med.p.floored=replace(sim3$LTM.med.p.floored, which(sim3$LTM.med.p.floored<=2e-16), 2e-16)
 
-sim$TGM.med.floored=sim$TGM.med.p
-sim$TGM.med.floored=replace(sim$TGM.med.floored, which(sim$TGM.med.floored<=2e-16), 2e-16)
+sim3$TGM.med.floored=sim3$TGM.med.p
+sim3$TGM.med.floored=replace(sim3$TGM.med.floored, which(sim3$TGM.med.floored<=2e-16), 2e-16)
 
-TT=summary(as.factor(sim$STM.dim.diff))
+TT=summary(as.factor(sim3$STM.dim.diff))
 rmv=as.numeric(names(TT[TT==1]))
 
-sim.sub=sim[-c(match(rmv, sim$STM.dim.diff)),]
+sim.sub=sim3[-c(match(rmv, sim3$STM.dim.diff)),]
 
 h=0.05
 A=ggplot(data = sim.sub)+
@@ -614,7 +616,7 @@ A=ggplot(data = sim.sub)+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
-B=ggplot(data = sim)+
+B=ggplot(data = sim3)+
   geom_boxplot(aes(x=as.factor(LTM.dim.diff), y=log10(LTM.med.p.floored), fill=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('LTM Sim. Parametric P-value')),
@@ -623,7 +625,7 @@ B=ggplot(data = sim)+
   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
 
 
-C=ggplot(data = sim)+
+C=ggplot(data = sim3)+
   geom_boxplot(aes(x=as.factor(Num.pcs.GMAC-Num.pcs.MRPC), y=log10(TGM.med.floored), fill=colvar))+
   theme(legend.position = "none")+
   labs(y = expression(log10('TGM Sim. Parametric P-value')),
@@ -662,9 +664,9 @@ set.seed(222)
 
 h=0.05
 
-sim.sub1=subset(sim, Med.pvalue.GMAC<0.05 & Med.pvalue.MRPC>0.05)
+sim.sub1=subset(sim3, Med.pvalue.GMAC<0.05 & Med.pvalue.MRPC>0.05)
 sim.sub1$`Model Significance`=rep("GMAC p < 0.05 vs MRPC p > 0.05", dim(sim.sub1)[1])
-sim.sub2=subset(sim, Med.pvalue.GMAC>0.05 & Med.pvalue.MRPC>0.05)
+sim.sub2=subset(sim3, Med.pvalue.GMAC>0.05 & Med.pvalue.MRPC>0.05)
 sim.sub2$`Model Significance`=rep("GMAC p > 0.05 vs MRPC p > 0.05", dim(sim.sub2)[1])
 
 sim.sub=rbind.data.frame(sim.sub1, sim.sub2)
@@ -685,7 +687,7 @@ B=ggplot(data = sim.sub)+geom_density(aes(x=Per.var.GMAC-Per.var.MRPC, fill=`Mod
   labs(x="Diff. In Cumulative Variation In Included PC's")
 
 
-C=ggplot(data = sim)+
+C=ggplot(data = sim3)+
   geom_point(aes(x=GMAC.Nominal.p, y=Nominal.p.MRPC, color=colvar, label=Trio.Num))+
   theme(legend.position = "none")+
   labs(y = "Observed Nominal P-value (MRPC)",
@@ -696,8 +698,8 @@ C=ggplot(data = sim)+
   scale_y_continuous(limits = c(0, h))+
   geom_abline(slope = 1, intercept = 0, linetype="dashed")
 
-MRPC.class=as.factor(sim$ADDIS.inf.Class)
-D=ggplot(data = sim)+
+MRPC.class=as.factor(sim3$ADDIS.inf.Class)
+D=ggplot(data = sim3)+
   geom_point(aes(x=GMAC.Nominal.p, y=Nominal.p.MRPC, color=MRPC.class))+
   #theme(legend.position = "none")+
   labs(y = "Obs. Nominal P-value (MRPC)",
@@ -747,15 +749,16 @@ ggplot(data = trio9AS)+
 ```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE}
 
 trio1922ArT=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/trio1922ArT.txt", sep="\t", header = T)
-
-ggplot(data = trio1922ArT)+
+pdf(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/SNP_effect_example_trio.pdf")
+A=ggplot(data = trio1922ArT)+
   geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)), size=3)+
   labs(x = expression("Cis Gene: ENSG00000167526"),
        y = expression("Trans Gene: ENSG00000215030"),
        col = expression('Genotype Of \nSubject'),
        subtitle = "SNP ID: chr16_89561052_T_G_b38")+theme_pubr()
-
-
+plot(A)
+dev.off()
+plot(A)
 ```
 
 
@@ -766,13 +769,15 @@ ggplot(data = trio1922ArT)+
 trio5683AS=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/Trio5683AS.txt", sep="\t", header = T)
 trio8112WB=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/Trio8112WB.txt", sep="\t", header = T)
 
-
+pdf("C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/SNP_effect_example_trio2.pdf")
 A=ggplot(data = trio5683AS)+
   geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
   labs(x = expression("Cis Gene: ENSG00000145715"),
        y = expression("Trans Gene: ENSG00000264330"),
        col = expression('Genotype Of \nSubject'),
        subtitle = "SNP ID: chr5_86411404_G_A_b38")
+
+
 
 B=ggplot(data = subset(trio5683AS, SNP!=2))+
   geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
@@ -781,6 +786,8 @@ B=ggplot(data = subset(trio5683AS, SNP!=2))+
        y = expression("Trans Gene: ENSG00000264330"),
        col = expression('Genotype Of \nSubject'),
        subtitle = "SNP ID: chr5_86411404_G_A_b38")
+ggarrange(A,B, labels = c("A","B"), nrow=2, ncol=1)
+dev.off()
 
 
 C=ggplot(data = trio8112WB)+

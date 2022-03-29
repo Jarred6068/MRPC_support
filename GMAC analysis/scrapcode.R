@@ -2,7 +2,7 @@
   #read in postprocessing functions
 
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
-l1=cross.analyze(tissues="CellsEBVtransformedlymphocytes", save=FALSE)
+l1=cross.analyze(tissues="AdiposeSubcutaneous", save=FALSE)
 #check first 15 M3's for wholeblood
 data1=l1$final.tables[[1]][which(l1$final.tables[[1]]$Addis.Class=="M3"),]
 M3.trios.sample=l1$final.tables[[1]][which(l1$final.tables[[1]]$Addis.Class=="M3"),]$Trio.Num

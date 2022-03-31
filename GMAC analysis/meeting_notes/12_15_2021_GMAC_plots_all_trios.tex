@@ -301,13 +301,16 @@ equivalent numbers of PCs
 
 \(\bullet\) - Figure 1 panel D supports that the nominal p-value appears
 to be better at determining the presence of a mediation edge for rare
-variants. This indicates we may need to preform the permuted regression
-test when the instrumental variable/ cis-eQTL contains a rare allele
+variants (points on the nomial p axis are all significant where as some
+trios/rare variants are insignificant on the parametric axis). This
+supports the use of the permuted regression test when the instrumental
+variable/ cis-eQTL contains a rare allele
 
-\(\bullet\) - Figure 1 panels A-C supports the need to skip the marginal
-tests and instead proceed directly to the conditional tests for each
-edge. However, these plots do not consider the entire model topology
-only the presence or absence of the mediation edge: \(T_1 - T_2\)
+\(\bullet\) - Figures 4-5 and Tables 4-9 represent two cases where the
+marginal tests preformed by MRPC falsely remove an edge in the graph
+that is supported by higher order tests. These cases justify the need to
+bypass the marginal tests and proceed directly to conditional tests
+which have increased power in these scenarios.
 
 \newpage
 \section{Tables and Figures}
@@ -540,9 +543,139 @@ plots}\label{simulations-nominal-p-value-plots}}
 
 \(\bullet\) Rare allele plots
 
+\begin{figure}
+\centering
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-8-1.pdf}
+\caption{Trio number 9 from the GTEx tissue Adipose Subcutaneous}
+\end{figure}
 
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Results showing the terms of interest for the Regression:
+cis.gene \textasciitilde{} SNP + trans.gene + PCs for trio 9 from the
+GTEx tissue Adipose Subcutaneous}\tabularnewline
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endfirsthead
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endhead
+(Intercept) & 2070.6858 & 75.9773 & 27.2540 & 0 \\
+trans.gene & 5.0385 & 0.2468 & 20.4178 & 0 \\
+SNP & -1050.0066 & 35.6044 & -29.4909 & 0 \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Results showing the terms of interest for the Regression:
+trans.gene \textasciitilde{} SNP + cis.gene + PCs for trio 9 from the
+GTEx tissue Adipose Subcutaneous}\tabularnewline
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endfirsthead
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endhead
+(Intercept) & -260.4547 & 10.3493 & -25.1664 & 0 \\
+cis.gene & 0.0856 & 0.0042 & 20.4178 & 0 \\
+SNP & 159.5456 & 3.0487 & 52.3325 & 0 \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Correlations between the molecular phenotypes and the eQTL for
+trio 9 from the GTEx tissue Adipose Subcutaneous. Notice that the
+correlation between the cis and trans gene is quite weak despite an
+obvious within-genotype correlation between the two molecular
+phenotypes. Thus MRPC removes this edge in the marginal tests despite
+being clearly supported in the higher order conditional
+tests.}\tabularnewline
+\toprule
+& cis.gene & trans.gene & SNP \\
+\midrule
+\endfirsthead
+\toprule
+& cis.gene & trans.gene & SNP \\
+\midrule
+\endhead
+cis.gene & 1.0000000 & 0.0680676 & -0.4544867 \\
+trans.gene & 0.0680676 & 1.0000000 & 0.7951252 \\
+SNP & -0.4544867 & 0.7951252 & 1.0000000 \\
+\bottomrule
+\end{longtable}
+
+\begin{figure}
+\centering
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-9-1.pdf}
+\caption{Trio number 9 from the GTEx tissue Adipose Subcutaneous}
+\end{figure}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Results showing the terms of interest for the Regression:
+cis.gene \textasciitilde{} SNP + trans.gene + PCs for trio 1922 from the
+GTEx tissue Artery Tibial}\tabularnewline
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endfirsthead
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endhead
+(Intercept) & 41.2423 & 27.1619 & 1.5184 & 0.1295 \\
+trans.gene & 1.0308 & 0.1027 & 10.0398 & 0.0000 \\
+SNP & -222.7941 & 19.8243 & -11.2384 & 0.0000 \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Results showing the terms of interest for the Regression:
+trans.gene \textasciitilde{} SNP + cis.gene + PCs for trio 1922 from the
+GTEx tissue Artery Tibial}\tabularnewline
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endfirsthead
+\toprule
+& Estimate & Std. Error & t value &
+Pr(\textgreater\textbar t\textbar) \\
+\midrule
+\endhead
+(Intercept) & -90.2013 & 9.5820 & -9.4136 & 0 \\
+cis.gene & 0.1480 & 0.0147 & 10.0398 & 0 \\
+SNP & 180.7298 & 3.2883 & 54.9611 & 0 \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\caption{Correlations between the molecular phenotypes and the eQTL for
+trio 1922 from the GTEx tissue Artery Tibial. This is a similar case as
+Trio 9 AS where the marginal relationship is not representative of the
+true relationship between the molecular phenotypes resulting in a false
+negative edge.}\tabularnewline
+\toprule
+& cis.gene & trans.gene & SNP \\
+\midrule
+\endfirsthead
+\toprule
+& cis.gene & trans.gene & SNP \\
+\midrule
+\endhead
+cis.gene & 1.0000000 & 0.0560624 & -0.1992017 \\
+trans.gene & 0.0560624 & 1.0000000 & 0.8869496 \\
+SNP & -0.1992017 & 0.8869496 & 1.0000000 \\
+\bottomrule
+\end{longtable}
 
 \begin{figure}
 \centering

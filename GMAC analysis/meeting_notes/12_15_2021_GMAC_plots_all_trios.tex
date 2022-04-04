@@ -528,9 +528,8 @@ plots}\label{simulations-median-p-value-plots}}
 for the mediation edge from 1000 iterations of each simulation scenario
 for each trio (y-axis) with the nominal p-value for the edge from the
 true model (x-axis). Each panel corresponds to a specific simulation
-scenario. These graphs support the need to use conditional tests
-directly as well as the need for the permutation test when the genotype
-has a low frequency allele.}
+scenario. These graphs support the need to use the permutation test when
+the genotype has a low frequency allele.}
 \end{figure}
 
 \hypertarget{simulations-nominal-p-value-plots}{%
@@ -589,28 +588,6 @@ SNP & 159.5456 & 3.0487 & 52.3325 & 0 \\
 \bottomrule
 \end{longtable}
 
-\begin{longtable}[]{@{}lrrr@{}}
-\caption{Correlations between the molecular phenotypes and the eQTL for
-trio 9 from the GTEx tissue Adipose Subcutaneous. Notice that the
-correlation between the cis and trans gene is quite weak despite an
-obvious within-genotype correlation between the two molecular
-phenotypes. Thus MRPC removes this edge in the marginal tests despite
-being clearly supported in the higher order conditional
-tests.}\tabularnewline
-\toprule
-& cis.gene & trans.gene & SNP \\
-\midrule
-\endfirsthead
-\toprule
-& cis.gene & trans.gene & SNP \\
-\midrule
-\endhead
-cis.gene & 1.0000000 & 0.0680676 & -0.4544867 \\
-trans.gene & 0.0680676 & 1.0000000 & 0.7951252 \\
-SNP & -0.4544867 & 0.7951252 & 1.0000000 \\
-\bottomrule
-\end{longtable}
-
 \begin{figure}
 \centering
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-9-1.pdf}
@@ -657,23 +634,24 @@ SNP & 180.7298 & 3.2883 & 54.9611 & 0 \\
 \bottomrule
 \end{longtable}
 
-\begin{longtable}[]{@{}lrrr@{}}
-\caption{Correlations between the molecular phenotypes and the eQTL for
-trio 1922 from the GTEx tissue Artery Tibial. This is a similar case as
-Trio 9 AS where the marginal relationship is not representative of the
-true relationship between the molecular phenotypes resulting in a false
-negative edge.}\tabularnewline
+\begin{longtable}[]{@{}lrrrr@{}}
+\caption{Correlations between the cis and trans genes trio 9 from the
+GTEx tissue Adipose Subcutaneous and trio 1922 from Artery Tibial.
+Notice that the correlation between the cis and trans gene is quite weak
+despite an obvious within-genotype correlation between the two molecular
+phenotypes. Thus MRPC removes this edge in the marginal tests (given by
+the pvalues) despite being clearly supported in the higher order
+conditional tests.}\tabularnewline
 \toprule
-& cis.gene & trans.gene & SNP \\
+& cor & df & t & p-value \\
 \midrule
 \endfirsthead
 \toprule
-& cis.gene & trans.gene & SNP \\
+& cor & df & t & p-value \\
 \midrule
 \endhead
-cis.gene & 1.0000000 & 0.0560624 & -0.1992017 \\
-trans.gene & 0.0560624 & 1.0000000 & 0.8869496 \\
-SNP & -0.1992017 & 0.8869496 & 1.0000000 \\
+Trio 9 AS & 0.0681 & 579 & 1.6417 & 0.1012 \\
+Trio 1922 ArT & 0.0561 & 582 & 1.3546 & 0.1761 \\
 \bottomrule
 \end{longtable}
 

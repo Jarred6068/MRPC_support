@@ -53,15 +53,21 @@ BC: 365,860 X 155
 =================================================
 ---------***Calculating--Centroids***------------
 =================================================
-we calculated the gene centroids by averaging over all probes into the same gene (accounting for aliases)
-gene centroids data dimension:
-21,244 X 333
+-Illumina 450k human methylation assay contains 485K probes and the manifest that comes standard 
+ with the assay contains gene names for 365K of theses probes (119,652 with missing UCSC Ref_names)
+-We filter out all probes with missing UCSC Ref_names 
+
+-we calculated the gene centroids for the remaining probes by averaging over all probes into the 
+ same gene (accounting for aliases) gene centroids data dimension:
+ 21,244 genes X 333 samples
 
 =================================================
 -------***Detecting-Differential-Genes***--------
 =================================================
+-We used 1-way anova across each gene centroid where the explanatory variable is a factor with two levels
+ "Normal" or "Cancerous" indicating the state of the tissue for each individual. We retain genes 
+ with significant F from this test as differentially methylated between normal and cancereous tissues
 
-We used 1-way anova across each gene where the explanatory variable is a factor with two levels
-"Normal" or "Cancerous" indicating the state of the tissue for each individual. We retain genes 
-with significant F from this test as differentially methylated between normal and cancereous tissues
+-We use a rejection threshold of alpha = 0.05 and the qvalue method to control the FDR at 5%
+
 

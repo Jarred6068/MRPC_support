@@ -71,16 +71,17 @@ all.data.centroids=t(all.data.centroids)
 
 #get differentially methylated genes:
 #first remove the stem cell samples:
-all.data.diff=all.data.centroids[,-c(1:57)] #first 57 columns are from the stem cell data
-labels.diff=labels.final[-c(1:57)]
+all.data.diff=all.data.centroids[,-c(1:56)] #first 57 columns are from the stem cell data
+labels.diff=labels.final[-c(1:56)]
 labels.diff[labels.diff!="Normal"]="Cancer"
 
 #############################################
 get.anova.p=function(X, factor1){
 
   X.new=cbind.data.frame(gene=X, type=as.factor(factor1))
-  print(head(X.new))
+  #print(head(X.new))
   anova.gene=anova(lm(gene~., data=X.new))
+  #print(anova.gene)
   return(anova.gene$`Pr(>F)`[1])
 
 }

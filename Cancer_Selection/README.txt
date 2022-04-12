@@ -45,7 +45,7 @@ the residuals from each regression were retained and kept for the analysis
 ***rows that did not contain a gene name were omitted from the final data set using the HM450k manifest as reference
 
 final dimension: 365,860 X 333
-SC59091: 365,860 X 48
+SC59091: 365,860 X 47
 SC116754: 365,860 X 9
 Healthy: 365,860 X 121
 BC: 365,860 X 155

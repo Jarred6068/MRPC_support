@@ -38,7 +38,7 @@ get.gene.idx=function(unique.genes=NULL, genes.list=NULL){
 mean.gene=function(idx=NULL, full.data=NULL){
 
   if(length(idx)>1){
-    y=colMeans(full.data[idx,])
+    y=colMeans(full.data[idx,], na.rm = TRUE)
   }else{
     y=full.data[idx,]
   }
@@ -64,8 +64,8 @@ calc.centroids=function(gene.idx.list=NULL, unique.genes=NULL, full.data=NULL){
 #save(unq.gene.rowid, file="/mnt/ceph/jarredk/Cancer_Selection/unq.gene.rowid.RData")
 load(file="/mnt/ceph/jarredk/Cancer_Selection/unq.gene.rowid.RData")
 #get the centroids matrix
-# all.data.centroids=calc.centroids(gene.idx.list = unq.gene.rowid, unique.genes = unq.genes, full.data = all.data)
-# save(all.data.centroids, file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.centroids.RData")
+all.data.centroids=calc.centroids(gene.idx.list = unq.gene.rowid, unique.genes = unq.genes, full.data = all.data)
+save(all.data.centroids, file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.centroids.RData")
 load(file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.centroids.RData")
 all.data.centroids=t(all.data.centroids)
 
@@ -73,7 +73,7 @@ all.data.centroids=t(all.data.centroids)
 #first remove the stem cell samples:
 all.data.diff=all.data.centroids[,-c(1:56)] #first 57 columns are from the stem cell data
 labels.diff=labels.final[-c(1:56)]
-labels.diff[labels.diff!="Normal"]="Cancer"
+#labels.diff[labels.diff!="Normal"]="Cancer"
 
 #############################################
 get.anova.p=function(X, factor1){
@@ -124,7 +124,7 @@ get.diff.genes=function(centroid.data=NULL, correction=c("qvalue","BH","bonferro
               adjusted.p=adj.p,
               q.values=q.val,
               genes=sig.genes,
-              G=X[,match(sig.genes, colnames(X))]))
+              G=X[,which(q.val<alpha)]))
 
 }
 #############################################
@@ -135,3 +135,5 @@ out1=get.diff.genes(centroid.data = all.data.diff,
                     factor.labels = labels.diff,
                     FDR=0.05,
                     alpha=0.05)
+
+save(out1, file="/mnt/ceph/jarredk/Cancer_Selection/output1.RData")

@@ -6,14 +6,20 @@ pack.path="/mnt/ceph/jarredk/Rpackages"
 #read in healthy breast tissue methylation data
 hbt.data=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE101961_normal_breast/GSE101961_normal_breast_residuals.txt",
                     header = T, sep = "\t")
+#hbt.data=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE101961_normal_breast/GSE101961_normal_breast_log_normal.txt",
+#                    header = T, sep = "\t")
 hbt.labels=rep("Normal", dim(hbt.data)[2])
 
 #read in stem_cell data set 59091
 stc59=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE116754_METH_stem/GSE59091/GSE59091_residuals.txt",
                  header = T, sep = "\t")
+#stc59=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE116754_METH_stem/GSE59091/GSE59091_log_normal.txt",
+#                 header = T, sep = "\t")
 stc59.meta=read.csv("/mnt/ceph/jarredk/Cancer_Selection/GSE116754_METH_stem/GSE59091//GSE59091_meta_info.csv")
 
 #read in stem_cell data set 116754
+#stc11=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE116754_METH_stem/GSE116754/GSE116754_STEM_log_normal.txt",
+#                 header = T, sep = "\t")
 stc11=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE116754_METH_stem/GSE116754/GSE116754_STEM_residuals.txt",
                  header = T, sep = "\t")
 stc11.meta=read.csv("/mnt/ceph/jarredk/Cancer_Selection/GSE116754_METH_stem/GSE116754/GSE116754_meta_info.csv")
@@ -21,6 +27,8 @@ stc11.meta=read.csv("/mnt/ceph/jarredk/Cancer_Selection/GSE116754_METH_stem/GSE1
 #breast cancer data
 bc.data=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE75067_BC_with_annotations/GSE75067_BC_residuals.txt",
                    header = T, sep = "\t")
+#bc.data=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE75067_BC_with_annotations/GSE75067_BC_log_normal.txt",
+#                   header = T, sep = "\t")
 bc.meta=read.table("/mnt/ceph/jarredk/Cancer_Selection/GSE75067_BC_with_annotations/GSE75067_sample_annotations.txt",
                    header = T, sep = "\t")
 #get the list of samples to remove for having missing grade or ER status
@@ -65,6 +73,9 @@ labels.final[which(labels.final==" embryonic stem cell")]="HESC"
 labels.final[which(labels.final==" dermal fibroblast")]="dermal.fibroblast"
 labels.final[which(labels.final==" endothelial precursor")]="endothelial.precursor"
 labels.final[which(labels.final==" foreskin fibroblast")]="foreskin.fibroblast"
+
+colnames(all.data)=labels.final
+save(all.data, file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.final.RData")
 
 save(labels.final, file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.final.labels.RData")
 

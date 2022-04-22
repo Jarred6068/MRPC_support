@@ -5,7 +5,7 @@ source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 #get the top five tissues by sample size
 top5=c(1, 6, 33, 40, 48)
 path='/mnt/ceph/jarredk/Reg_Net/'
-tissues.vec=tissue.names[top5, 2]
+tissues.vec=tissue.names[, 2]
 
 for(t in 1:length(tissues.vec)){
 

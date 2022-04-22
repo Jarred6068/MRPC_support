@@ -62,7 +62,7 @@ normalize.data=function(meth.data=NULL, meta.data=NULL,which.covars=NULL, plot4=
   resids=apply(t(log.norm), 2,
                norm.data,
                var1 = meta.data$age,
-               factor1 = meta.data$Sample_Plate
+               factor1 = meta.data$Sample_Plate,
                factor2 = meta.data$Sample.Section)
 
   print(t(resids[1:5,1:5]))

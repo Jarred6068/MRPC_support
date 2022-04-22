@@ -2,9 +2,8 @@
 
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 #get the top five tissues by sample size
-top5=c(1, 6, 33, 40, 48)
 path='/mnt/ceph/jarredk/Reg_Net/'
-tissues.vec=tissue.names[top5, 2]
+tissues.vec=tissue.names[, 2]
 library('psych', lib="/mnt/ceph/jarredk/Rpackages")
 
 for(i in 1:length(tissues.vec)){
@@ -28,7 +27,7 @@ for(i in 1:length(tissues.vec)){
     Pvalues <- corr.PCs$p
     Pvalues.nona <- Pvalues[!is.na(Pvalues)]
     All.Pvalues [[m]] <- Pvalues.nona
-    qobj <- qvalue(Pvalues.nona, fdr.level=0.10)
+    qobj <- qvalue(Pvalues.nona, fdr.level = 0.10)
 
     # Significant associations
     Significant.asso <- qobj$significant

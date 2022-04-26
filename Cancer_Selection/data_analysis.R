@@ -7,7 +7,6 @@ library('qvalue', lib = pack.path)
 #read in human methylation 450k header descriptions
 hm450=read.csv("/mnt/ceph/jarredk/Cancer_Selection/GPL13534_HumanMethylation450_15017482_v.1.1.csv")
 
-
 load(file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.final.RData")
 
 load(file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.final.labels.RData")
@@ -15,7 +14,7 @@ load(file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.final.labels.RData")
 genes=hm450$UCSC_RefGene_Name[match(row.names(all.data), hm450$IlmnID)]
 genes.list=strsplit(genes, ";")
 #replace character(0) with NA
-genes.list.NAs=lapply(genes.list, function(x){ifelse(identical(x, character(0)),NA, x)})
+genes.list.NAs=lapply(genes.list, function(x){ifelse(identical(x, character(0)), NA, x)})
 nogenenames=which(is.na(genes.list.NAs))
 
 all.data=all.data[-nogenenames,]

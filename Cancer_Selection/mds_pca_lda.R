@@ -1,8 +1,13 @@
+
+idx=c(172, 179, 512, 818, 819, 820)
 library(ggpubr, lib="/mnt/ceph/jarredk/Rpackages")
+library(MRGN, lib="/mnt/ceph/jarredk/Rpackages")
 bmart=read.table(file="/mnt/ceph/jarredk/Reg_Net/mart_export_merged_lncRNA_fixed.txt", sep = "\t", header = T)
 setwd("/mnt/ceph/jarredk/Cancer_Selection")
 
 dm=read.table("/mnt/ceph/jarredk/Cancer_Selection/differential.matrix.txt",header=T)
+dm2=loadRData(fileName="/mnt/ceph/jarredk/Cancer_Selection/in_depth_analysis/all.data.centroids2.RData")
+labels2=loadRData(fileName="/mnt/ceph/jarredk/Cancer_Selection/in_depth_analysis/all.data.final.labels.prop.methyl.RData")
 load("/mnt/ceph/jarredk/Cancer_Selection/all.data.final.labels.RData")
 row.names(dm)=make.unique(labels.final)
 tissue=as.factor(labels.final)
@@ -21,8 +26,8 @@ row.names(ev)=rn
 break.down.pos=summary(as.factor(types.pos))
 break.down.neg=summary(as.factor(types.neg))
 
-types.pc1.pl=cbind.data.frame(Loading.on.PC1=c(rep("pos.loading", length(break.down.pos)),
-                                               rep("neg.loading", length(break.down.neg))),
+types.pc1.pl=cbind.data.frame(Loading.on.PC1=c(rep("neg.loading", length(break.down.pos)),
+                                               rep("pos.loading", length(break.down.neg))),
                               gene.types=c(names(break.down.pos), names(break.down.neg)),
                               counts=c(log10(break.down.pos), log10(break.down.neg)))
 
@@ -49,48 +54,55 @@ dev.off()
 
 rot.var2=cbind.data.frame(rot.var, Hist.Group=tissue[-c(1:56)])
 pdf("/mnt/ceph/jarredk/Cancer_Selection/in_depth_analysis/PCA_PC1_2.pdf")
-sp <- ggscatter(rot.var2, x = "PC1", y = "PC2",
+sp <- ggscatter(rot.var2, x = "PC1",
+                y = "PC2",
                 color = "Hist.Group", palette = "jco",
-                size = 2, alpha = 0.6)+
-  border()
-# Marginal density plot of x (top panel) and y (right panel)
-xplot <- ggdensity(rot.var2, "PC1", fill = "Hist.Group",
-                   palette = "jco")
-yplot <- ggdensity(rot.var2, "PC2", fill = "Hist.Group",
-                   palette = "jco")+
-  rotate()
-# Cleaning the plots
-yplot <- yplot + clean_theme()
-xplot <- xplot + clean_theme()
-# Arranging the plot
-ggarrange(xplot, NULL, sp, yplot,
-          ncol = 2, nrow = 2,  align = "hv",
-          widths = c(2, 1), heights = c(1, 2),
-          common.legend = TRUE)
-
+                size = 3, alpha = 0.8)+
+  xlab(paste0("PC1 (",round(dat2$Percent.of.Variance[1],4)*100,"%)"))+
+  ylab(paste0("PC2 (",round(dat2$Percent.of.Variance[2],4)*100, "%)"))
+#   border()
+# # Marginal density plot of x (top panel) and y (right panel)
+# xplot <- ggdensity(rot.var2, "PC1", fill = "Hist.Group",
+#                    palette = "jco")
+# yplot <- ggdensity(rot.var2, "PC2", fill = "Hist.Group",
+#                    palette = "jco")+
+#   rotate()
+# # Cleaning the plots
+# yplot <- yplot + clean_theme()
+# xplot <- xplot + clean_theme()
+# # Arranging the plot
+# ggarrange(xplot, NULL, sp, yplot,
+#           ncol = 2, nrow = 2,  align = "hv",
+#           widths = c(2, 1), heights = c(1, 2),
+#           common.legend = TRUE)
+plot(sp)
 dev.off()
 
 
 
 pdf("/mnt/ceph/jarredk/Cancer_Selection/in_depth_analysis/PCA_PC2_3.pdf")
-sp <- ggscatter(rot.var2, x = "PC2", y = "PC3",
+sp <- ggscatter(rot.var2, x = "PC2",
+                y = "PC3",
                 color = "Hist.Group", palette = "jco",
-                size = 2, alpha = 0.6)+
-  border()
+                size = 3, alpha = 0.8)+
+  xlab(paste0("PC2 (",round(dat2$Percent.of.Variance[2],4)*100,"%)"))+
+  ylab(paste0("PC3 (",round(dat2$Percent.of.Variance[3],4)*100, "%)"))
+
 # Marginal density plot of x (top panel) and y (right panel)
-xplot <- ggdensity(rot.var2, "PC2", fill = "Hist.Group",
-                   palette = "jco")
-yplot <- ggdensity(rot.var2, "PC3", fill = "Hist.Group",
-                   palette = "jco")+
-  rotate()
-# Cleaning the plots
-yplot <- yplot + clean_theme()
-xplot <- xplot + clean_theme()
+# xplot <- ggdensity(rot.var2, "PC2", fill = "Hist.Group",
+#                    palette = "jco")
+# yplot <- ggdensity(rot.var2, "PC3", fill = "Hist.Group",
+#                    palette = "jco")+
+#   rotate()
+# # Cleaning the plots
+# yplot <- yplot + clean_theme()
+# xplot <- xplot + clean_theme()
 # Arranging the plot
-ggarrange(xplot, NULL, sp, yplot,
-          ncol = 2, nrow = 2,  align = "hv",
-          widths = c(2, 1), heights = c(1, 2),
-          common.legend = TRUE)
+# ggarrange(xplot, NULL, sp, yplot,
+#           ncol = 2, nrow = 2,  align = "hv",
+#           widths = c(2, 1), heights = c(1, 2),
+#           common.legend = TRUE)
+plot(sp)
 
 dev.off()
 

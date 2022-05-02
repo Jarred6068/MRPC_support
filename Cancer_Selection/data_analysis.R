@@ -133,6 +133,6 @@ out1=get.diff.genes(centroid.data = all.data.diff,
                     correction = 'qvalue',
                     factor.labels = labels.diff,
                     FDR=0.05,
-                    alpha=0.05)
+                    alpha=0.00005)
 
 save(out1, file="/mnt/ceph/jarredk/Cancer_Selection/output1.RData")

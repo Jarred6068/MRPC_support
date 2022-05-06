@@ -152,7 +152,7 @@ table.unique=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysi
 table3=cbind.data.frame(table.totals[,2],c(1:5), table.totals[,3:5], table.unique[,-1], rowSums(table.unique[,-1]))
 colnames(table3)=c("Tissue", "Sample Size", "Tested Trios", "Cis-Gene Mediation Trios", "Trans-Gene Mediation Trios", "Unique Cis", "Unique Trans", "Unique Both", "Unique Total")
 table3$`Sample Size`=c(581, 584, 706, 605, 670)
-table3$Tissue=c("AdiposeSubcutaneous", "ArteryTibial", "MuscleSkeletal", "SunExposedSkin", "WholeBlood")
+table3$Tissue=c("AdiposeSub", "ArteryTibial", "MuscleSkeletal", "SunExp.Skin", "WholeBlood")
 kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersection of the columns \"Total Cis Mediated\" and \"Total Trans Mediated\" ")
 
 write.csv(table3, file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/GMAC_MRPC_comparison_final2.csv")

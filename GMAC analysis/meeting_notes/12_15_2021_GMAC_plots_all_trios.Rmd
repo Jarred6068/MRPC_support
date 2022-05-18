@@ -164,8 +164,6 @@ write.csv(table3, file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/
 ![A visual depiction of the relationship between the STM and LTM simulation models for the trans gene and the regression used for the mediation test](C:\Users\Bruin\Documents\GitHub\MRPC_support\Manuscript\GMACwriteup_sim_diagram.png)
 
 
-## variance across tissues plots
-
 
 
 
@@ -222,11 +220,6 @@ ggarrange(A, B, nrow = 2, labels = c("A", "B"))
 
 
 
-
-
-
-
-## simulation(s) Median P-value plots
 
 
 
@@ -294,8 +287,6 @@ ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 
-
-## simulation(s) Nominal P-value plots
 
 
 
@@ -428,12 +419,6 @@ ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
 
 
 
-
-
-
-
-
-$\bullet$ Rare allele plots
 
 
 ```{r, fig.cap="Trio number 9 from the GTEx tissue Adipose Subcutaneous", echo=FALSE, message=FALSE, warning=FALSE}

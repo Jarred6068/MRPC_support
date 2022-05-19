@@ -26,7 +26,7 @@ input.list=list(cov.pool=t(pc.matrix), snp.dat.cis=t(snp.dat.cis), exp.dat=t(exp
 cl <- makeCluster(10)
 
 
-output.cis.med <- gmac(cl=input.list$clusters, known.conf = NULL, cov.pool = input.list$cov.pool,
+output.cis.med <- gmac(cl=input.list$clusters, known.conf = input.list$known.conf, cov.pool = input.list$cov.pool,
                        exp.dat = input.list$exp.dat, snp.dat.cis = input.list$snp.dat.cis,
                        trios.idx = input.list$trio.indexes, nperm = input.list$nperm,
                        nominal.p = input.list$use.nominal.p)

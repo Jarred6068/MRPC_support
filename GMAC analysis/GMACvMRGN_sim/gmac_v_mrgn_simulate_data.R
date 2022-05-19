@@ -89,16 +89,44 @@ dim(t(snp.dat.cis))
 dim(t(pc.matrix))
 
 input.list=list(kc = t(kc), cov.pool=t(pc.matrix), snp.dat.cis=t(snp.dat.cis), exp.dat=t(exp.dat), trio.indexes=trios.idx,
-                nperm=10000, clusters=cl, use.nominal.p=TRUE)
+                nperm=10000, use.nominal.p=TRUE)
+
+cl <- makeCluster(10)
+
+output.cis.med <- gmac(cl=input.list$clusters, known.conf = input.list$kc, cov.pool = input.list$cov.pool,
+                       exp.dat = input.list$exp.dat, snp.dat.cis = input.list$snp.dat.cis,
+                       trios.idx = input.list$trio.indexes, nperm = input.list$nperm,
+                       nominal.p = input.list$use.nominal.p)
+
+output.trans.med <- gmac(cl=input.list$clusters, known.conf = input.list$kc, cov.pool = input.list$cov.pool,
+                       exp.dat = input.list$exp.dat, snp.dat.cis = input.list$snp.dat.cis,
+                       trios.idx = input.list$trio.indexes[,c(1,3,2)], nperm = input.list$nperm,
+                       nominal.p = input.list$use.nominal.p)
+stopCluster(cl)
+
+#reorganize output for saving
+#cis results
+out.table.cis=cbind.data.frame(output.cis.med[[1]], output.cis.med[[2]])
+colnames(out.table.cis)=c(paste0('pval_', colnames(output.cis.med[[1]])),
+                      paste0('effect_change_', colnames(output.cis.med[[2]])))
+
+out.list.cis=list(out.table, input.list, output.cis.med[[3]])
+names(out.list.cis)=c("output.table", "input.list", "cov.indicator.list")
+
+#trans results
+out.table.trans=cbind.data.frame(output.trans.med[[1]], output.trans.med[[2]])
+colnames(out.table.cis)=c(paste0('pval_', colnames(output.trans.med[[1]])),
+                          paste0('effect_change_', colnames(output.trans.med[[2]])))
+
+out.list.trans=list(out.table.trans, input.list, output.trans.med[[3]])
+names(out.list.trans)=c("output.table", "input.list", "cov.indicator.list")
 
 
 
+print("Done!...Saving...")
 
-
-
-print("Done!")
-
-
+save(out.list.trans, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/gmac_10k_trans_results_c_kc_all_mods.RData")
+save(out.list.cis, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/gmac_10k_cis_results_c_kc_all_mods.RData")
 
 
 #preform regressions and classify model types

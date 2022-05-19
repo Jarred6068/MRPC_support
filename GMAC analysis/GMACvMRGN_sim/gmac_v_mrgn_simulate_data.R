@@ -63,8 +63,8 @@ for(j in 1:number.of.datasets){
   #print(paste0(length(resamples)," before all 3 genotypes represented"))
   #print(dim(X))
   #store
-  print(params[j,])
-  print(dim(X))
+  #print(params[j,])
+  #print(dim(X))
   small.datasets[[j]]=X
 }
 

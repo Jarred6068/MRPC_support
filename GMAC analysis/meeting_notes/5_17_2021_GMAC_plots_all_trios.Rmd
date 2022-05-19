@@ -4,19 +4,24 @@ author:
 -  Jarred Kvamme, University of Idaho
 date: "9/22/2021"
 output:
-  pdf_document:
-    fig_caption: yes
-    keep_tex: yes
+  pdf_document: 
+    keep_tex: true
+    number_sections: true
+header-includes:
+  \usepackage{float}
+  \usepackage{tikz}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_chunk$set(fig.width=12, fig.height=8)
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.pos = "H")
 library(latex2exp)
 library(gridExtra)
 ```
 
-
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.pos = "H")
+```
 
 \section*{1. Overview}
 Both MRPC-LOND and MRPC-ADDIS techniques inferred a large number of trans mediated trios. The trans-mediation model has been previously identified, but is not the commonly ackowledged mode of mediation. Since this result is surprising relative to the existing literature, we sought to apply another method for inferring mediation on a subset of GTEx trios analyzed herein by MRPC. The Genomic Mediation analysis with Adaptive Confounding (GMAC) algorithm allows for a unique selection of a subset of potential confounders, ${\bf X_{ij}}$ from a larger covariate pool, ${\bf H}$, for each trio. By taking advantage of the Principle of Mendelian Randomization, the authors filter ${\bf H}$ by removing common child and intermediate confounding variables (e.g variables associated with the eQTL as well as the cis/trans genes). Post-filtering, GMAC preforms a mediation test on the edge between the cis gene and trans gene via the regression of the trans-gene $T_j$ on the cis-eQTL $L_i$, cis-gene $C_i$, and the set of adaptively selected confounders ${\bf X_{ij}}$:
@@ -38,7 +43,7 @@ Consistent with @yang2017identifying, the analysis was preformed using a common 
    
 After applying GMAC to each tissue, the false discovery rate among the retained mediation p-values was controlled at the more liberal rate of $10\%$ [@yang2017identifying]. Each trio determined to have significant mediation after FDR filtering was compared with the regulatory network type inferred by MRPC-ADDIS. MRPC-ADDIS can infer three types of regulatory networks that contain an edge between the cis and trans gene (M1, M2, or M4). Since GMAC considers only the presence of the edge and not its direction, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).   
 
-\subsection*{2.3 Simulations}
+\subsection*{2.3 Simulations Using Real Trios}
 
 \indent $\bullet$ The Small True Model Simulation (STM)
 
@@ -85,6 +90,37 @@ We created a fourth simulation scenario to test the importance of permutation on
 
 where $\epsilon \sim N(0, \hat{\sigma})$. We then apply the correct model ${\bf (1)}$ to each simulated trio under this scenario to obtain the parametric and permutation inferences when we know the analysis model is correct.  
 
+
+\subsection*{2.4 Simulations Using Synthetic Trios}
+
+\indent $\bullet$ \textbf{Purpose:} We simulated 10,000 trios of all model types (M0 - M4) with $u$ "unknown" confounding variables (PCs) represented by the matrix ${\bf U}$ and 3 simulated "known" confounders represented by the matrix ${\bf K}$.
+
+\noindent \textbf{(1.)} - We simulate the variant $V_1 = [v_1, v_2, \cdots v_n]$ from a multinomial distribution under Hardy-Weinberg equilibrium:
+
+\[ Pr(v_i = 0) =(1 -\theta)^2; \ Pr(v_i = 1) = 2\theta(1-\theta); \ Pr(v_i = 2) = \theta^2 \]
+
+\noindent \textbf{(2.)} - We denote the $j^{th}$ molecular pheonotype as $T_j$ and its set of parents by ${\bf Parents}(T_j)$. The set of parent nodes ${\bf Parents}(T_j)$ may be empty, contain $V$-nodes, $T$-nodes, or a combination of both (Badsha and Fu, 2019). We model $T_j$ as following a normal distribution where
+
+\begin{eqnarray}
+ T_j \sim N\left( \beta_0 + \sum_{i\in{\bf Parents}(T_j)} \beta_{i} V_i +\left(\sum_{k\in{\bf Parents}(T_j)} \beta_k T_k\right) + {\bf \Gamma U} + {\bf \Phi K}, \ \sigma_j \right)  
+\end{eqnarray}
+
+
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[node distance={30mm}, thick, main/.style = {draw, circle}] 
+\node[main] (1) {$V_1$};
+\node[main] (2) [below left of=1] {$T_1$};
+\node[main] (3) [below right of=1] {$T_2$};
+\node[main] (4) [below right of=2] {$\bf U, K$};
+\draw[->] (1) -- (2) node [midway, yshift=+0.25cm, xshift=-0.52cm, fill=white] {$\beta_{11}$};
+\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{12}$};
+\draw[->] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.5cm, fill=white] {$\bf \Gamma_1, \Phi_1$};
+\draw[->] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.5cm, fill=white] {$\bf \Gamma_2, \Phi_2$};
+\end{tikzpicture}
+\end{center}
+\end{figure}
 
 
 \section*{3. Results}

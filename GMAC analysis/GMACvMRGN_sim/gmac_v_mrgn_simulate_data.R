@@ -70,7 +70,7 @@ for(j in 1:number.of.datasets){
 
 print("Done!...Saving...")
 
-save(small.datasets, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/mrgn_v_gmac_v_mrpc_10k_datasets_c_kc_all_mods.RData")
+save(small.datasets, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/mrgn_v_gmac_v_mrpc_10k_datasets_c_kc_all_mods.RData")
 
 #perform GMAC inferences
 #GMAC
@@ -93,12 +93,12 @@ input.list=list(kc = t(kc), cov.pool=t(pc.matrix), snp.dat.cis=t(snp.dat.cis), e
 
 cl <- makeCluster(10)
 
-output.cis.med <- gmac(cl=input.list$clusters, known.conf = input.list$kc, cov.pool = input.list$cov.pool,
+output.cis.med <- gmac(cl=cl, known.conf = input.list$kc, cov.pool = input.list$cov.pool,
                        exp.dat = input.list$exp.dat, snp.dat.cis = input.list$snp.dat.cis,
                        trios.idx = input.list$trio.indexes, nperm = input.list$nperm,
                        nominal.p = input.list$use.nominal.p)
 
-output.trans.med <- gmac(cl=input.list$clusters, known.conf = input.list$kc, cov.pool = input.list$cov.pool,
+output.trans.med <- gmac(cl=cl, known.conf = input.list$kc, cov.pool = input.list$cov.pool,
                        exp.dat = input.list$exp.dat, snp.dat.cis = input.list$snp.dat.cis,
                        trios.idx = input.list$trio.indexes[,c(1,3,2)], nperm = input.list$nperm,
                        nominal.p = input.list$use.nominal.p)
@@ -125,8 +125,8 @@ names(out.list.trans)=c("output.table", "input.list", "cov.indicator.list")
 
 print("Done!...Saving...")
 
-save(out.list.trans, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/gmac_10k_trans_results_c_kc_all_mods.RData")
-save(out.list.cis, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/gmac_10k_cis_results_c_kc_all_mods.RData")
+save(out.list.trans, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/gmac_10k_trans_results_c_kc_all_mods.RData")
+save(out.list.cis, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/gmac_10k_cis_results_c_kc_all_mods.RData")
 
 
 #preform regressions and classify model types
@@ -150,8 +150,8 @@ inf.mods=apply(reg.res,2, class.vec)
 print("Done!...Saving results...")
 
 #save
-save(reg.res, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/mrgn_10k_regres_results_c_kc_all_mods.RData")
-save(inf.mods, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/mrgn_10k_inf_results_c_kc_all_mods.RData")
+save(reg.res, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/mrgn_10k_regres_results_c_kc_all_mods.RData")
+save(inf.mods, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/mrgn_10k_inf_results_c_kc_all_mods.RData")
 
 
 #MRPC
@@ -271,8 +271,8 @@ for(i in 1:length(small.datasets)){
 print("Done!...Saving results...")
 
 #save
-save(mrpc.infer.list, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/mrpc_10k_small_results_c_kc_all_mods.RData")
-save(params, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/mrpc_v_mrgn_v_gmac_10k_params_c_kc_all_mods.RData")
+save(mrpc.infer.list, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/mrpc_10k_small_results_c_kc_all_mods.RData")
+save(params, file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/mrpc_v_mrgn_v_gmac_10k_params_c_kc_all_mods.RData")
 
 
 

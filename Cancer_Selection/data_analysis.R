@@ -11,6 +11,13 @@ load(file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.final.RData")
 
 load(file = "/mnt/ceph/jarredk/Cancer_Selection/all.data.final.labels.RData")
 
+#remove probe location variable
+sites.on.genome=strsplit(hm450$UCSC_RefGene_Group,";")
+#get TSS sites and gene body site probe indexes
+TSS.sites=which(unlist(lapply(sites.on.genome, function(x){any(grepl("TSS", x))})))
+gene.body.sites=which(unlist(lapply(sites.on.genome, function(x){any(grepl("Body", x))})))
+all.data.new=all.data[,]
+
 genes=hm450$UCSC_RefGene_Name[match(row.names(all.data), hm450$IlmnID)]
 genes.list=strsplit(genes, ";")
 #replace character(0) with NA

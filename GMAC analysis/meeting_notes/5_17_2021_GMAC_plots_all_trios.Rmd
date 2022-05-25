@@ -93,13 +93,16 @@ where $\epsilon \sim N(0, \hat{\sigma})$. We then apply the correct model ${\bf 
 
 \subsection*{2.4 Simulations Using Synthetic Trios}
 
-\indent $\bullet$ \textbf{Purpose:} We simulated 10,000 trios of all model types (M0 - M4) with $u$ "unknown" confounding variables (PCs) represented by the matrix ${\bf U}$ and 3 simulated "known" confounders represented by the matrix ${\bf K}$.
+\indent $\bullet$ \textbf{Purpose:} In the simulations above, it becomes increasingly difficult to determine the robustness of the GMAC performance compared with other algorithms because we do not know the true model of the trio. We decided to perform a second set of simulations were each trio is generated under a specific model type. Therefore, with the truth known prior to inference, we are better able to compare the inferential differences between MRGN, GMAC, and MRPC-ADDIS. 
+
+
+\indent $\bullet$ \textbf{Method:} We simulated 10,000 trios of all model types (M0 - M4) with $u$ "unknown" confounding variables (PCs) represented by the matrix ${\bf U}$ and 3 simulated "known" confounders represented by the matrix ${\bf K}$. We include ${\bf K}$ to satisfy the input requirement of GMAC. The possible PCs for each trio are selected randomly from the whole genome PC matrix for the GTEx tissue Whole Blood. Additionally, the known confounders for each trio are the "pcr", "platform", and "sex" covariates from Whole Blood. We simulate the effects of the unknown confounders as described in the MRGN simulations (See MRGN Simulations Write-up). We simulated the effects of the known confounders such that $\phi_i\sim \text{unif}(0.01, 0.1)$.
 
 \noindent \textbf{(1.)} - We simulate the variant $V_1 = [v_1, v_2, \cdots v_n]$ from a multinomial distribution under Hardy-Weinberg equilibrium:
 
 \[ Pr(v_i = 0) =(1 -\theta)^2; \ Pr(v_i = 1) = 2\theta(1-\theta); \ Pr(v_i = 2) = \theta^2 \]
 
-\noindent \textbf{(2.)} - We denote the $j^{th}$ molecular pheonotype as $T_j$ and its set of parents by ${\bf Parents}(T_j)$. The set of parent nodes ${\bf Parents}(T_j)$ may be empty, contain $V$-nodes, $T$-nodes, or a combination of both (Badsha and Fu, 2019). We model $T_j$ as following a normal distribution where
+\noindent \textbf{(2.)} - We denote the $j^{th}$ molecular phenotype as $T_j$ and its set of parents by ${\bf Parents}(T_j)$. The set of parent nodes ${\bf Parents}(T_j)$ may be empty, contain $V$-nodes, $T$-nodes, or a combination of both (Badsha and Fu, 2019). We model $T_j$ as following a normal distribution where
 
 \begin{eqnarray}
  T_j \sim N\left( \beta_0 + \sum_{i\in{\bf Parents}(T_j)} \beta_{i} V_i +\left(\sum_{k\in{\bf Parents}(T_j)} \beta_k T_k\right) + {\bf \Gamma U} + {\bf \Phi K}, \ \sigma_j \right)  
@@ -122,6 +125,16 @@ where $\epsilon \sim N(0, \hat{\sigma})$. We then apply the correct model ${\bf 
 \end{center}
 \end{figure}
 
+\indent $\bullet$ \textbf{Assessing Performance} We apply GMAC twice to each simulated trio, once with $T_1$ as the mediator and second with $T_2$ as the mediator. This allows for a determination of the direction of the mediation edge. That is, combining the two inferences allows for the determination of Cis mediation ($T_1 \rightarrow T_2$), Trans mediation ($T_2 \rightarrow T_1$) or both (bi-directional $T_1 - T_2$). To compare the three algorithms across the simulated trios, we define an accuracy metric based on the mediation edge (i.e the edge between nodes $T_1$ and $T_2$) for GMAC. If the true model adjacency matrix $\textbf{A}$ contains an edge between the genes $T_1 - T_2; T_1 \rightarrow T_2; T_2 \rightarrow T_1$ and GMAC correctly predicts that edge (and its direction), we apply an accuracy of 100%. In the case of the inference performed by GMAC we define:
+
+\[ Acc = \begin{cases} 1, & \text{if Inferred} = \text{Cis Mediation} | \text{Truth} = M1.1 \ \text{or} \ M2.2  \\
+                       1, & \text{if Inferred} = \text{Trans Mediation} | \text{Truth} = M1.2 \ \text{or} \ M2.1 \\
+                       1, & \text{if Inferred} = \text{Both} | \text{Truth} = M4 \\
+                       1, & \text{if Inferred} = \text{No Med} | \text{Truth} = M0.1, \ M0.2 \ \text{or} \ M3  \\
+                       0, & \text{else}
+                       \end{cases} \] 
+
+For each simulated trio we preform the GMAC, MRPC-ADDIS, and MRGN algorithms 
 
 \section*{3. Results}
 \subsection*{3.1 Comparing GMAC and MRPC}

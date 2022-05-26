@@ -50,7 +50,7 @@ out.table.cis=cbind.data.frame(output.cis.med[[1]], output.cis.med[[2]])
 colnames(out.table.cis)=c(paste0('pval_', colnames(output.cis.med[[1]])),
                           paste0('effect_change_', colnames(output.cis.med[[2]])))
 
-out.list.cis=list(out.table, input.list, output.cis.med[[3]])
+out.list.cis=list(out.table.cis, input.list, output.cis.med[[3]])
 names(out.list.cis)=c("output.table", "input.list", "cov.indicator.list")
 
 #trans results

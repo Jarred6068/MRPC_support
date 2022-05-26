@@ -3,13 +3,24 @@
 library("MRGN",lib="/mnt/ceph/jarredk/Rpackages")
 
 small.datasets=loadRData(file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/mrgn_v_gmac_v_mrpc_10k_datasets_c_kc_all_mods.RData")
+just.trios=lapply(small.datasets, function(x) x[,1:3])
+tissue.name="WholeBlood"
+pc.matrix=loadRData(paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",tissue.name,
+                          "_AllPC/PCs.matrix.",tissue.name,".RData", sep = ""))
+confs=get.conf(trios=just.trios, PCscores=pc.matrix, blocksize = 2000)
+
+conf.list=lapply(confs$sig.asso.pcs, function(x,y){y[,x[[1]]]}, y=pc.matrix)
+
+trios.with.pcs=mapply(cbind.data.frame, just.trios, conf.list)
+
+for(i in 1:length())
 #preform regressions and classify model types
 #MRGN
 print("Running MRGN")
 reg.res=NULL
 inf.mods=NULL
 #regression
-reg.res=sapply(small.datasets, infer.trio, nperm=1000)
+reg.res=sapply(trios.with.pcs, infer.trio, nperm=1000)
 #model class
 inf.mods=apply(reg.res, 2, class.vec)
 

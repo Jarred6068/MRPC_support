@@ -1,13 +1,19 @@
 
-#Simulate All Data and Parameters:
-library("GMAC", lib="/mnt/ceph/jarredk/Rpackages")
-#cl <- makeCluster(10)
+
 source("/mnt/ceph/jarredk/GMACanalysis/GMACpostproc.R")
 library("MRGN",lib="/mnt/ceph/jarredk/Rpackages")
 library("qvalue", lib="/mnt/ceph/jarredk/Rpackages")
 
 small.datasets=loadRData(file = "/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulated_data/mrgn_v_gmac_v_mrpc_10k_datasets_c_kc_all_mods.RData")
-kc = t(as.matrix(output.WB$input.list$known.conf))
+just.trios=lapply(small.datasets, function(x) x[,1:3])
+tissue.name="WholeBlood"
+pc.matrix=loadRData(paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",tissue.name,
+                          "_AllPC/PCs.matrix.",tissue.name,".RData", sep = ""))
+confs=get.conf(trios=just.trios, PCscores=pc.matrix, blocksize = 2000)
+
+conf.list=lapply(confs$sig.asso.pcs, function(x,y){y[,x[[1]]]}, y=pc.matrix)
+
+trios.with.pcs=mapply(cbind.data.frame, just.trios, conf.list)
 
 #MRPC
 print("Running MRPC...")
@@ -115,10 +121,10 @@ apply.mrpc=function(X){
 
 #get estimate of time to infer each trio
 mrpc.infer.list=list()
-for(i in 1:length(small.datasets)){
-  start.time=Sys.time()
-  mrpc.infer.list[[i]]=apply.mrpc(small.datasets[[i]])
-  end.time=Sys.time()
+for(i in 1:length(trios.with.pcs)){
+  #start.time=Sys.time()
+  mrpc.infer.list[[i]]=apply.mrpc(trios.with.pcs[[i]])
+  #end.time=Sys.time()
   #params$Time.to.compute.mrpc[i]=difftime(end.time, start.time, units = 'mins')
 }
 

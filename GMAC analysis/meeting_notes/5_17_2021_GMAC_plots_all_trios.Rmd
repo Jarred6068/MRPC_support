@@ -93,10 +93,10 @@ where $\epsilon \sim N(0, \hat{\sigma})$. We then apply the correct model ${\bf 
 
 \subsection*{2.4 Simulations Using Synthetic Trios}
 
-\indent $\bullet$ \textbf{Purpose:} In the simulations above, it becomes increasingly difficult to determine the robustness of the GMAC performance compared with other algorithms because we do not know the true model of the trio. We decided to perform a second set of simulations were each trio is generated under a specific model type. Therefore, with the truth known prior to inference, we are better able to compare the inferential differences between MRGN, GMAC, and MRPC-ADDIS. 
+\indent $\bullet$ \textbf{Purpose:} In the simulations above, it becomes increasingly difficult to determine the robustness of the GMAC performance compared with other algorithms because we do not know the true model of the trio. We decided to perform a second set of simulations were each trio is generated under a specific model type. Therefore, with the truth known prior to inference, we are better able to compare the inferential differences between MRGN, GMAC, and MRPC-ADDIS. Additionally, we simulate each trio with "known" confounders, $u$ "unknown" confounders, $w$ intermediate variables, and $z$ common child variables as defined by Yang et. al., 2017. In doing so, we also able to compare the confounder selection procedures of GMAC and MRGN/MRPC to better discern the appropriate procedure for selecting the confounder set.  
 
 
-\indent $\bullet$ \textbf{Method:} We simulated 10,000 trios of all model types (M0 - M4) with $u$ "unknown" confounding variables (PCs) represented by the matrix ${\bf U}$ and 3 simulated "known" confounders represented by the matrix ${\bf K}$. We include ${\bf K}$ to satisfy the input requirement of GMAC. The possible PCs for each trio are selected randomly from the whole genome PC matrix for the GTEx tissue Whole Blood. Additionally, the known confounders for each trio are the "pcr", "platform", and "sex" covariates from Whole Blood. We simulate the effects of the unknown confounders as described in the MRGN simulations (See MRGN Simulations Write-up). We simulated the effects of the known confounders such that $\phi_i\sim \text{unif}(0.01, 0.1)$.
+\indent $\bullet$ \textbf{Method:} We simulated 10,000 trios of all model types (M0 - M4) with $u$ "unknown" confounding variables (PCs) represented by the matrix ${\bf U}$ and 3 simulated "known" confounders represented by the matrix ${\bf K}$, $w$ intermediate variables represented by the matrix $W$, and $z$ common child variables represented by the matrix $Z$. we simulate with $u,w,z \sim N(\mu = 10, \sigma =2)$ such that $u,w,z\in[1,\infty)$. We include ${\bf K}$ to satisfy the input requirement of GMAC. The possible PCs involded in each trio are selected randomly from the whole genome PC matrix for the GTEx tissue Whole Blood. Additionally, the known confounders for each trio are the "pcr", "platform", and "sex" covariates from Whole Blood. We simulate all confounder effects uniformly where $\gamma_i \sim \text{unif}(a=0.15, b=0.5)$ and select half at random to be negative. Further, we simulate the SNP effects as $\beta_{11}, \beta_{12} \sim \text{unif}(a=0.5, b=1.5)$, and the mediation effects as $\beta_{21}, \beta_{22}\sim\text{unif}(a=0.5,b=1.0)$ following Yang et. al., 2017. We simulated the effects of the known confounders such that $\phi_i\sim \text{unif}(0.01, 0.1)$.
 
 \noindent \textbf{(1.)} - We simulate the variant $V_1 = [v_1, v_2, \cdots v_n]$ from a multinomial distribution under Hardy-Weinberg equilibrium:
 
@@ -112,18 +112,67 @@ where $\epsilon \sim N(0, \hat{\sigma})$. We then apply the correct model ${\bf 
 
 \begin{figure}
 \begin{center}
+\caption{The confounder model}
 \begin{tikzpicture}[node distance={30mm}, thick, main/.style = {draw, circle}] 
 \node[main] (1) {$V_1$};
 \node[main] (2) [below left of=1] {$T_1$};
 \node[main] (3) [below right of=1] {$T_2$};
 \node[main] (4) [below right of=2] {$\bf U, K$};
 \draw[->] (1) -- (2) node [midway, yshift=+0.25cm, xshift=-0.52cm, fill=white] {$\beta_{11}$};
-\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{12}$};
-\draw[->] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.5cm, fill=white] {$\bf \Gamma_1, \Phi_1$};
-\draw[->] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.5cm, fill=white] {$\bf \Gamma_2, \Phi_2$};
+\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{21}, \beta_{22}$};
+\draw[->] (1) -- (3) node [midway, yshift=+0.25cm, xshift=+0.52cm, fill=white] {$\beta_{12}$};
+\draw[->] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.7cm, fill=white] {$\bf \Gamma_1, \Phi_1$};
+\draw[->] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.7cm, fill=white] {$\bf \Gamma_2, \Phi_2$};
 \end{tikzpicture}
 \end{center}
 \end{figure}
+
+\begin{eqnarray}
+ Z_j \sim N\left( \beta_0 +  \ \sigma_j \right)  
+\end{eqnarray}
+
+\begin{figure}
+\begin{center}
+\caption{The common child model}
+\begin{tikzpicture}[node distance={30mm}, thick, main/.style = {draw, circle}] 
+\node[main] (1) {$V_1$};
+\node[main] (2) [below left of=1] {$T_1$};
+\node[main] (3) [below right of=1] {$T_2$};
+\node[main] (4) [below right of=2] {$\bf Z$};
+\draw[->] (1) -- (2) node [midway, yshift=+0.25cm, xshift=-0.52cm, fill=white] {$\beta_{11}$};
+\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{21}, \beta_{22}$};
+\draw[->] (1) -- (3) node [midway, yshift=+0.25cm, xshift=+0.52cm, fill=white] {$\beta_{12}$};
+\draw[<-] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.7cm, fill=white] {$\bf \Psi_1$};
+\draw[<-] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.7cm, fill=white] {$\bf \Psi_2$};
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+\begin{eqnarray}
+ T_j \sim N\left( \beta_0 + \sum_{i\in{\bf Parents}(T_j)} \beta_{i} V_i +\left(\sum_{k\in{\bf Parents}(T_j)} \beta_k T_k\right) + {\bf \Gamma U} + {\bf \Phi K} + {\bf \Omega_2 W}, \ \sigma_j \right)  
+\end{eqnarray}
+
+\begin{eqnarray}
+ W_j \sim N\left( \beta_0 +  \sum_{i=1}^{w} \omega_{i,1} T_j,  \ \sigma_j \right)  
+\end{eqnarray}
+
+\begin{figure}
+\begin{center}
+\caption{The intermediate variable model}
+\begin{tikzpicture}[node distance={30mm}, thick, main/.style = {draw, circle}] 
+\node[main] (1) {$V_1$};
+\node[main] (2) [below left of=1] {$T_1$};
+\node[main] (3) [below right of=1] {$T_2$};
+\node[main] (4) [below right of=2] {$\bf W$};
+\draw[->] (1) -- (2) node [midway, yshift=+0.25cm, xshift=-0.52cm, fill=white] {$\beta_{11}$};
+\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{21}, \beta_{22}$};
+\draw[->] (1) -- (3) node [midway, yshift=+0.25cm, xshift=+0.52cm, fill=white] {$\beta_{12}$};
+\draw[<-] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.7cm, fill=white] {$\bf \Omega_1$};
+\draw[->] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.7cm, fill=white] {$\bf \Omega_2$};
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
 
 \indent $\bullet$ \textbf{Assessing Performance} We apply GMAC twice to each simulated trio, once with $T_1$ as the mediator and second with $T_2$ as the mediator. This allows for a determination of the direction of the mediation edge. That is, combining the two inferences allows for the determination of Cis mediation ($T_1 \rightarrow T_2$), Trans mediation ($T_2 \rightarrow T_1$) or both (bi-directional $T_1 - T_2$). To compare the three algorithms across the simulated trios, we define an accuracy metric based on the mediation edge (i.e the edge between nodes $T_1$ and $T_2$) for GMAC. If the true model adjacency matrix $\textbf{A}$ contains an edge between the genes $T_1 - T_2; T_1 \rightarrow T_2; T_2 \rightarrow T_1$ and GMAC correctly predicts that edge (and its direction), we apply an accuracy of 100%. In the case of the inference performed by GMAC we define:
 

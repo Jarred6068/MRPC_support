@@ -9,12 +9,18 @@ just.trios=lapply(small.datasets, function(x) x[,1:3])
 tissue.name="WholeBlood"
 pc.matrix=loadRData(paste("/mnt/lfs2/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/",tissue.name,
                           "_AllPC/PCs.matrix.",tissue.name,".RData", sep = ""))
-confs=get.conf(trios=just.trios, PCscores=pc.matrix, blocksize = 2000)
+confs=get.conf(trios=just.trios, PCscores=pc.matrix, blocksize = 2000, method = "correlation")
 
 conf.list=lapply(confs$sig.asso.pcs, function(x,y){y[,x[[1]]]}, y=pc.matrix)
 
 trios.with.pcs=mapply(cbind.data.frame, just.trios, conf.list)
 
+
+kc = t(as.matrix(output.WB$input.list$known.conf))
+
+trios.with.pcs2=lapply(trios.with.pcs, function(x,y) cbind.data.frame(x,y), y = kc)
+
+print(lapply(trios.with.pcs2[1:5], head))
 #MRPC
 print("Running MRPC...")
 #----begin analysis-----#
@@ -121,9 +127,9 @@ apply.mrpc=function(X){
 
 #get estimate of time to infer each trio
 mrpc.infer.list=list()
-for(i in 1:length(trios.with.pcs)){
+for(i in 1:length(trios.with.pcs2)){
   #start.time=Sys.time()
-  mrpc.infer.list[[i]]=apply.mrpc(trios.with.pcs[[i]])
+  mrpc.infer.list[[i]]=apply.mrpc(trios.with.pcs2[[i]])
   #end.time=Sys.time()
   #params$Time.to.compute.mrpc[i]=difftime(end.time, start.time, units = 'mins')
 }

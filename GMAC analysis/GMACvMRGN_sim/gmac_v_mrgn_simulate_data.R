@@ -10,7 +10,7 @@ source("/mnt/ceph/jarredk/GMACanalysis/GMACvMRGN_sim/simulate_trios_with_c_kc.R"
 #set.seed(234)
 #pre-allocate simulation conditions
 model.types=c("model0","model1","model2","model3","model4")
-number.of.datasets=10000
+number.of.datasets=5000
 #preallocate
 params=as.data.frame(matrix(0, nrow = number.of.datasets, ncol = 6))
 colnames(params)=c("model","SD", "minor.freq", "b.snp","b.med","number.of.conf")

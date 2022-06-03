@@ -37,12 +37,14 @@ output.cis.med <- gmac(known.conf = input.list$kc, cov.pool = input.list$cov.poo
                        trios.idx = input.list$trio.indexes, nperm = input.list$nperm,
                        nominal.p = input.list$use.nominal.p)
 
+print(output.cis.med)
 
 output.trans.med <- gmac(known.conf = input.list$kc, cov.pool = input.list$cov.pool,
                          exp.dat = input.list$exp.dat, snp.dat.cis = input.list$snp.dat.cis,
                          trios.idx = input.list$trio.indexes[,c(1,3,2)], nperm = input.list$nperm,
                          nominal.p = input.list$use.nominal.p)
 #stopCluster(cl)
+print(output.trans.med)
 
 #reorganize output for saving
 #cis results

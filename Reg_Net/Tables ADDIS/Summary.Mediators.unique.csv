@@ -1,4 +1,5 @@
-"Total.Unique.Genes","Percent.Of.Total"
-730,0.199453551912568
-2848,0.778142076502732
-82,0.0224043715846995
+"Description","Total.Unique.Genes","Percent.Of.Total"
+"Cis Only Unique",686,0.19140625
+"Trans Only Unique",2816,0.785714285714286
+"Both Cis & Trans",82,0.0228794642857143
+"Total",3584,1

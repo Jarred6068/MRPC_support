@@ -31,8 +31,8 @@ loadRData <- function(fileName=NULL){
 df=loadRData(fileName="C:/Users/Bruin/Documents/GitHub/MRPC_support/Reg_Net/loaded_AL_datatables.Rdata")
 
 inter.med=intersect(df$lm1t1$Cis.Gene.ID, df$lm1t2$Trans.Gene.ID)
-trans.med=df$lm1t2[-c(match(inter.med, df$lm1t2$Trans.Gene.ID)), ]$Trans.Gene.ID
-cis.med=df$lm1t1[-c(match(inter.med, df$lm1t1$Cis.Gene.ID)), ]$Cis.Gene.ID
+trans.med=df$lm1t2$Trans.Gene.ID
+cis.med=df$lm1t1$Cis.Gene.ID
 total.med=length(inter.med)+length(trans.med)+length(cis.med)
 
 summary1=cbind.data.frame(c(length(cis.med), length(trans.med),length(inter.med)), 
@@ -44,20 +44,22 @@ library(knitr)
 kable(summary1, caption = "Total number of Cis and Trans genes identified as Mediators under MRPC-LOND")
 write.csv(summary1, file = paste0(write.path.lond, "Summary.Mediators.csv"), row.names = FALSE)
 
-unq.trans.med=unique(trans.med)
-unq.cis.med=unique(cis.med)
 unq.inter.med=unique(inter.med)
+unq.trans.med=unique(trans.med)[-match(unq.inter.med, unique(trans.med))]
+unq.cis.med=unique(cis.med)[-match(unq.inter.med, unique(cis.med))]
 unq.total.med=length(unq.inter.med)+length(unq.trans.med)+length(unq.cis.med)
 
-summary2=cbind.data.frame(c(length(unq.cis.med), length(unq.trans.med),length(unq.inter.med)), 
-                          c(length(unq.cis.med)/unq.total.med, length(unq.trans.med)/unq.total.med, length(unq.inter.med)/unq.total.med))
+summary2=rbind.data.frame(cbind.data.frame(c(length(unq.cis.med), length(unq.trans.med),length(unq.inter.med)), 
+                          c(length(unq.cis.med)/unq.total.med, length(unq.trans.med)/unq.total.med,
+                            length(unq.inter.med)/unq.total.med)),
+                          c(unq.total.med, 1))
 colnames(summary2)=c("Total.Unique.Genes", "Percent.Of.Total")
-row.names(summary2)=c("Cis Only Unique", "Trans Only Unique","Both Cis & Trans")
+summary2=cbind.data.frame(Description = c("Cis Only Unique", "Trans Only Unique","Both Cis & Trans", "Total"),
+                          summary2)
 
 library(knitr)
-kable(summary2, caption = "Total number of Unqiue Cis and Trans genes identified as Mediators under MRPC-LOND")
+kable(summary2, caption = "Total number of Unqiue Cis and Trans genes identified as Mediators under MRPC-ADDIS")
 write.csv(summary2, file = paste0(write.path.lond, "Summary.Mediators.unique.csv"), row.names = FALSE)
-
 ```
 
 
@@ -368,11 +370,19 @@ print(AchsqGOF)
 mat1=rbind.data.frame(summary(trans.types), summary(all.types.adj))
 per=rbind(summary(trans.types)/sum(summary(trans.types)), summary(all.types.adj)/sum(summary(all.types.adj)))
 mat1=cbind.data.frame(mat1[,1], per[,1] ,mat1[,2], per[,2])
-colnames(mat1)=c("non-pseudo", '%non-pseudo',"pseudogene", '%pseudogene')
+colnames(mat1)=c("non-lncRNA", '%non-lncRNA',"lncRNA", '%lncRNA')
 row.names(mat1)=c("Observed","Genome")
 
-kable(mat1, caption = "Chi-Square GOF observed vs. expected proportions of trans gene types ADDIS: gene.type=Pseudogene", digits=4)
-write.csv(mat1, file = paste0(write.path.lond, "pseudogene.comp.wg.csv"), row.names = FALSE)
+mat2=rbind.data.frame(summary(cis.types), summary(all.types.adj))
+per2=rbind(summary(cis.types)/sum(summary(cis.types)), summary(all.types.adj)/sum(summary(all.types.adj)))
+mat2=cbind.data.frame(mat2[,1], per2[,1] ,mat2[,2], per2[,2])
+colnames(mat2)=c("non-lncRNA", '%non-lncRNA',"lncRNA", '%lncRNA')
+row.names(mat2)=c("Observed","Genome")
+
+kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of trans gene  Type=pseudogene", digits=4)
+kable(mat2, caption = "Chi-Square GOF observed vs. Expected proportions of cis gene: Type=pseudogene", digits=4)
+write.csv(mat1, file = paste0(write.path.lond, "pseudo.comp.wg.trans.csv"), row.names = TRUE)
+write.csv(mat2, file = paste0(write.path.lond, "pseudo.comp.wg.cis.csv"), row.names = TRUE)
 
 ```
 
@@ -471,14 +481,22 @@ AchsqGOF=chisq.test(summary(trans.types), p=observed.probs)
 
 print(AchsqGOF)
 
-mat1=rbind.data.frame(summary(cis.types), summary(all.types.adj))
-per=rbind(summary(cis.types)/sum(summary(cis.types)), summary(all.types.adj)/sum(summary(all.types.adj)))
+
+mat1=rbind.data.frame(summary(trans.types), summary(all.types.adj))
+per=rbind(summary(trans.types)/sum(summary(trans.types)), summary(all.types.adj)/sum(summary(all.types.adj)))
 mat1=cbind.data.frame(mat1[,1], per[,1] ,mat1[,2], per[,2])
-colnames(mat1)=c("non-protein_coding", '%non-protein_coding',"protein_coding", '%protein_coding')
+colnames(mat1)=c("non-lncRNA", '%non-lncRNA',"lncRNA", '%lncRNA')
 row.names(mat1)=c("Observed","Genome")
 
-kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of cis gene types ADDIS: Type=Protein Coding", digits=4)
-write.csv(mat1, file = paste0(write.path.lond, "protein.coding.comp.wg.csv"), row.names = FALSE)
+mat2=rbind.data.frame(summary(cis.types), summary(all.types.adj))
+per2=rbind(summary(cis.types)/sum(summary(cis.types)), summary(all.types.adj)/sum(summary(all.types.adj)))
+mat2=cbind.data.frame(mat2[,1], per2[,1] ,mat2[,2], per2[,2])
+colnames(mat2)=c("non-lncRNA", '%non-lncRNA',"lncRNA", '%lncRNA')
+row.names(mat2)=c("Observed","Genome")
+kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of trans gene  Type=protein_coding", digits=4)
+kable(mat2, caption = "Chi-Square GOF observed vs. Expected proportions of cis gene: Type=protein_coding", digits=4)
+write.csv(mat1, file = paste0(write.path.lond, "prc.comp.wg.trans.csv"), row.names = TRUE)
+write.csv(mat2, file = paste0(write.path.lond, "prc.comp.wg.cis.csv"), row.names = TRUE)
 
 ```
 
@@ -582,9 +600,16 @@ mat1=cbind.data.frame(mat1[,1], per[,1] ,mat1[,2], per[,2])
 colnames(mat1)=c("non-lncRNA", '%non-lncRNA',"lncRNA", '%lncRNA')
 row.names(mat1)=c("Observed","Genome")
 
-kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of gene types ADDIS: Type=lncRNA", digits=4)
-write.csv(mat1, file = paste0(write.path.lond, "lncRNA.comp.wg.csv"), row.names = FALSE)
+mat2=rbind.data.frame(summary(cis.types), summary(all.types.adj))
+per2=rbind(summary(cis.types)/sum(summary(cis.types)), summary(all.types.adj)/sum(summary(all.types.adj)))
+mat2=cbind.data.frame(mat2[,1], per2[,1] ,mat2[,2], per2[,2])
+colnames(mat2)=c("non-lncRNA", '%non-lncRNA',"lncRNA", '%lncRNA')
+row.names(mat2)=c("Observed","Genome")
 
+kable(mat1, caption = "Chi-Square GOF observed vs. Expected proportions of trans gene  Type=lncRNA", digits=4)
+kable(mat2, caption = "Chi-Square GOF observed vs. Expected proportions of cis gene: Type=lncRNA", digits=4)
+write.csv(mat1, file = paste0(write.path.lond, "lncRNA.comp.wg.trans.csv"), row.names = TRUE)
+write.csv(mat2, file = paste0(write.path.lond, "lncRNA.comp.wg.cis.csv"), row.names = TRUE)
 
 ```
 

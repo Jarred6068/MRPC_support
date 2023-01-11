@@ -27,8 +27,9 @@ MRPC.fit.FDR.addis <- MRPC(test.data,
                            GV = 1,
                            FDR = 0.05,
                            indepTest = 'gaussCItest',
+                           FDRcontrol = "ADDIS",
                            labels = V,
-                           verbose = FALSE)
+                           verbose = TRUE)
 
 as(MRPC.fit.FDR.addis@graph, "matrix")[1:3,1:3]
 

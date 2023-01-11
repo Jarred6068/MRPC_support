@@ -75,7 +75,7 @@ for(i in 1:length(trios)){
     b1$simu2.b[j] = out2$b.coef
     b1$simu3.b[j] = out3$b.coef
     b1$simu4.b[j] = out4$b.coef
-    
+    print(p1$simu1.p)
   }
   print("...done!")
   print(head(p1))

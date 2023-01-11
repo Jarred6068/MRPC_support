@@ -311,7 +311,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
                          resol=resolution)
     
     #count interactions in observed
-    reads[i]=ifelse(empty(as.data.frame(data.hic))==TRUE, NA, sum(data.hic$counts))
+    reads[i]=ifelse(plyr::empty(as.data.frame(data.hic))==TRUE, NA, sum(data.hic$counts))
     
     
     #resample the data to obtain a probability distribution by MC integration
@@ -320,6 +320,7 @@ interaction_check=function(hic.filename=NULL, trios=NULL, resolution=10000, sear
       averages[i]=NA
       p.values[i]=NA
       p.values2[i]=NA
+      total.nas[i] = NA
     }else{
       #else return the resampled data and determine P(>=obs)
       RS=Resample_interactions(filePath = hic.filename,

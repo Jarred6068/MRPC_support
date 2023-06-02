@@ -33,14 +33,6 @@
   \KOMAoptions{parskip=half}}
 \makeatother
 \usepackage{xcolor}
-\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
-\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
-\hypersetup{
-  pdftitle={12/1/2021 GMAC analysis and pvalue plots},
-  pdfauthor={Jarred Kvamme, University of Idaho},
-  hidelinks,
-  pdfcreator={LaTeX via pandoc}}
-\urlstyle{same} % disable monospaced font for URLs
 \usepackage[margin=1in]{geometry}
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
@@ -72,6 +64,14 @@
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={12/1/2021 GMAC analysis and pvalue plots},
+  pdfauthor={Jarred Kvamme, University of Idaho},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
 
 \title{12/1/2021 GMAC analysis and pvalue plots}
 \author{Jarred Kvamme, University of Idaho}
@@ -324,7 +324,7 @@ which have increased power in these scenarios.
   >{\raggedleft\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1364}}@{}}
 \caption{Descriptive statistics for the distribution of missing values
 across the eQTL's for each tissue used in GMAC}\tabularnewline
-\toprule
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Adipose Subcutaneous
@@ -337,9 +337,9 @@ Skin Sun Exposed
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Whole Blood
 \end{minipage} \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Adipose Subcutaneous
@@ -352,7 +352,7 @@ Skin Sun Exposed
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Whole Blood
 \end{minipage} \\
-\midrule
+\midrule()
 \endhead
 Min. & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
 1st Qu. & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
@@ -360,7 +360,7 @@ Median & 0.000000 & 0.000000 & 0.000000 & 0.000000 & 0.000000 \\
 Mean & 0.006365 & 0.006625 & 0.006560 & 0.006701 & 0.006103 \\
 3rd Qu. & 0.003442 & 0.003425 & 0.002833 & 0.003306 & 0.002985 \\
 Max. & 0.156627 & 0.159247 & 0.158640 & 0.160331 & 0.155224 \\
-\bottomrule
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}
@@ -378,7 +378,7 @@ trans mediation under GMAC across their respective ADDIS inferred
 regulatory networks. The column ``Percentage In Common'' is the
 proportion of significant trios that also contained a mediation edge in
 the regulatory network inferred under ADDIS}\tabularnewline
-\toprule
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Tissue
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
@@ -398,9 +398,9 @@ Total GMAC Inferred
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Percentage In Common
 \end{minipage} \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Tissue
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
@@ -420,14 +420,14 @@ Total GMAC Inferred
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Percentage In Common
 \end{minipage} \\
-\midrule
+\midrule()
 \endhead
 AdiposeSubcutaneous & 107 & 47 & 12 & 102 & 134 & 2 & 404 & 0.4777 \\
 ArteryTibial & 88 & 37 & 10 & 108 & 112 & 0 & 355 & 0.4479 \\
 MuscleSkeletal & 126 & 37 & 8 & 145 & 132 & 2 & 450 & 0.3933 \\
 SkinSunExposed & 118 & 42 & 12 & 132 & 139 & 0 & 443 & 0.4357 \\
 WholeBlood & 107 & 55 & 29 & 142 & 171 & 4 & 508 & 0.5020 \\
-\bottomrule
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}
@@ -444,7 +444,7 @@ WholeBlood & 107 & 55 & 29 & 142 & 171 & 4 & 508 & 0.5020 \\
 both cis and trans mediation types. The column ``Unique Both''
 represents the intersection of the columns ``Total Cis Mediated'' and
 ``Total Trans Mediated''}\tabularnewline
-\toprule
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Tissue
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
@@ -464,9 +464,9 @@ Unique Both
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Unique Total
 \end{minipage} \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Tissue
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
@@ -486,14 +486,14 @@ Unique Both
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
 Unique Total
 \end{minipage} \\
-\midrule
+\midrule()
 \endhead
 AdiposeSub & 581 & 11850 & 374 & 282 & 122 & 30 & 252 & 404 \\
 ArteryTibial & 584 & 11471 & 334 & 226 & 129 & 21 & 205 & 355 \\
 MuscleSkeletal & 706 & 10257 & 401 & 314 & 136 & 49 & 265 & 450 \\
 SunExp.Skin & 605 & 13045 & 404 & 333 & 110 & 39 & 294 & 443 \\
 WholeBlood & 670 & 8823 & 451 & 398 & 110 & 57 & 341 & 508 \\
-\bottomrule
+\bottomrule()
 \end{longtable}
 
 \begin{figure}
@@ -528,96 +528,102 @@ the genotype has a low frequency allele.}
 
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-7-1.pdf}
 
-\begin{figure}
-\centering
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-8-1.pdf}
-\caption{Trio number 9 from the GTEx tissue Adipose Subcutaneous}
-\end{figure}
+\includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-8-2.pdf}
+\includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-8-3.pdf}
+
+\begin{verbatim}
+## pdf 
+##   2
+\end{verbatim}
 
 \begin{longtable}[]{@{}lrrrr@{}}
 \caption{Results showing the terms of interest for the Regression:
 cis.gene \textasciitilde{} SNP + trans.gene + PCs for trio 9 from the
 GTEx tissue Adipose Subcutaneous}\tabularnewline
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endhead
-(Intercept) & 2070.6858 & 75.9773 & 27.2540 & 0 \\
-trans.gene & 5.0385 & 0.2468 & 20.4178 & 0 \\
-SNP & -1050.0066 & 35.6044 & -29.4909 & 0 \\
-\bottomrule
+(Intercept) & 2076.1916 & 78.6750 & 26.3895 & 0 \\
+trans.gene & 5.0401 & 0.2470 & 20.4012 & 0 \\
+SNP1 & -1060.4040 & 52.1817 & -20.3214 & 0 \\
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}lrrrr@{}}
 \caption{Results showing the terms of interest for the Regression:
 trans.gene \textasciitilde{} SNP + cis.gene + PCs for trio 9 from the
 GTEx tissue Adipose Subcutaneous}\tabularnewline
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endhead
-(Intercept) & -260.4547 & 10.3493 & -25.1664 & 0 \\
-cis.gene & 0.0856 & 0.0042 & 20.4178 & 0 \\
-SNP & 159.5456 & 3.0487 & 52.3325 & 0 \\
-\bottomrule
+(Intercept) & -261.9558 & 10.6471 & -24.6035 & 0 \\
+cis.gene & 0.0856 & 0.0042 & 20.4012 & 0 \\
+SNP1 & 162.4906 & 5.7355 & 28.3304 & 0 \\
+\bottomrule()
 \end{longtable}
 
-\begin{figure}
-\centering
 \includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-9-1.pdf}
-\caption{Trio number 1922 from the GTEx tissue Artery Tibial}
-\end{figure}
+\includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-9-2.pdf}
+\includegraphics{12_15_2021_GMAC_plots_all_trios_files/figure-latex/unnamed-chunk-9-3.pdf}
+
+\begin{verbatim}
+## pdf 
+##   2
+\end{verbatim}
 
 \begin{longtable}[]{@{}lrrrr@{}}
 \caption{Results showing the terms of interest for the Regression:
 cis.gene \textasciitilde{} SNP + trans.gene + PCs for trio 1922 from the
 GTEx tissue Artery Tibial}\tabularnewline
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endhead
-(Intercept) & 41.2423 & 27.1619 & 1.5184 & 0.1295 \\
-trans.gene & 1.0308 & 0.1027 & 10.0398 & 0.0000 \\
-SNP & -222.7941 & 19.8243 & -11.2384 & 0.0000 \\
-\bottomrule
+(Intercept) & 40.5757 & 27.2261 & 1.4903 & 0.1367 \\
+trans.gene & 1.0285 & 0.1029 & 9.9961 & 0.0000 \\
+SNP1 & -224.9689 & 20.4760 & -10.9870 & 0.0000 \\
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}lrrrr@{}}
 \caption{Results showing the terms of interest for the Regression:
 trans.gene \textasciitilde{} SNP + cis.gene + PCs for trio 1922 from the
 GTEx tissue Artery Tibial}\tabularnewline
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 & Estimate & Std. Error & t value &
 Pr(\textgreater\textbar t\textbar) \\
-\midrule
+\midrule()
 \endhead
-(Intercept) & -90.2013 & 9.5820 & -9.4136 & 0 \\
-cis.gene & 0.1480 & 0.0147 & 10.0398 & 0 \\
-SNP & 180.7298 & 3.2883 & 54.9611 & 0 \\
-\bottomrule
+(Intercept) & -90.6102 & 9.5915 & -9.4469 & 0 \\
+cis.gene & 0.1474 & 0.0147 & 9.9961 & 0 \\
+SNP1 & 178.4845 & 4.0117 & 44.4914 & 0 \\
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}lrrrr@{}}
@@ -628,26 +634,26 @@ despite an obvious within-genotype correlation between the two molecular
 phenotypes. Thus MRPC removes this edge in the marginal tests (given by
 the pvalues) despite being clearly supported in the higher order
 conditional tests.}\tabularnewline
-\toprule
+\toprule()
 & cor & df & t & p-value \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 & cor & df & t & p-value \\
-\midrule
+\midrule()
 \endhead
 Trio 9 AS & 0.0681 & 579 & 1.6417 & 0.1012 \\
 Trio 1922 ArT & 0.0561 & 582 & 1.3546 & 0.1761 \\
-\bottomrule
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}lrrrr@{}}
-\toprule
+\toprule()
 & cor & df & t & p-value \\
-\midrule
+\midrule()
 \endhead
 Trio 1922 ArT & 0.0560624 & 582 & 1.354617 & 0.1760653 \\
-\bottomrule
+\bottomrule()
 \end{longtable}
 
 \begin{figure}

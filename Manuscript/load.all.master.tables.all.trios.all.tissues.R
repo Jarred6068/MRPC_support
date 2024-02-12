@@ -27,8 +27,12 @@ MT.addis.onetab = do.call('rbind.data.frame', MT.addis.pr.lnc.only2)
 
 MT.onetab = do.call('rbind.data.frame', MT.MRGN)
 
+tt = subset(MT.onetab, MRPC.Addis.Inferred.Model == "M1.1")
+all.med.pairs = paste(tt$Cis.Gene.Name, tt$Trans.Gene.Name, tt$MRPC.Addis.Inferred.Model, sep = "--")
+#get descriptions for cis.gene.mediators
+xx = match(tt$Cis.Gene.ID, bmart.w.descript$Gene.stable.ID)
+des = bmart.w.descript$Gene.description[na.omit(xx)]
 
+genes.plus.descript = cbind.data.frame(Cis.Gene.Name = tt$Cis.Gene.Name[-attr(na.omit(xx), 'na.omit')], descript = des)
 
-
-
-MRGN.WB.master = loadRData(file = "/mnt/ceph/jarredk/MRGN_extra/GTEx_tissues_analysis/Manuscript_results/trio_tables/all_master_trio_tables.RData")
+#MRGN.WB.master = loadRData(file = "/mnt/ceph/jarredk/MRGN_extra/GTEx_tissues_analysis/Manuscript_results/trio_tables/all_master_trio_tables.RData")

@@ -1,2 +1,2 @@
 # MRPC_support
-Supporting Code and Data for Analysis of ADDIS implement to MRPC algorithm
+Code repository for Kvamme, Jarred, et al. "Types of Cis-and Trans-Gene Regulation of Expression Quantitative Trait Loci Across Human Tissues." bioRxiv (2022): 2022-01.

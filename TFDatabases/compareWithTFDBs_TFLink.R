@@ -1,11 +1,7 @@
 ##################################################
-# 1. set up the environment
+# 1. Load functions and set up the environment
 ##################################################
-source("loadRData.R")
-source("readMRGNTrios.R")
-source("extractTFsFromTrios.R")
-source("extractTFTargetFromGTEx.R")
-source("compareTables.R")
+source("functions_TFDatabases.R")
 library(openxlsx)
 library(data.table)
 

@@ -11,12 +11,12 @@ library(data.table)
 # tissues into one data frame
 #################################################################
 setwd("~/Documents/CisTrans/Data/SuppTables_202412")
-path <- "Supplemental_Table_S7_MRPC_LOND_M1_cis_each_tissue.xlsx"
+path <- "Supplemental_Table_S8_MRPC_LOND_M1_cis_each_tissue.xlsx"
 trios.all.m11 <- readMRGNTrios (path)
 dim (trios.all.m11)
 # 395  26
 
-path <- "Supplemental_Table_S8_MRPC_LOND_M1_trans_each_tissue.xlsx"
+path <- "Supplemental_Table_S9_MRPC_LOND_M1_trans_each_tissue.xlsx"
 trios.all.m12 <- readMRGNTrios (path)
 dim (trios.all.m12)
 # 1323   26

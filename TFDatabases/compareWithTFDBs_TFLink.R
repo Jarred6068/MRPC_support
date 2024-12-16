@@ -33,7 +33,7 @@ dim (trios.all.m12)
 # under 'Homo sapiens small and large-scale interaction table'
 # filename: TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz
 ##################################################
-tflink <- read.table(gzfile("/mnt/ceph/audreyf/CisTrans/TFDatabases/TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"), header = TRUE, sep = "\t")
+tflink <- read.table(gzfile("TFLink_Homo_sapiens_interactions_All_simpleFormat_v1.0.tsv.gz"), header = TRUE, sep = "\t")
 dim (tflink)
 # 6739357      15
 all_unique <- unique(tflink$Name.TF)
@@ -90,7 +90,7 @@ db.ensembl <- as.list(x[mapped_genes])
 
 
 # Read in the candidate trios
-tissues.vec <- read.csv("/mnt/ceph/jarredk/AddisReRunFiles/tissuenames.csv", header = T)
+tissues.vec <- read.csv("tissuenames.csv", header = T)
 result.m11.tflink.trios <- extractTFTargetFromGTEx(tf.name.m11, tf.targets.tflink.m11, tissues=tissues.vec$tissue.name1, file.path='/mnt/zeta/audreyf/mdbadsha/peer_example/SNP_cis_trans_files/GTEx_version_8/', db.entrez, db.ensembl)
 write.table (result.m11.tflink.trios, "result_m11_matched_candidate_trios_tflink.txt", quote=FALSE, sep="\t", row.names = FALSE, col.names = FALSE)
 

@@ -1,0 +1,656 @@
+---
+title: "5/17/2021 GMAC analysis and pvalue plots"
+author: 
+-  Jarred Kvamme, University of Idaho
+date: "9/22/2021"
+output:
+  pdf_document: 
+    keep_tex: true
+    number_sections: true
+header-includes:
+  \usepackage{float}
+  \usepackage{tikz}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.pos = "H")
+library(latex2exp)
+library(gridExtra)
+```
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.pos = "H")
+```
+
+\section*{1. Overview}
+Both MRPC-LOND and MRPC-ADDIS techniques inferred a large number of trans mediated trios. The trans-mediation model has been previously identified, but is not the commonly ackowledged mode of mediation. Since this result is surprising relative to the existing literature, we sought to apply another method for inferring mediation on a subset of GTEx trios analyzed herein by MRPC. The Genomic Mediation analysis with Adaptive Confounding (GMAC) algorithm allows for a unique selection of a subset of potential confounders, ${\bf X_{ij}}$ from a larger covariate pool, ${\bf H}$, for each trio. By taking advantage of the Principle of Mendelian Randomization, the authors filter ${\bf H}$ by removing common child and intermediate confounding variables (e.g variables associated with the eQTL as well as the cis/trans genes). Post-filtering, GMAC preforms a mediation test on the edge between the cis gene and trans gene via the regression of the trans-gene $T_j$ on the cis-eQTL $L_i$, cis-gene $C_i$, and the set of adaptively selected confounders ${\bf X_{ij}}$:
+
+\begin{eqnarray} T_j = \beta_0 + \beta_1 C_i + \beta_2 L_i + {\bf \Gamma} {\bf X}_{ij} + \epsilon \end{eqnarray}
+
+The mediation statistic is the observed $t$-value of the cis-gene coefficient $\beta_1$. A null distribution for no-mediation is constructed by iteratively permuting the values of the cis-transcript within each genotype and repeating the above regression. The authors argue that the permutation of the cis-transcript within the genotypes of the cis-eQTL removes the association between the cis and trans gene transcripts while preserving the higher order associations with the cis-eQTL. The resulting permutation test for mediation compares the observed relationship between the trans and cis gene to a null distribution constructed from a model with no association and assuming that possible confounding has been well adjusted via the selected covariates. 
+
+It is important to note that the above mediation test describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider possible effects between the cis-eQTL and the cis-gene transcript ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene transcript ($L_i \rightarrow T_j$).
+
+\section*{2. Methods}
+\subsection*{2.1 Applying GMAC to GTEx Trios}
+
+To compare the GMAC and MRPC algorithms, we applied the GMAC algorithm to the top five GTEx tissues by sample size. Following with the creators of GMAC, we used the full set of principle components retained from the PCA of the expression matrix as the covariate pool, and three additional known confounders: the PCR used, the platform used, and sex of the individual in each sample [@yang2017identifying].    
+
+Consistent with @yang2017identifying, the analysis was preformed using a common child and intermediate variable filtering  FDR of $10\%$ and a confounder selection FDR of $5\%$ for each trio. Each trio supplied to GMAC consisted of the cis-QTL and the PEER normalized cis and trans gene transcripts with the highest association to the eQTL. To mitigate missing values in the eQTL matrix, multiple imputation of the matrix of unique cis-eQTLs was preformed via multiple correspondence analysis (MCA) prior to its use in GMAC [@josse2016missmda]. The analysis was preformed twice on each trio, first with the cis gene as the mediator and second with the trans gene as the mediator. This allowed for GMAC inferred trios to be decomposed into the three groupings used under MRPC: 1) Cis-gene mediation, 2) Trans-gene mediation, 3) both (undirected). 
+
+\subsection*{2.2 Comparison of GMAC and MRPC Results}
+   
+After applying GMAC to each tissue, the false discovery rate among the retained mediation p-values was controlled at the more liberal rate of $10\%$ [@yang2017identifying]. Each trio determined to have significant mediation after FDR filtering was compared with the regulatory network type inferred by MRPC-ADDIS. MRPC-ADDIS can infer three types of regulatory networks that contain an edge between the cis and trans gene (M1, M2, or M4). Since GMAC considers only the presence of the edge and not its direction, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).   
+
+\subsection*{2.3 Simulations Using Real Trios}
+
+\indent $\bullet$ The Small True Model Simulation (STM)
+
+To further understand the conflict in edge determination between MRPC-ADDIS and GMAC, we simulated the mediation test - the test for the $\beta_1$ coefficient in the presence of all adaptively selected confounders, ${\bf X}_{ij}$, as described by the regression in \textbf{eq (1)} - under two different scenarios. (i) To observe the predictive power of the mediation test when the trans gene comes from a set of explanatory variables smaller than those in ${\bf X}_{ij}$, We simulated the trans gene of each trio using the linear relationship:
+
+\begin{eqnarray} T^{\ast}_{j} = \hat{\beta_0}+\hat{\beta_1}C_i + \hat{\beta_2}L_i + \hat{{\bf\Gamma}}_W {\bf W}_{ij} +\epsilon  \end{eqnarray}
+
+where $T^{\ast}_{j}$ is the simulated trans gene, the coefficients are replaced by their estimates from the regression in \textbf{eq (1)}, the errors are $\epsilon \sim N(0, \hat{\sigma})$, and ${\bf W}_{ij}$ is a subset of confounders in ${\bf X}_{ij}$ representing the "highly" significant confounders from \textbf{eq (1)} ($p<0.001$). Note that if the GMAC inferred mediation type was trans gene mediation only then the cis gene was simulated and the mediation test was preformed on the $\beta_1$ coefficient from regression of the cis gene: $C_i = \beta_0 + \beta_1T_j + \beta_2L_i + {\bf \Gamma X}_{ij}+\epsilon$. 
+
+We refer to the trans-gene generating function in \textbf{(2)} as the Small True Model (STM) as the simulated trans gene comes from a model that is a subset of the explanatory variables in the analysis model described in \textbf{(1)}. The simulated mediation test then replaces $T_j$ in \textbf{(1)} with the simulated trans gene $T^{\ast}_j$. Therefore, the simulated mediation test under the STM can be decomposed as the test on the $\beta_1$ coefficient obtained from the regression:
+
+\begin{eqnarray} T^{\ast}_{j} = \beta_0+\beta_1C_i + \beta_2L_i + {\bf\Gamma}_{1,W} {\bf W}_{ij} + {\bf \Gamma}_{2,M}{\bf M}_{ij} +\epsilon \end{eqnarray}
+
+where ${\bf M}_{ij}$ represents the additional confounders in ${\bf X}_{ij}$ that are not included in ${\bf W}_{ij}$ see \textbf{Figure 1}.  
+
+\indent $\bullet$ The Large True Model Simulation (LTM)
+
+
+Conversely, a second simulation model was implemented to observe the power of the mediation test when the generating model for the trans gene is larger than the model used to infer the mediation relationship. In this scenario, the trans gene is simulated via:
+
+\begin{eqnarray} T^{\ast}_{j} = \hat{\beta}_0+\hat{\beta}_1C_i + \hat{\beta}_2L_i + \hat{{\bf \Gamma}}_V{\bf V}_{ij} +\epsilon  \end{eqnarray}
+
+which we refer to as the Large True Model (LTM). Note that the coefficient estimates in \textbf{(4)} come from the regression of the original data on a larger set than in \textbf{eq. (1)}:
+
+\begin{eqnarray} T_{j} = \beta_0+\beta_1C_i + \beta_2L_i + {\bf\Gamma} {\bf X}_{ij} + {\bf \Gamma}_{G}{\bf G}_{ij} +\epsilon \end{eqnarray}
+
+where ${\bf G}_{ij}$ represents the additional explanatory variables in ${\bf V}_{ij}$ not in ${\bf X}_{ij}$ (see \textbf{Figure 1}). The additional variables represented by ${\bf G}_{ij}$ were randomly selected from the confounder pool ${\bf H}$ with equal probability. The four sets of $p$-values (GMAC mediation $p$-value, GMAC permutation $p$-value, the STM mediation $p$-value, and the LTM mediation $p$-value) were visually inspected to determine the effect of model mis-specification on the power of the mediation and permutation test(s).
+
+
+\indent $\bullet$ True GMAC Model Simulation (TGM)
+
+We preformed a third simulation of the trans gene using the analysis model in GMAC given by \textbf{(1)} as the trans gene generating process. We then applied the MRPC model 
+
+\begin{eqnarray}  T_j = \beta_0 + \beta_1 C_i +\beta_2 L_i + {\bf \Gamma}_z {\bf Z}_{ij} \end{eqnarray}
+
+where the column dimension ${\bf Z}_{ij}$ is a less than or equal to the column dimension of ${W}_{ij}$ and represents only the confounders selected under the MRPC PC-selection methodology. The goal was to analyze the power of MRPC in detecting the mediation edge when the data is generated from the much larger GMAC model.
+
+
+\indent $\bullet$ GMAC Self Simulation (GSS)
+
+We created a fourth simulation scenario to test the importance of permutation on the analysis result. Each of the above simulations seeks to understanding the inferential power of MRPC/GMAC under model misspecification. In this scenario we take a different approach and use the model suggested by GMAC for each trio given by \textbf{eqn. (1)} to generate the trans gene such that:
+
+\[ T_j^{\ast} = \hat{\beta}_0 + \hat{\beta}_1 C_i + \hat{\beta}_2 L_i + \hat{{\bf \Gamma}} {\bf X}_{ij} + \epsilon  \]
+
+where $\epsilon \sim N(0, \hat{\sigma})$. We then apply the correct model ${\bf (1)}$ to each simulated trio under this scenario to obtain the parametric and permutation inferences when we know the analysis model is correct.  
+
+
+\subsection*{2.4 Simulations Using Synthetic Trios}
+
+\indent $\bullet$ \textbf{Purpose:} In the simulations above, it becomes increasingly difficult to determine the robustness of the GMAC performance compared with other algorithms because we do not know the true model of the trio. We decided to perform a second set of simulations were each trio is generated under a specific model type. Therefore, with the truth known prior to inference, we are better able to compare the inferential differences between MRGN, GMAC, and MRPC-ADDIS. Additionally, we simulate each trio with "known" confounders, $u$ "unknown" confounders, $w$ intermediate variables, and $z$ common child variables as defined by Yang et. al., 2017. In doing so, we also able to compare the confounder selection procedures of GMAC and MRGN/MRPC to better discern the appropriate procedure for selecting the confounder set.  
+
+
+\indent $\bullet$ \textbf{Method:} We simulated 10,000 trios of all model types (M0 - M4) with $u$ "unknown" confounding variables (PCs) represented by the matrix ${\bf U}$ and 3 simulated "known" confounders represented by the matrix ${\bf K}$, $w$ intermediate variables represented by the matrix $W$, and $z$ common child variables represented by the matrix $Z$. we simulate with $u,w,z \sim N(\mu = 10, \sigma =2)$ such that $u,w,z\in[1,\infty)$. We include ${\bf K}$ to satisfy the input requirement of GMAC. The possible PCs involded in each trio are selected randomly from the whole genome PC matrix for the GTEx tissue Whole Blood. Additionally, the known confounders for each trio are the "pcr", "platform", and "sex" covariates from Whole Blood. We simulate all confounder effects uniformly where $\gamma_i \sim \text{unif}(a=0.15, b=0.5)$ and select half at random to be negative. Further, we simulate the SNP effects as $\beta_{11}, \beta_{12} \sim \text{unif}(a=0.5, b=1.5)$, and the mediation effects as $\beta_{21}, \beta_{22}\sim\text{unif}(a=0.5,b=1.0)$ following Yang et. al., 2017. We simulated the effects of the known confounders such that $\phi_i\sim \text{unif}(0.01, 0.1)$.
+
+\noindent \textbf{(1.)} - We simulate the variant $V_1 = [v_1, v_2, \cdots v_n]$ from a multinomial distribution under Hardy-Weinberg equilibrium:
+
+\[ Pr(v_i = 0) =(1 -\theta)^2; \ Pr(v_i = 1) = 2\theta(1-\theta); \ Pr(v_i = 2) = \theta^2 \]
+
+\noindent \textbf{(2.)} - We denote the $j^{th}$ molecular phenotype as $T_j$ and its set of parents by ${\bf Parents}(T_j)$. The set of parent nodes ${\bf Parents}(T_j)$ may be empty, contain $V$-nodes, $T$-nodes, or a combination of both (Badsha and Fu, 2019). We model $T_j$ as following a normal distribution where
+
+\begin{eqnarray}
+ T_j \sim N\left( \beta_0 + \sum_{i\in{\bf Parents}(T_j)} \beta_{i} V_i +\left(\sum_{k\in{\bf Parents}(T_j)} \beta_k T_k\right) + {\bf \Gamma U} + {\bf \Phi K}, \ \sigma_j \right)  
+\end{eqnarray}
+
+
+
+\begin{figure}
+\begin{center}
+\caption{The confounder model}
+\begin{tikzpicture}[node distance={30mm}, thick, main/.style = {draw, circle}] 
+\node[main] (1) {$V_1$};
+\node[main] (2) [below left of=1] {$T_1$};
+\node[main] (3) [below right of=1] {$T_2$};
+\node[main] (4) [below right of=2] {$\bf U, K$};
+\draw[->] (1) -- (2) node [midway, yshift=+0.25cm, xshift=-0.52cm, fill=white] {$\beta_{11}$};
+\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{21}, \beta_{22}$};
+\draw[->] (1) -- (3) node [midway, yshift=+0.25cm, xshift=+0.52cm, fill=white] {$\beta_{12}$};
+\draw[->] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.7cm, fill=white] {$\bf \Gamma_1, \Phi_1$};
+\draw[->] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.7cm, fill=white] {$\bf \Gamma_2, \Phi_2$};
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+\begin{eqnarray}
+ Z_j \sim N\left( \beta_0 +  \ \sigma_j \right)  
+\end{eqnarray}
+
+\begin{figure}
+\begin{center}
+\caption{The common child model}
+\begin{tikzpicture}[node distance={30mm}, thick, main/.style = {draw, circle}] 
+\node[main] (1) {$V_1$};
+\node[main] (2) [below left of=1] {$T_1$};
+\node[main] (3) [below right of=1] {$T_2$};
+\node[main] (4) [below right of=2] {$\bf Z$};
+\draw[->] (1) -- (2) node [midway, yshift=+0.25cm, xshift=-0.52cm, fill=white] {$\beta_{11}$};
+\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{21}, \beta_{22}$};
+\draw[->] (1) -- (3) node [midway, yshift=+0.25cm, xshift=+0.52cm, fill=white] {$\beta_{12}$};
+\draw[<-] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.7cm, fill=white] {$\bf \Psi_1$};
+\draw[<-] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.7cm, fill=white] {$\bf \Psi_2$};
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+\begin{eqnarray}
+ T_j \sim N\left( \beta_0 + \sum_{i\in{\bf Parents}(T_j)} \beta_{i} V_i +\left(\sum_{k\in{\bf Parents}(T_j)} \beta_k T_k\right) + {\bf \Gamma U} + {\bf \Phi K} + {\bf \Omega_2 W}, \ \sigma_j \right)  
+\end{eqnarray}
+
+\begin{eqnarray}
+ W_j \sim N\left( \beta_0 +  \sum_{i=1}^{w} \omega_{i,1} T_j,  \ \sigma_j \right)  
+\end{eqnarray}
+
+\begin{figure}
+\begin{center}
+\caption{The intermediate variable model}
+\begin{tikzpicture}[node distance={30mm}, thick, main/.style = {draw, circle}] 
+\node[main] (1) {$V_1$};
+\node[main] (2) [below left of=1] {$T_1$};
+\node[main] (3) [below right of=1] {$T_2$};
+\node[main] (4) [below right of=2] {$\bf W$};
+\draw[->] (1) -- (2) node [midway, yshift=+0.25cm, xshift=-0.52cm, fill=white] {$\beta_{11}$};
+\draw[dotted] (2) -- (3) node [midway, above, fill=white] {$\beta_{21}, \beta_{22}$};
+\draw[->] (1) -- (3) node [midway, yshift=+0.25cm, xshift=+0.52cm, fill=white] {$\beta_{12}$};
+\draw[<-] (4) -- (2) node [midway, yshift=-0.21cm, xshift=-0.7cm, fill=white] {$\bf \Omega_1$};
+\draw[->] (4) -- (3) node [midway, yshift=-0.21cm, xshift=+0.7cm, fill=white] {$\bf \Omega_2$};
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+
+\indent $\bullet$ \textbf{Assessing Performance} We apply GMAC twice to each simulated trio, once with $T_1$ as the mediator and second with $T_2$ as the mediator. This allows for a determination of the direction of the mediation edge. That is, combining the two inferences allows for the determination of Cis mediation ($T_1 \rightarrow T_2$), Trans mediation ($T_2 \rightarrow T_1$) or both (bi-directional $T_1 - T_2$). To compare the three algorithms across the simulated trios, we define an accuracy metric based on the mediation edge (i.e the edge between nodes $T_1$ and $T_2$) for GMAC. If the true model adjacency matrix $\textbf{A}$ contains an edge between the genes $T_1 - T_2; T_1 \rightarrow T_2; T_2 \rightarrow T_1$ and GMAC correctly predicts that edge (and its direction), we apply an accuracy of 100%. In the case of the inference performed by GMAC we define:
+
+\[ Acc = \begin{cases} 1, & \text{if Inferred} = \text{Cis Mediation} | \text{Truth} = M1.1 \ \text{or} \ M2.2  \\
+                       1, & \text{if Inferred} = \text{Trans Mediation} | \text{Truth} = M1.2 \ \text{or} \ M2.1 \\
+                       1, & \text{if Inferred} = \text{Both} | \text{Truth} = M4 \\
+                       1, & \text{if Inferred} = \text{No Med} | \text{Truth} = M0.1, \ M0.2 \ \text{or} \ M3  \\
+                       0, & \text{else}
+                       \end{cases} \] 
+
+For each simulated trio we preform the GMAC, MRPC-ADDIS, and MRGN algorithms 
+
+\section*{3. Results}
+\subsection*{3.1 Comparing GMAC and MRPC}
+
+
+In light of the surprising number of trans-gene mediation trios inferred by MRPC, we sought to compare our results with GMAC by applying the GMAC method to the top five GTEx tissues by sample size. It is important to note that the test for mediation used by GMAC describes only the association between cis-gene and trans-gene transcripts ($C_i \leftrightarrow T_j$ ) and does not consider the possible effects between the cis-eQTL and the cis-gene ($L_i \rightarrow C_i$), or the cis-eQTL and trans-gene ($L_i \rightarrow T_j$). Therefore, since GMAC considers only the presence of the mediation edge, trios inferred to be one of M1, M2, or M4 under ADDIS, that were also significant under GMAC, were considered consistent (e.g $C_i \rightarrow T_j$; $T_j \rightarrow C_i$; $C_i \leftrightarrow T_j$ are synonymous under GMAC).
+
+At the $10\%$ false discovery rate, GMAC identified $2,160$ trios with an edge between the cis and trans genes out of $55,446$ total trios tested across the five selected tissues: Adipose subcutaneous, Tibial artery, Muscle skeletal, Sun exposed skin, and Whole blood. Of the trios with mediation edges, 653 were identified as the cis gene mediating the trans gene, 245 as trans gene mediating the cis gene and 1,345 as both ($29.1\%, 10.9\%$, and $60\%$ respectively). As can be seen from \textbf{Table 2}, the consistency in inferred mediation edges between the two methods varied between $39\%$ and $50\%$ of the trios across tissues. 
+
+\subsection*{3.2 Simulation Results}
+
+
+$\bullet$ - We noticed that the mediation parametric p-value can vary quite a bit. we ran each simulation scenario 1000 times on each trio and obtained the median p-value from each of the 4 scenarios. We used this as a robust estimate of the parametric p-value
+
+$\bullet$ - The nominal p-value and mediation p-value give more or less the same value except for rare variant trios 
+
+$\bullet$ - We noticed that Badsha implemented the PC selection code for MRPC in a way that led to the qvalues of each correlation test being applied after the p-values had already been bonferroni adjusted. This lead to extremely few PCs being selected for each trio. After implementing the correct PC selection process, MRPC and GMAC select equivalent numbers of PCs
+
+$\bullet$ - Figure 1 panel D supports that the nominal p-value appears to be better at determining the presence of a mediation edge for rare variants (points on the nomial p axis are all significant where as some trios/rare variants are insignificant on the parametric axis). This supports the use of the permuted regression test when the instrumental variable/ cis-eQTL contains a rare allele
+
+$\bullet$ - Figures 4-5 and Tables 4-9 represent two cases where the marginal tests preformed by MRPC falsely remove an edge in the graph that is supported by higher order tests. These cases justify the need to bypass the marginal tests and proceed directly to conditional tests which have increased power in these scenarios. 
+
+
+\newpage
+\section{Tables and Figures}
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+cn=c("Adipose Subcutaneous","Artery Tibial","Muscle Skeletal","Skin Sun Exposed","Whole Blood")
+
+rn=c("Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max.")
+dat=matrix(0, nrow=6, ncol = 5)
+dat[,1]=c(0.000000, 0.000000, 0.000000, 0.006365, 0.003442, 0.156627)
+dat[,2]=c(0.000000, 0.000000, 0.000000, 0.006625, 0.003425, 0.159247)
+dat[,3]=c(0.000000, 0.000000, 0.000000, 0.006560, 0.002833, 0.158640)
+dat[,4]=c(0.000000, 0.000000, 0.000000, 0.006701, 0.003306, 0.160331)
+dat[,5]=c(0.000000, 0.000000, 0.000000, 0.006103, 0.002985, 0.155224)
+colnames(dat)=cn
+row.names(dat)=rn
+
+kable(dat, caption = "Descriptive statistics for the distribution of missing values across the eQTL's for each tissue used in GMAC" )
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+table.final=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/summary.all.tissues.final.csv")
+
+table.final[,9]=(table.final$M1+table.final$M2+table.final$M4)/table.final[,8]
+colnames(table.final)=c("Tissue", paste0("M", c(0:4)), "Other", "Total GMAC Inferred", "Percentage In Common")
+
+kable(table.final, caption = "The breakdown of unqiue trios with inferred significant cis or trans mediation under GMAC across their respective ADDIS inferred regulatory networks. The column \"Percentage In Common\" is the proportion of significant trios that also contained a mediation edge in the regulatory network inferred under ADDIS", digits = 4)
+```
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+table.totals=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/final_result_table10000.csv")
+table.unique=read.csv("C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/GMAC.unique.trios.breakdown.csv")
+table3=cbind.data.frame(table.totals[,2],c(1:5), table.totals[,3:5], table.unique[,-1], rowSums(table.unique[,-1]))
+colnames(table3)=c("Tissue", "Sample Size", "Tested Trios", "Cis-Gene Mediation Trios", "Trans-Gene Mediation Trios", "Unique Cis", "Unique Trans", "Unique Both", "Unique Total")
+table3$`Sample Size`=c(581, 584, 706, 605, 670)
+table3$Tissue=c("AdiposeSub", "ArteryTibial", "MuscleSkeletal", "SunExp.Skin", "WholeBlood")
+kable(table3, caption = "Breakdown of trios with inferred mediation under GMAC across both cis and trans mediation types. The column \"Unique Both\" represents the intersection of the columns \"Total Cis Mediated\" and \"Total Trans Mediated\" ")
+
+write.csv(table3, file="C:/Users/Bruin/Documents/GitHub/MRPC_support/Manuscript/GMAC_MRPC_comparison_final2.csv")
+
+```
+
+
+
+![A visual depiction of the relationship between the STM and LTM simulation models for the trans gene and the regression used for the mediation test](C:\Users\Bruin\Documents\GitHub\MRPC_support\Manuscript\GMACwriteup_sim_diagram.png)
+
+
+
+
+
+```{r, fig.cap="A) The number of PC's included for each trio in whole blood after using the corrected PC selection for MRPC with the number of PC's selected by GMAC. B) compares the number of PC's selected for each trio under Badsha's original code vs the corrected version of PC selection", echo=FALSE, message=FALSE, warning=FALSE}
+#sim=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/simulations_wholeblood.txt", sep="\t", header = T)
+library(ggpubr)
+library(prodlim)
+# sim=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB_Updated_12_10_2021.csv", header = T)
+
+#this file has the median p-values 
+sim=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/TRIOS_imbalanced_genotypes_WB_Updated_12_10_2021.csv", header = T)
+
+pc.info=read.csv(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/ADDIS_ReRun/Updated_PC_Selection/Updated.PC.info.WholeBlood.csv")
+
+new.var=cbind.data.frame(c(pc.info$updated.per.var*100,sim$Per.var.MRPC), c(pc.info$Num.pcs, sim$Num.pcs.MRPC), c(rep("Updated.PC.Selection",length(sim$Trio.Num)),rep("Old.PC.Selection",length(sim$Trio.Num))))
+colnames(new.var)=c("Percent.variance", "Number.of.PCs", "Method")
+
+new.var2=cbind.data.frame(c(pc.info$updated.per.var*100,sim$Per.var.GMAC), c(pc.info$Num.pcs, sim$Num.pcs.GMAC), c(rep("Updated.MRPC",length(sim$Trio.Num)),rep("GMAC",length(sim$Trio.Num))))
+colnames(new.var2)=c("Percent.variance", "Number.of.PCs", "Method")
+
+sim$alternative=(sim$het+2*sim$ha)/(2*rowSums(sim[,37:39]))
+sim$reference=1-sim$alternative
+genotypes=sim[,37:39]/rowSums(sim[,37:39])
+
+
+
+#create color for allele frequencies of alternative or reference < 5% 
+cv1=rep(0, dim(sim)[1])
+cv2=replace(cv1, which(sim$alternative<=0.05 | sim$reference<=0.05), 1)
+h=0.05
+sim$colvar=as.factor(cv2)
+
+A=ggplot(data = new.var2, aes(x=Number.of.PCs, y=Percent.variance, color=Method))+
+  geom_point()+
+  ggtitle("WholeBlood", subtitle = "GMAC vs. Updated MRPC")+
+  xlab("Number of PC's")+
+  ylab("%Total Variance In Expression")
+
+B=ggplot(data = new.var, aes(x=Number.of.PCs, y=Percent.variance, color=Method))+
+  geom_point()+
+  ggtitle("WholeBlood", subtitle = "MRPC")+
+  xlab("Number of PC's")+
+  ylab("%Total Variance In Expression")
+
+ggarrange(A, B, nrow = 2, labels = c("A", "B"))
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+```{r, fig.cap="All panels: comparison of the median $p$-value from the test for the mediation edge from 1000 iterations of each simulation scenario for each trio (y-axis) with the nominal p-value for the edge from the true model (x-axis). Each panel corresponds to a specific simulation scenario. These graphs support the need to use the permutation test when the genotype has a low frequency allele.", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+
+#set.seed(222)
+
+
+h=0.05
+A=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(STM.median.p), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Median Sim. Para P-value')),
+       x = expression(log10('True Nominal P-value')),
+       subtitle = "1000 Small True Model Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+
+B=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(LTM.median.p), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Median Sim. Para P-value')),
+       x = expression(log10('True Nominal P-value')),
+       subtitle = "Large True Model Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+C=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(TGM.median.p), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Median Sim. Para P-value')),
+       x = expression(log10('True Nominal P-value')),
+       subtitle = "True GMAC Model Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+D=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(GSS.median.p), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Median Sim. Para P-value')),
+       x = expression(log10('True Nominal P-value')),
+       subtitle = "GMAC Self Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+
+ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
+
+```
+
+
+
+
+
+
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+
+#set.seed(222)
+
+
+h=0.05
+A=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.STM), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('True GMAC Nominal P-value')),
+       subtitle = "Small True Model Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+
+B=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.LTM), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('True GMAC Nominal P-value')),
+       subtitle = "Large True Model Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+C=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.TGM), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('True GMAC Nominal P-value')),
+       subtitle = "True GMAC Model Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+D=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Nominal.p.GSS), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('Sim. Nominal P-value')),
+       x = expression(log10('True GMAC Nominal P-value')),
+       subtitle = "GMAC Self Simulation")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+
+ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
+
+```
+
+
+
+```{r, fig.cap="", echo=FALSE, message=FALSE, warning=FALSE,results='hide',fig.keep='all'}
+
+A=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(Med.pvalue.GMAC), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('True Para. P-value')),
+       x = expression(log10('True Nominal P-value')),
+       subtitle = "Nominal Vs. Parametric")+
+  scale_x_continuous(limits = c(-15,0))+
+  scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+sim$perm.p.GMAC.pseudo=sim$Perm.p.GMAC
+sim$med.p.GMAC.pseudo=sim$Med.pvalue.GMAC
+sim$med.p.GMAC.pseudo=replace(sim$med.p.GMAC.pseudo, which(sim$Med.pvalue.GMAC<=2e-16), 1e-5)
+sim$perm.p.GMAC.pseudo=replace(sim$perm.p.GMAC.pseudo, which(sim$Perm.p.GMAC==0), 1)
+
+
+B=ggplot(data = sim)+
+  geom_point(aes(x=log10(med.p.GMAC.pseudo), y=log10(perm.p.GMAC.pseudo), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('True Perm. P-value')),
+       x = expression(log10('True Para. P-value')),
+       subtitle = "Parametric vs Permutation")+
+  scale_x_continuous(limits = c(-5,0))+
+  scale_y_continuous(limits = c(-5,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+C=ggplot(data = sim)+
+  geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(perm.p.GMAC.pseudo), color=colvar))+
+  theme(legend.position = "none")+
+  labs(y = expression(log10('True Perm. P-value ')),
+       x = expression(log10('True Nominal P-value ')),
+       subtitle = "Nominal vs Permutation")+
+  #scale_x_continuous(limits = c(0,0.003))+
+  #scale_y_continuous(limits = c(-15,0))+
+  geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+  geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+  geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+
+# D=ggplot(data = sim)+
+#   geom_point(aes(x=log10(GMAC.Nominal.p), y=log10(perm.p.GMAC.pseudo), color=colvar))+
+#   theme(legend.position = "none")+
+#   labs(y = expression(log10('True Perm. P-value ')),
+#        x = expression(log10('True Nominal P-value ')),
+#        subtitle = "Nominal vs Permutation")+
+#   #scale_x_continuous(limits = c(0,0.003))+
+#   #scale_y_continuous(limits = c(0,0.003))+
+#   geom_abline(intercept = 0, slope = 1, linetype="dotted")+
+#   geom_vline(xintercept = log10(h), color="red", linetype="dashed")+
+#   geom_hline(yintercept = log10(h), color="red", linetype="dashed")
+
+ggarrange(A, B, C, D, labels = c("A","B","C","D") , nrow=2, ncol=2)
+
+```
+
+
+
+
+
+```{r, fig.cap="Trio number 9 from the GTEx tissue Adipose Subcutaneous", echo=FALSE, message=FALSE, warning=FALSE}
+
+trio9AS=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/trio9AS.txt", sep="\t", header = T)
+
+
+ggplot(data = trio9AS)+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)), size=3)+
+  labs(x = expression("Cis Gene: ENSG00000163682"),
+       y = expression("Trans Gene: ENSG00000237550"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr4_39448204_G_A_b38")+theme_pubr()
+r1=summary(lm(cis.gene~., data=trio9AS))$coefficients[1:3,]
+r2=summary(lm(trans.gene~., data=trio9AS))$coefficients[1:3,]
+
+kable(r1, caption = "Results showing the terms of interest for the Regression: cis.gene ~ SNP + trans.gene + PCs for trio 9 from the GTEx tissue Adipose Subcutaneous", digits = 4)
+
+kable(r2, caption = "Results showing the terms of interest for the Regression: trans.gene ~ SNP + cis.gene + PCs for trio 9 from the GTEx tissue Adipose Subcutaneous", digits = 4)
+
+# kable(cor(trio9AS[,1:3]), caption = "Correlations between the molecular phenotypes and the eQTL for trio 9 from the GTEx tissue Adipose Subcutaneous. Notice that the correlation between the cis and trans gene is quite weak despite an obvious within-genotype correlation between the two molecular phenotypes. Thus MRPC removes this edge in the marginal tests despite being clearly supported in the higher order conditional tests.")
+
+
+
+
+```
+
+
+
+```{r, fig.cap="Trio number 1922 from the GTEx tissue Artery Tibial", echo=FALSE, message=FALSE, warning=FALSE}
+
+trio1922ArT=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/trio1922ArT.txt", sep="\t", header = T)
+
+ggplot(data = trio1922ArT)+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)), size=3)+
+  labs(x = expression("Cis Gene: ENSG00000167526"),
+       y = expression("Trans Gene: ENSG00000215030"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr16_89561052_T_G_b38")+theme_pubr()
+
+
+r1=summary(lm(cis.gene~., data=trio1922ArT))$coefficients[1:3,]
+r2=summary(lm(trans.gene~., data=trio1922ArT))$coefficients[1:3,]
+
+kable(r1, caption = "Results showing the terms of interest for the Regression: cis.gene ~ SNP + trans.gene + PCs for trio 1922 from the GTEx tissue Artery Tibial", digits = 4)
+
+kable(r2, caption = "Results showing the terms of interest for the Regression: trans.gene ~ SNP + cis.gene + PCs for trio 1922 from the GTEx tissue Artery Tibial", digits = 4)
+
+x1=cor.test(trio9AS$cis.gene, trio9AS$trans.gene)
+x2=cor.test(trio1922ArT$cis.gene, trio1922ArT$trans.gene)
+
+T1.1=as.data.frame(matrix(0, nrow = 2, ncol = 4))
+colnames(T1.1)=c(names(x1$estimate), names(x1$parameter), names(x1$statistic), "p-value")
+T1.1[1,]=c(x1$estimate, x1$parameter, x1$statistic, x1$p.value)
+T1.1[2,]=c(x2$estimate, x2$parameter, x2$statistic, x2$p.value)
+row.names(T1.1)=c("Trio 9 AS", "Trio 1922 ArT")
+
+kable(T1.1, caption = "Correlations between the cis and trans genes trio 9 from the GTEx tissue Adipose Subcutaneous and trio 1922 from Artery Tibial. Notice that the correlation between the cis and trans gene is quite weak despite an obvious within-genotype correlation between the two molecular phenotypes. Thus MRPC removes this edge in the marginal tests (given by the pvalues) despite being clearly supported in the higher order conditional tests.", digits = 4)
+
+kable(T1.1[2,])
+
+
+```
+
+
+
+
+```{r, fig.cap="\\textbf{A} and \\textbf{C}: Example scatter plots of trios from subcutaneous adipose tissue and whole blood (respectively) with a rare allele present in the sample: Note that 0 indicates individuals homozygous for the reference allele, 1 indicates hetezygous individuals and 2 indicates individuals who are homozygous for the alternative (rare) allele. The apparent outlier represents a single individual in the sample who was homozygous for the rare allele, and \\textbf{B} and \\textbf{C} are the scatter plots with the point(s) for the homozygous-alternative individuals removed and a confidence ellipse calculated over the remaining homozygous-reference and heterzygous individals.", echo=FALSE, message=FALSE, warning=FALSE}
+
+trio5683AS=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/Trio5683AS.txt", sep="\t", header = T)
+trio8112WB=read.table(file="C:/Users/Bruin/Documents/GitHub/MRPC_support/GMAC analysis/master_tables/Trio8112WB.txt", sep="\t", header = T)
+
+
+A=ggplot(data = trio5683AS)+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  labs(x = expression("Cis Gene: ENSG00000145715"),
+       y = expression("Trans Gene: ENSG00000264330"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr5_86411404_G_A_b38")
+
+B=ggplot(data = subset(trio5683AS, SNP!=2))+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  stat_ellipse(geom="polygon",aes(x=cis.gene, y=trans.gene, fill=as.factor(SNP)),alpha=0.35, show.legend=F)+
+  labs(x = expression("Cis Gene: ENSG00000145715"),
+       y = expression("Trans Gene: ENSG00000264330"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr5_86411404_G_A_b38")
+
+
+C=ggplot(data = trio8112WB)+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  labs(x = expression("Cis Gene: ENSG00000272356"),
+       y = expression("Trans Gene: ENSG00000238423"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr6_111433344_G_A_b38")
+
+
+D=ggplot(data = subset(trio8112WB, SNP!=2))+
+  geom_point(aes(x=cis.gene, y=trans.gene, color=as.factor(SNP)))+
+  stat_ellipse(geom="polygon",aes(x=cis.gene, y=trans.gene, fill=as.factor(SNP)),alpha=0.35, show.legend=F)+
+  labs(x = expression("Cis Gene: ENSG00000272356"),
+       y = expression("Trans Gene: ENSG00000238423"),
+       col = expression('Genotype Of \nSubject'),
+       subtitle = "SNP ID: chr6_111433344_G_A_b38")
+
+
+ggarrange(A,B,C,D, labels = c("A","B","C","D"), nrow=2, ncol=2)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

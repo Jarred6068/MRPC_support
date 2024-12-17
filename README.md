@@ -12,9 +12,11 @@ The following analyses were performed:
     - the scripts `ADDIS_Post_Analysis_processing.R` and `AL_genetabV2.R` contain supporting functions used in analyzing and producing results.
     - Additional R functions and intermediate output files are provided in this folder.
 
-- In the folder `./Analysis with GMAC` the GMAC function from Yang et al, 2017 was applied to trios from the top 5 five tissues by sample size from GTEx and compared with results from MRPC. 
+- In the folder `./Analysis with GMAC` the GMAC function from Yang et al, 2017 "Identifying cis-mediators for trans-eQTLs across many
+human tissues using genomic mediation analysis" was applied to trios from the top 5 five tissues by sample size from GTEx and compared with results from MRPC. 
     - The subdirectory `run_GMAC_scripts` contains scripts used to run GMAC on the trios in each tissue. See `README_gmac.txt` 
     - The sudirectory `/sim_scripts` contains the scripts and functions for comparing GMAC and MRPC and simulated mediation trios. See `GMAC_Simulations_README.txt` 
+    - The subdirectory `./Lab Notes` contains intermediate progress reports for the analses of trios with GMAC
     - The script `GMACpostproc.R` contains a set of helper functions used across post inference analyses and generating results. 
     - The script `GMACanalysis.R` contains wrapper functions used for running GMAC. 
     - Additional R scripts and intermediate output files are provided in this folder
@@ -23,7 +25,11 @@ The following analyses were performed:
 
 - In the folder `./TFDatabases`, `compareWithTFDBs_TFLink.R` looked at pairs of transcription factors and target genes in mediation trios to see whether they appear in the TFLink database.  Additional R functions and intermediate output files are provided in this folder.
 
-- In the folder `./HiC`, the script `Run_HiC_DA.R` investigated enrichment of HiC reads among cis and trans mediation trios. The data for this analysis were obtained from Encode - See DataFilesMeta.txt
+- In the folder `./HiC`, the script `Run_HiC_DA.R` investigated enrichment of HiC reads among cis and trans mediation trios. The data for this analysis were obtained from Encode - See `DataFilesMeta`.txt
     - The script `HiC_search.R` contains R functions which support the HiC enrichment analysis.
     - The script `Run_HiC_DA.R` performs the analysis checking for interaction enrichment among trios inferred as mediation by MRPC-ADDIS 
     - The subdirectory `./Results` contains intermediate results from this analysis
+
+- The folder `./Manuscript`, contains R scripts to create tables and figures of results, supplementary figures, and other intermediate outputs. This folder also contains the manuscript document, intermediate reports, other materials needed to produce manuscript results
+
+- The folder `./SuppTables` contains the tables included in the supplementary material of the manuscript.  

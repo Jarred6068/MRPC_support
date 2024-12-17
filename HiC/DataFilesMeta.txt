@@ -1,6 +1,9 @@
 ------------------------------->>Meta_DATA_HiC_Files<<----------------------------------
 
-Files_Name            Tissue
+The following HiC data obtained from ENCODE
+
+File_Name            Tissue
 ENCFF366ERB.hic        lung
 ENCFF355OWW.hic        lymphoblastoid cells
 ENCFF894RRQ.hic        fibroblast cells
+ENCFF569RJM.hic        skin

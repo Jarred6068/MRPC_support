@@ -1,9 +1,0 @@
-#!/bin/bash
-#SBATCH -o stdout.out
-#SBATCH -e stderr.out
-
-module load R/4.0.2
-
-cd /mnt/ceph/jarredk/GMACanalysis
-
-R CMD BATCH runGMACanalysisAdiposeSubcutaneous.R 

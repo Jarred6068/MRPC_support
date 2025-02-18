@@ -122,7 +122,13 @@ extract_hic=function(fileName=NULL, chrs=c("1","1"), resol=10000, package.path="
   
   library(strawr, lib=package.path)
   
-  HiC.df=straw("observed", "NONE", fileName, chrs[1], chrs[2], "BP", resol)
+  HiC.df=straw(norm = "NONE", 
+               fname = fileName, 
+               chr1loc = chrs[1], 
+               chr2loc = chrs[2], 
+               unit = "BP", 
+               binsize = resol,
+               matrix = "observed")
   
   if(savefile==TRUE){
     write.table(HiC.df, file = paste(fileName, ".txt", sep=""), sep = "\t", row.names = FALSE, col.names = TRUE)

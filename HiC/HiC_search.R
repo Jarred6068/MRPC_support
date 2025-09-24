@@ -195,7 +195,7 @@ Resample_interactions=function(filePath=NULL, chrs=c("1","1"), res=10000, search
     hic.obj=extract_hic(fileName=filePath, chrs = c(left.pos, right.pos), resol = res)
     
     #count interactions
-    reads[i]=ifelse(empty(as.data.frame(hic.obj))==TRUE, NA, sum(hic.obj$counts))
+    reads[i]=ifelse(nrow(as.data.frame(hic.obj))==0, NA, sum(hic.obj$counts))
     
   }
   

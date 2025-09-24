@@ -86,7 +86,7 @@ trio.attributes$Attributes$trans
 
 trio.attributes$Attributes$cis
 
-hic1=extract_hic(fileName="/mnt/ceph/jarredk/HiC_Analyses/lymphoblastoid_cells/ENCFF355OWW.hic", 
+hic1=extract_hic(fileName="/mnt/ceph/jarredk/HiC_Analyses/Data/lymphoblastoid_cells/ENCFF355OWW.hic", 
                  chrs=c("22","11"), 
                  resol=5000)
 
